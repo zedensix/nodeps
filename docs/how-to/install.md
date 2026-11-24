@@ -9,15 +9,15 @@ tags: [install, npm, pip, mise]
 
 Every channel ships the same standalone binary; none of them needs Bun.
 
-nodeps is in beta: every release is a prerelease like `1.0.0-beta.3`, so ask each channel for one explicitly.
+nodeps is in beta: every release is a prerelease like `1.0.0-beta.3`. npm installs it by default; pip and mise need to be asked for one.
 
 ## With npm
 
 ```sh
-npm install --global @zedensix/nodeps@beta
+npm install --global @zedensix/nodeps
 ```
 
-Or without installing: `npx @zedensix/nodeps@beta dev`.
+Or without installing: `npx @zedensix/nodeps dev`.
 
 ## With pip
 

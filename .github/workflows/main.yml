@@ -77,14 +77,13 @@ jobs:
         with:
           node-version: 24
       # Trusted publishing: npm trades the job's OIDC token for a publish token and adds provenance itself.
+      # Until 1.0.0 every beta is `latest`, so a plain install gets it: the token cannot move dist-tags later.
       - name: Publish the platform packages, then the launcher
         run: |
           chmod +x build/release/npm/*/bin/*
           for package in build/release/npm/nodeps-*/ build/release/npm/nodeps; do
-            npm publish "$package" --access public --tag "$NPM_TAG"
+            npm publish "$package" --access public --tag latest
           done
-        env:
-          NPM_TAG: ${{ needs.release.outputs.prerelease == 'true' && 'beta' || 'latest' }}
 
   pypi:
     needs: release
@@ -101,3 +100,43 @@ jobs:
       - uses: pypa/gh-action-pypi-publish@7245906fb61fa33a13554f9d5fb856fe61758086 # v1.14.3
         with:
           packages-dir: build/release/pypi
+
+  channels:
+    needs: [release, docker, npm, pypi]
+    if: needs.release.outputs.released == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      # Fails the run when a channel the install docs advertise lacks the release; registries can lag, so each check retries.
+      - name: Check every install channel has the release
+        env:
+          VERSION: ${{ needs.release.outputs.version }}
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          python_version=$(echo "$VERSION" | sed -E 's/-alpha\./a/; s/-beta\./b/; s/-rc\./rc/; s/-[0-9A-Za-z-]+\.([0-9]+)$/.dev\1/')
+          missing=0
+          check() {
+            name=$1
+            shift
+            for attempt in 1 2 3 4 5 6; do
+              if "$@" > /dev/null 2>&1; then
+                echo "ok: $name"
+                return
+              fi
+              sleep 20
+            done
+            echo "::error::$name does not have $VERSION"
+            missing=1
+          }
+          for package in nodeps nodeps-linux-x64 nodeps-linux-arm64 nodeps-linux-x64-musl nodeps-linux-arm64-musl nodeps-darwin-x64 nodeps-darwin-arm64 nodeps-win32-x64; do
+            check "npm @zedensix/$package" curl -fsS "https://registry.npmjs.org/@zedensix%2f$package/$VERSION"
+          done
+          check "PyPI zedensix-nodeps $python_version" curl -fsS "https://pypi.org/pypi/zedensix-nodeps/$python_version/json"
+          check "Docker Hub zedensix/nodeps:$VERSION" curl -fsS "https://hub.docker.com/v2/repositories/zedensix/nodeps/tags/$VERSION"
+          assets=$(gh release view "v$VERSION" --repo "$REPOSITORY" --json assets --jq '.assets[].name')
+          for asset in nodeps-linux-x64 nodeps-linux-arm64 nodeps-linux-x64-musl nodeps-linux-arm64-musl nodeps-darwin-x64 nodeps-darwin-arm64 nodeps-win32-x64.exe SHA256SUMS; do
+            check "GitHub release asset $asset (binaries and mise)" grep -qx "$asset" <<< "$assets"
+          done
+          exit "$missing"

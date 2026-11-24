@@ -1,6 +1,8 @@
 import { existsSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
-import { materialColors, supportedExtensions, supportedFeatures, supportedPlugins } from "./mkdocs-support.ts";
+import { translateAwesomeNav } from "./awesome-nav.ts";
+import { supportedExtensions, supportedFeatures, supportedPlugins } from "./mkdocs-support.ts";
+import { mapTheme } from "./theme-mapping.ts";
 
 type Mapping = Record<string, unknown>;
 
@@ -71,8 +73,20 @@ export interface MigrationReport {
   mapped: string[];
   native: string[];
   unsupported: string[];
+  warnings: string[];
+  files: { path: string; content: string }[];
   pages: { path: string; added: string[] }[];
 }
+
+const unsupportedKeys: Record<string, string> = {
+  hooks:
+    "Python hooks cannot run in nodeps. Port what they do to Markdown, a theme or a build step before nodeps build.",
+  "extra.analytics": "nodeps adds no analytics. Add your tracking snippet to themes/default/head.html if you need it.",
+  "extra.consent":
+    "nodeps shows no cookie banner. Add your own in themes/default/head.html if your analytics needs one.",
+  "extra.version": "nodeps does not switch between versions. Deploy each version to its own base path instead.",
+  "extra.alternate": "nodeps has no language switcher. Build each language as its own site and link them with links.",
+};
 
 /**
  * Reads an mkdocs.yml and works out the docs.yaml equivalent without writing
@@ -88,7 +102,15 @@ export async function planMigration(mkdocsPath: string): Promise<MigrationReport
   const mkdocs = (Bun.YAML.parse(stripPythonTags(await file.text())) ?? {}) as Mapping;
   const theme = (mkdocs.theme ?? {}) as Mapping;
   const extra = (mkdocs.extra ?? {}) as Mapping;
-  const report: MigrationReport = { config: {}, mapped: [], native: [], unsupported: [], pages: [] };
+  const report: MigrationReport = {
+    config: {},
+    mapped: [],
+    native: [],
+    unsupported: [],
+    warnings: [],
+    files: [],
+    pages: [],
+  };
   const config = report.config;
   const map = (from: string, to: string, value: unknown) => {
     if (value !== undefined && value !== null && value !== "") {
@@ -133,69 +155,64 @@ export async function planMigration(mkdocsPath: string): Promise<MigrationReport
     );
   }
 
-  if (mkdocs.nav) {
+  const source = resolve(dirname(resolve(mkdocsPath)), String(config.source ?? "docs"));
+  const plugins = names(mkdocs.plugins);
+  const awesomeNav = plugins.includes("awesome-nav") ? translateAwesomeNav(source, report.warnings) : undefined;
+  if (awesomeNav) {
+    config.nav = awesomeNav;
+    report.mapped.push(
+      `plugins: awesome-nav (.nav.yml files) → nav${mkdocs.nav ? ", replacing the nav in mkdocs.yml as awesome-nav does" : ""}`,
+    );
+  } else if (mkdocs.nav) {
     map("nav", "nav", mkdocs.nav);
   }
 
-  const themeConfig: Mapping = {};
-  const palette = Array.isArray(theme.palette)
-    ? (theme.palette[0] as Mapping | undefined)
-    : (theme.palette as Mapping | undefined);
-  const primary = typeof palette?.primary === "string" ? palette.primary.toLowerCase().replace(/\s+/g, "-") : undefined;
-  if (primary && materialColors[primary]) {
-    themeConfig.accent = materialColors[primary];
-    report.mapped.push(`theme.palette.primary (${primary}) → theme.accent`);
-  }
-  if (theme.font) {
-    report.unsupported.push(
-      "theme.font: Google Fonts are not downloaded; set theme.font and theme.mono to installed or self-hosted fonts",
-    );
-  }
-  const extraCss = Array.isArray(mkdocs.extra_css) ? (mkdocs.extra_css as string[]) : [];
-  if (extraCss.length > 0) {
-    themeConfig.stylesheet = join(String(config.source ?? "docs"), extraCss[0]!);
-    report.mapped.push(`extra_css (${extraCss[0]}) → theme.stylesheet`);
-    for (const stylesheet of extraCss.slice(1)) {
-      report.unsupported.push(`extra_css: only one stylesheet is supported, merge ${stylesheet} into the first`);
-    }
-  }
-  if (Object.keys(themeConfig).length > 0) {
-    config.theme = themeConfig;
-  }
+  mapTheme(mkdocs, config, report);
 
   for (const feature of features) {
-    (supportedFeatures.has(feature) ? report.native : report.unsupported).push(`theme.features: ${feature}`);
-  }
-  for (const extension of names(mkdocs.markdown_extensions)) {
-    (supportedExtensions.has(extension) ? report.native : report.unsupported).push(`markdown_extensions: ${extension}`);
-  }
-  for (const plugin of names(mkdocs.plugins)) {
-    if (supportedPlugins[plugin]) {
-      report.native.push(`plugins: ${plugin} (${supportedPlugins[plugin]})`);
+    if (supportedFeatures.has(feature)) {
+      report.native.push(`theme.features: ${feature}`);
     } else {
-      report.unsupported.push(`plugins: ${plugin}`);
+      report.unsupported.push(
+        `theme.features: ${feature}: no nodeps equivalent, so it is ignored. Nothing to do unless readers relied on it.`,
+      );
     }
   }
-  for (const key of [
-    "extra_javascript",
-    "hooks",
-    "theme.custom_dir",
-    "extra.analytics",
-    "extra.consent",
-    "extra.version",
-    "extra.alternate",
-  ]) {
+  for (const extension of names(mkdocs.markdown_extensions)) {
+    if (supportedExtensions.has(extension)) {
+      report.native.push(`markdown_extensions: ${extension}`);
+    } else {
+      report.unsupported.push(
+        `markdown_extensions: ${extension}: not supported, so its syntax shows as plain Markdown. Check the pages that use it with nodeps dev.`,
+      );
+    }
+  }
+  for (const plugin of plugins) {
+    if (plugin === "awesome-nav") {
+      if (!awesomeNav) {
+        report.native.push("plugins: awesome-nav without .nav.yml files (nodeps builds the sidebar from folders)");
+      }
+    } else if (supportedPlugins[plugin]) {
+      report.native.push(`plugins: ${plugin} (${supportedPlugins[plugin]})`);
+    } else {
+      report.unsupported.push(
+        `plugins: ${plugin}: no nodeps equivalent, so the site builds without it. Check what it generated (pages, redirects, metadata) and recreate what you still need.`,
+      );
+    }
+  }
+  for (const [key, reason] of Object.entries(unsupportedKeys)) {
     const [first, second] = key.split(".") as [string, string | undefined];
     const value = second ? ((mkdocs[first] ?? {}) as Mapping)[second] : mkdocs[first];
     if (value !== undefined) {
-      report.unsupported.push(key);
+      report.unsupported.push(`${key}: ${reason}`);
     }
   }
   if (typeof theme.language === "string" && theme.language !== "en") {
-    report.unsupported.push(`theme.language: ${theme.language} (the interface is English only)`);
+    report.unsupported.push(
+      `theme.language: ${theme.language}: the interface is English only, page content is untouched.`,
+    );
   }
 
-  const source = resolve(dirname(resolve(mkdocsPath)), String(config.source ?? "docs"));
   const byline = (mkdocs.site_author as string | undefined) ?? `${mkdocs.site_name ?? "The"} contributors`;
   for (const path of new Bun.Glob("**/*.md").scanSync({ cwd: source })) {
     const text = await Bun.file(join(source, path)).text();
@@ -222,16 +239,22 @@ export function renderConfig(config: Mapping) {
 }
 
 /**
- * Writes docs.yaml next to the mkdocs.yml and adds the planned frontmatter to each
- * page, creating the block when a page has none. Refuses to run when docs.yaml
- * already exists so a previous migration is never overwritten.
+ * Writes docs.yaml and the generated files next to the mkdocs.yml and adds the
+ * planned frontmatter to each page, creating the block when a page has none.
+ * Refuses to run when any of those files exists so nothing is overwritten.
  */
 export async function writeMigration(mkdocsPath: string, report: MigrationReport) {
   const target = join(dirname(resolve(mkdocsPath)), "docs.yaml");
-  if (existsSync(target)) {
-    throw new Error(`${target} already exists; move it away to migrate again`);
+  const files = report.files.map((file) => ({ ...file, path: join(dirname(target), file.path) }));
+  for (const path of [target, ...files.map((file) => file.path)]) {
+    if (existsSync(path)) {
+      throw new Error(`${path} already exists; move it away to migrate again`);
+    }
   }
   await Bun.write(target, renderConfig(report.config));
+  for (const file of files) {
+    await Bun.write(file.path, file.content);
+  }
   for (const page of report.pages) {
     const text = await Bun.file(page.path).text();
     const updated = /^---\r?\n/.test(text)

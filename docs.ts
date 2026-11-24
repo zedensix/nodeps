@@ -58,6 +58,11 @@ try {
     section("Mapped to docs.yaml", report.mapped);
     section("Supported natively", report.native);
     section("Not supported", report.unsupported);
+    section("Check by hand", report.warnings);
+    section(
+      values.write ? "Generated files" : "Files --write will generate",
+      report.files.map((file) => file.path),
+    );
     console.log(`\n${report.pages.length} pages need an icon and a byline in their frontmatter.`);
     if (values.write) {
       const target = await writeMigration(mkdocsPath, report);

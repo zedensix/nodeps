@@ -11,39 +11,45 @@ Zensical, by the team behind Material for MkDocs, reads `mkdocs.yml` and renders
 
 ## Authoring
 
-| Feature                                                              | nodeps                           |
-| -------------------------------------------------------------------- | -------------------------------- |
-| Admonitions, collapsible blocks, GitHub callouts                     | Yes                              |
-| Content tabs, linked                                                 | Yes                              |
-| Code blocks: title, `hl_lines`, `linenums`, copy                     | Yes                              |
-| Code annotations `# (1)!`                                            | No                               |
-| Inline highlighting `` `#!py …` ``                                   | No                               |
-| Snippets `--8<--`                                                    | Yes                              |
-| Icons: Lucide, Material, Font Awesome, Octicons, Simple Icons; emoji | Yes                              |
-| Mermaid diagrams, math                                               | Yes, loaded from a CDN when used |
-| Footnotes, definition lists, abbreviations                           | Yes                              |
-| Keys, mark, insert, sub, sup                                         | Yes                              |
-| Attribute lists, buttons, grids and cards                            | Yes                              |
-| Image captions, `#only-light` / `#only-dark`                         | No                               |
-| Smart symbols, magic links                                           | No                               |
-| Front matter `hide`, `tags`, `icon`                                  | Yes                              |
+| Feature                                                              | nodeps                                 |
+| -------------------------------------------------------------------- | -------------------------------------- |
+| Admonitions, collapsible blocks, GitHub callouts                     | Yes                                    |
+| Content tabs, linked                                                 | Yes                                    |
+| Code blocks: title, `hl_lines`, `linenums`, copy                     | Yes                                    |
+| Code annotations `# (1)!`                                            | No                                     |
+| Inline highlighting `` `#!py …` ``                                   | No                                     |
+| Custom Pygments lexers (Svelte and others)                           | No: plain text, built-in grammars only |
+| Snippets `--8<--`                                                    | Yes                                    |
+| Icons: Lucide, Material, Font Awesome, Octicons, Simple Icons; emoji | Yes                                    |
+| Mermaid diagrams, math                                               | Yes, loaded from a CDN when used       |
+| Footnotes, definition lists, abbreviations                           | Yes                                    |
+| Keys, mark, insert, sub, sup                                         | Yes                                    |
+| Attribute lists, buttons, grids and cards                            | Yes                                    |
+| Image captions, `#only-light` / `#only-dark`                         | No                                     |
+| Smart symbols, magic links                                           | No                                     |
+| Front matter `hide`, `tags`, `icon`                                  | Yes                                    |
 
 ## Site
 
-| Feature                                                             | nodeps                            |
-| ------------------------------------------------------------------- | --------------------------------- |
-| `nav`, tabs, sections, index pages, breadcrumbs                     | Yes                               |
-| Instant navigation with prefetch                                    | Yes                               |
-| Search, with tag filtering                                          | Yes, English only                 |
-| Color schemes and a theme toggle                                    | Yes, plus themes readers can pick |
-| Edit and view source links, any git provider                        | Yes                               |
-| `llms.txt`, page Markdown, copy as Markdown                         | Yes                               |
-| Tags                                                                | Yes                               |
-| Back-to-top button, progress bar, header autohide, announcement bar | No                                |
-| Blog, social cards, offline, privacy, redirects plugins             | No                                |
-| Versioning (mike), languages other than English                     | No                                |
-| Analytics, cookie consent, feedback widget                          | No                                |
-| Template overrides (`custom_dir`), hooks                            | No                                |
+| Feature                                                             | nodeps                                                     |
+| ------------------------------------------------------------------- | ---------------------------------------------------------- |
+| `nav`, tabs, sections, index pages, breadcrumbs                     | Yes                                                        |
+| Instant navigation with prefetch                                    | Yes                                                        |
+| Search, with tag filtering                                          | Yes, English only                                          |
+| Color schemes and a theme toggle                                    | Yes, plus themes readers can pick                          |
+| Edit and view source links, any git provider                        | Yes                                                        |
+| `llms.txt`, page Markdown, copy as Markdown                         | Yes                                                        |
+| Tags                                                                | Yes                                                        |
+| Back-to-top button, progress bar, header autohide, announcement bar | No                                                         |
+| Blog, social cards, offline, privacy, redirects plugins             | No                                                         |
+| Versioning (mike), languages other than English                     | No                                                         |
+| Analytics, cookie consent, feedback widget                          | No                                                         |
+| Template overrides (`custom_dir`)                                   | No: a nodeps theme overrides HTML partials and CSS instead |
+| Hooks                                                               | No                                                         |
+| `extra_css`                                                         | Yes, every file in order                                   |
+| `extra_javascript`                                                  | No setting: load scripts from a theme's `head.html`        |
+| Google Fonts (`theme.font`)                                         | No download: install or self-host the font                 |
+| awesome-nav `.nav.yml` files                                        | Converted to `nav` by `nodeps migrate`                     |
 
 ## Only in nodeps
 

@@ -34,6 +34,9 @@ hooks = [
     "toml",
   ] },
   { id = "bun-lint", name = "bun lint", entry = "bun lint", language = "system", types_or = ["ts", "javascript"] },
+  { id = "bun-test", name = "bun test", entry = "bun test", language = "system", pass_filenames = false, types_or = [
+    "ts",
+  ] },
   { id = "max-lines", name = "files stay under 300 lines", entry = "awk 'FNR == 301 { print FILENAME \": more than 300 lines\"; failed = 1 } END { exit failed }'", language = "system", types_or = ["css", "html", "json", "markdown", "yaml", "toml", "shell"] },
   { id = "docs-build", name = "docs build", entry = "bun docs.ts build", language = "system", pass_filenames = false, files = "^(docs/|src/|client/|themes/|docs\\.(ts|yaml)$)" },
   { id = "zizmor", name = "zizmor", entry = "zizmor --min-severity low", language = "system", files = "^\\.github/workflows/" },
