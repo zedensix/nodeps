@@ -55,9 +55,15 @@ const targets = [
   { bun: "bun-windows-x64", npm: "win32-x64", os: "win32", cpu: "x64", libc: "", wheel: ["win_amd64"] },
 ];
 
-const licenses = [join(root, "theme/icons/LICENSE"), join(root, "theme/icons/brands/LICENSE.md")];
-const thirdPartyNotice = async () =>
-  `nodeps embeds Lucide icons (ISC) and Simple Icons logos (CC0).\n\n${(await Promise.all(licenses.map((file) => Bun.file(file).text()))).join("\n\n")}`;
+const thirdPartyNotice = async () => {
+  const directory = join(root, "theme/icons/licenses");
+  const sections = await Promise.all(
+    Array.from(new Bun.Glob("*.LICENSE").scanSync({ cwd: directory }))
+      .sort()
+      .map(async (file) => `## ${file.replace(/\.LICENSE$/, "")}\n\n${await Bun.file(join(directory, file)).text()}`),
+  );
+  return `nodeps embeds Lucide (ISC), Material Design Icons (Apache-2.0), Octicons (MIT), Font Awesome Free (CC BY 4.0 icons), Simple Icons (CC0) and gemoji (MIT).\n\n${sections.join("\n\n")}`;
+};
 
 await rm(output, { recursive: true, force: true });
 // Cross-compiling downloads the Bun runtime of the running version, and canary runtimes are not published.

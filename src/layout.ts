@@ -2,7 +2,7 @@ import { markdownHref, pageHref } from "./ai.ts";
 import { editUrl, gitProviders, type Theme } from "./config.ts";
 import { editorSourcePath } from "./editor.ts";
 import { presets, themeDeclarations } from "./presets.ts";
-import { icon } from "./icons.ts";
+import { icon, normalizeIcon } from "./icons.ts";
 import { renderCode } from "./markdown.ts";
 import { formatSize, resourceIcon } from "./resources.ts";
 import { resourceUrl, type Category, type DiataxisKind, type NavItem, type Page, type Site } from "./site.ts";
@@ -71,6 +71,9 @@ function containsPage(item: NavItem, page?: Page): boolean {
   if (item.kind === "page") {
     return item.page === page;
   }
+  if (item.kind === "link") {
+    return false;
+  }
   return item.index === page || item.children.some((child) => containsPage(child, page));
 }
 
@@ -84,7 +87,10 @@ function sidebarItems(site: Site, items: NavItem[], current?: Page): string {
   return items
     .map((item) => {
       if (item.kind === "page") {
-        return `<li>${sidebarLink(site, item.page, current)}</li>`;
+        return `<li>${sidebarLink(site, item.page, current, item.label ?? item.page.title)}</li>`;
+      }
+      if (item.kind === "link") {
+        return `<li><a href="${escape(item.url)}" target="_blank" rel="noopener">${icon("external-link")}<span class="sidebar-text"><span>${escape(item.title)}</span></span></a></li>`;
       }
       const children = sidebarItems(site, item.children, current);
       const folderIcon = item.icon ? icon(item.icon) : "";
@@ -174,7 +180,15 @@ function footer(site: Site, page?: Page) {
   } else if (page && repository?.edit) {
     edit = `<a class="edit-link" href="${escape(editUrl(repository, page.source))}">${icon("square-pen")}Edit this page on ${gitProviders[repository.provider]}</a>`;
   }
-  const text = site.config.footer ? `<p>${escape(site.config.footer)}</p>` : "";
+  const social = site.config.social
+    .map(
+      (entry) =>
+        `<a href="${escape(entry.url)}" target="_blank" rel="noopener" aria-label="${escape(entry.label)}" data-tooltip="${escape(entry.label)}">${icon(normalizeIcon(entry.icon))}</a>`,
+    )
+    .join("");
+  const text =
+    (site.config.footer ? `<p>${escape(site.config.footer)}</p>` : "") +
+    (social ? `<nav class="social-links" aria-label="Social links">${social}</nav>` : "");
   return edit ? `<div class="page-meta">${edit}</div>${text}` : text;
 }
 
@@ -219,7 +233,7 @@ function renderDocument(site: Site, options: RenderOptions, parts: DocumentParts
     links:
       config.links.map((link) => `<a href="${escape(link.url)}">${escape(link.label)}</a>`).join("") +
       (config.repository
-        ? `<a class="repository-link" href="${escape(config.repository.url)}" title="Source on ${gitProviders[config.repository.provider]}">${icon(config.repository.provider)}<span>${escape(config.repository.label)}</span></a>`
+        ? `<a class="repository-link" href="${escape(config.repository.url)}" title="Source on ${gitProviders[config.repository.provider]}">${icon(`simple-${config.repository.provider}`)}<span>${escape(config.repository.label)}</span></a>`
         : ""),
     sidebar: sidebar(site, page),
     "theme-picker": themePicker(site),
@@ -233,14 +247,15 @@ function renderDocument(site: Site, options: RenderOptions, parts: DocumentParts
   };
   const flags: Record<string, boolean> = {
     page: page !== undefined && !parts.home,
-    sidebar: !parts.home,
+    sidebar: !parts.home && !page?.hide.includes("navigation"),
     mcp: options.server,
-    pager: pagerHtml !== "" && !parts.home,
+    pager: pagerHtml !== "" && !parts.home && !page?.hide.includes("footer"),
     footer: footerHtml !== "",
-    toc: (tocHtml !== "" || tagsHtml !== "") && !parts.home,
+    toc: (tocHtml !== "" || tagsHtml !== "") && !parts.home && !page?.hide.includes("toc"),
     headings: tocHtml !== "",
     tags: tagsHtml !== "",
     editor: config.editor.enabled,
+    reader: config.readerMode,
     tabs: tabsHtml !== "",
   };
 
@@ -440,10 +455,12 @@ export function renderPage(site: Site, page: Page, options: RenderOptions) {
     description: page.description || site.config.description,
     page,
     article:
-      withTitleBadge(title + description + byline + page.html, diataxisBadge(site, page)).replace(
-        galleryPlaceholder,
-        () => themeGallery(site),
-      ) + resourcesSection(site, page),
+      withTitleBadge(
+        page.hasTitleHeading
+          ? page.html.replace(/<\/h1>/, () => `</h1>${description}${byline}`)
+          : title + description + byline + page.html,
+        diataxisBadge(site, page),
+      ).replace(galleryPlaceholder, () => themeGallery(site)) + resourcesSection(site, page),
   });
 }
 

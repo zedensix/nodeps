@@ -25,6 +25,15 @@ mise run compile    # standalone binary in build/
 
 The documentation lives in `docs/` and is served by the tool itself: start with `mise run dev`.
 
+## Coming from MkDocs or Zensical
+
+```sh
+nodeps migrate mkdocs.yml           # report only
+nodeps migrate mkdocs.yml --write   # write docs.yaml and add missing frontmatter
+```
+
+Admonitions, content tabs, snippets, icons, Mermaid, math and the rest of the PyMdown syntax render as they are.
+
 ## Develop
 
 ```sh

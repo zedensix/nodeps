@@ -12,20 +12,22 @@ bun docs.ts <command> [options]
 
 ## Commands
 
-| Command | Description                                             |
-| ------- | ------------------------------------------------------- |
-| `dev`   | Serve with live reload                                  |
-| `serve` | Serve in production, with server-side rendering and MCP |
-| `build` | Export static files into the output directory           |
+| Command   | Description                                                                 |
+| --------- | --------------------------------------------------------------------------- |
+| `dev`     | Serve with live reload                                                      |
+| `serve`   | Serve in production, with server-side rendering and MCP                     |
+| `build`   | Export static files into the output directory                               |
+| `migrate` | Converts an MkDocs or Zensical project; a dry run unless `--write` is given |
 
 ## Options
 
-| Option           | Default            | Description       |
-| ---------------- | ------------------ | ----------------- |
-| `-c`, `--config` | `docs.yaml`        | Config file       |
-| `-p`, `--port`   | `$PORT`, then 3000 | Port to listen on |
-| `--host`         | `0.0.0.0`          | Hostname to bind  |
-| `-h`, `--help`   |                    | Show the help     |
+| Option           | Default            | Description                                                   |
+| ---------------- | ------------------ | ------------------------------------------------------------- |
+| `-c`, `--config` | `docs.yaml`        | Config file                                                   |
+| `-p`, `--port`   | `$PORT`, then 3000 | Port to listen on                                             |
+| `--host`         | `0.0.0.0`          | Hostname to bind                                              |
+| `--write`        |                    | With `migrate`: write `docs.yaml` and add missing frontmatter |
+| `-h`, `--help`   |                    | Show the help                                                 |
 
 ## mise tasks
 

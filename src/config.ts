@@ -62,6 +62,27 @@ export interface Editor {
   oauth?: { clientId: string; clientSecret: string; scope: string };
 }
 
+export type NavEntry = string | { [title: string]: string | NavEntry[] };
+
+function readNav(value: unknown, path: string): NavEntry[] {
+  if (!Array.isArray(value)) {
+    fail(path, "a list of pages, `Title: page.md` entries or `Section: [...]` entries");
+  }
+  return value.map((entry, index) => {
+    if (typeof entry === "string") {
+      return entry;
+    }
+    if (typeof entry !== "object" || entry === null || Object.keys(entry).length !== 1) {
+      fail(`${path}[${index}]`, "a page path or a single `Title: target` mapping");
+    }
+    const [title, target] = Object.entries(entry)[0]!;
+    if (typeof target === "string") {
+      return { [title]: target };
+    }
+    return { [title]: readNav(target, `${path}[${index}].${title}`) };
+  });
+}
+
 export interface Config {
   file: string;
   root: string;
@@ -75,9 +96,12 @@ export interface Config {
   repository?: Repository;
   footer?: string;
   links: Link[];
+  social: { icon: string; url: string; label: string }[];
   home?: Home;
+  nav?: NavEntry[];
   sidebar: { dropdowns: boolean; bylines: boolean };
   diataxis: { badge: boolean };
+  readerMode: boolean;
   editor: Editor;
   theme: Theme;
 }
@@ -135,6 +159,30 @@ function readLinks(mapping: Mapping, key: string, path = key): Link[] {
     return {
       label: readString(entry, "label", `${path}[${index}].label`) ?? fail(`${path}[${index}].label`, "a string"),
       url: readString(entry, "url", `${path}[${index}].url`) ?? fail(`${path}[${index}].url`, "a string"),
+    };
+  });
+}
+
+function readSocial(data: Mapping) {
+  const value = data.social;
+  if (value === undefined || value === null) {
+    return [];
+  }
+  if (!Array.isArray(value)) {
+    fail("social", "a list of { icon, url, label } entries");
+  }
+  return value.map((entry, index) => {
+    const path = `social[${index}]`;
+    if (typeof entry !== "object" || entry === null) {
+      fail(path, "a mapping with icon and url");
+    }
+    const url = readString(entry, "url", `${path}.url`) ?? fail(`${path}.url`, "a URL");
+    return {
+      icon:
+        readString(entry, "icon", `${path}.icon`) ??
+        fail(`${path}.icon`, "an icon name, like fontawesome/brands/github"),
+      url,
+      label: readString(entry, "label", `${path}.label`) ?? new URL(url).hostname.replace(/^www\./, ""),
     };
   });
 }
@@ -304,8 +352,11 @@ function parseConfig(file: string, data: Mapping): Config {
     editor: readEditor(data),
     footer: readString(data, "footer"),
     links: readLinks(data, "links"),
+    social: readSocial(data),
     home,
     sidebar: { dropdowns, bylines },
+    nav: data.nav === undefined || data.nav === null ? undefined : readNav(data.nav, "nav"),
+    readerMode: readBoolean(data, "reader_mode", "reader_mode", true),
     diataxis: { badge: readBoolean(readMapping(data, "diataxis") ?? {}, "badge", "diataxis.badge", true) },
     theme: {
       preset: preset.name,

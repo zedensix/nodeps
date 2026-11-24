@@ -1,0 +1,5 @@
+title: Configuration
+icon: settings
+order: 3.5
+diataxis: reference
+description: Every setting of docs.yaml, _folder.yaml and page frontmatter, one area per page.

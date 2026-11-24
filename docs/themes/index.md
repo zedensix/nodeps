@@ -28,4 +28,4 @@ theme:
   radius: 2px
 ```
 
-See [Customize the theme](../how-to/customize-theme.md) and [Design tokens](../reference/design-tokens.md).
+See [Customize the theme](../how-to/customize-theme.md) and [Design tokens](../configuration/design-tokens.md).

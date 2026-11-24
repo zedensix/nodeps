@@ -1,9 +1,10 @@
 import { stat } from "node:fs/promises";
 import { basename } from "node:path";
-import type { Config } from "./config.ts";
-import { icon, isIcon } from "./icons.ts";
+import type { Config, NavEntry } from "./config.ts";
+import { ensureIcons } from "./icon-download.ts";
+import { icon, iconDirectory, isIcon, normalizeIcon } from "./icons.ts";
 import { insideSkill, resolveResources, skillArchive, skillDirectories, type Resource } from "./resources.ts";
-import { bundle, bundleLayout } from "./theme.ts";
+import { bundle, bundleLayout, embeddedTheme } from "./theme.ts";
 import { parseFrontmatter, renderMarkdown, type Heading, type Section } from "./markdown.ts";
 
 export interface Page {
@@ -16,6 +17,7 @@ export interface Page {
   icon: string;
   byline: string;
   tags: string[];
+  hide: string[];
   order: number;
   updated: Date;
   category?: Category;
@@ -51,7 +53,8 @@ export interface NavFolder {
   children: NavItem[];
 }
 
-export type NavItem = { kind: "page"; page: Page } | NavFolder;
+export type NavItem =
+  { kind: "page"; page: Page; label?: string } | { kind: "link"; title: string; url: string } | NavFolder;
 
 export interface Category {
   folder: string;
@@ -169,11 +172,11 @@ async function readFolderSettings(path: string): Promise<FolderSettings> {
       throw new Error(`${path}: "icon" must be a Lucide icon name`);
     }
     try {
-      icon(data.icon);
+      icon(normalizeIcon(data.icon));
     } catch {
-      throw new Error(`${path}: unknown Lucide icon "${data.icon}", see https://lucide.dev/icons`);
+      throw new Error(`${path}: unknown icon "${data.icon}", see https://lucide.dev/icons`);
     }
-    settings.icon = data.icon;
+    settings.icon = normalizeIcon(data.icon);
   }
   if (data.order !== undefined) {
     if (typeof data.order !== "number") {
@@ -200,6 +203,75 @@ async function readFolderSettings(path: string): Promise<FolderSettings> {
     settings.diataxis = data.diataxis as DiataxisKind;
   }
   return settings;
+}
+
+function buildCategoriesFromNav(
+  nav: NavEntry[],
+  bySource: Map<string, Page>,
+  config: Config,
+  warnings: string[],
+): Category[] {
+  const flatten = (items: NavItem[]): Page[] =>
+    items.flatMap((item) =>
+      item.kind === "page"
+        ? [item.page]
+        : item.kind === "link"
+          ? []
+          : [...(item.index ? [item.index] : []), ...flatten(item.children)],
+    );
+  const entryItems = (entries: NavEntry[], trail: string[]): NavItem[] =>
+    entries.flatMap((entry): NavItem[] => {
+      const [title, target] =
+        typeof entry === "string" ? [undefined, entry] : (Object.entries(entry)[0] as [string, string | NavEntry[]]);
+      if (typeof target === "string") {
+        if (/^[a-z][a-z\d+.-]*:/i.test(target)) {
+          return [{ kind: "link", title: title ?? target, url: target }];
+        }
+        const page = bySource.get(target.replace(/^\.?\//, ""));
+        if (!page) {
+          warnings.push(`docs.yaml: nav entry "${target}" does not match a page`);
+          return [];
+        }
+        page.trail = trail;
+        return [{ kind: "page", page, label: title }];
+      }
+      const children = entryItems(target, [...trail, title!]);
+      const first = children[0];
+      const index = first?.kind === "page" && /(^|\/)index\.md$/.test(first.page.source) ? first.page : undefined;
+      return [
+        {
+          kind: "folder",
+          folder: title!,
+          title: title!,
+          index,
+          dropdown: config.sidebar.dropdowns,
+          children: index ? children.slice(1) : children,
+        },
+      ];
+    });
+
+  const loose: NavEntry[] = [];
+  const categories: Category[] = [];
+  for (const entry of nav) {
+    const target = typeof entry === "string" ? entry : Object.values(entry)[0];
+    if (Array.isArray(target)) {
+      const title = Object.keys(entry as object)[0]!;
+      const items = entryItems(target, []);
+      categories.push({ folder: title, title, items, pages: flatten(items) });
+    } else {
+      loose.push(entry);
+    }
+  }
+  if (loose.length > 0) {
+    const items = entryItems(loose, []);
+    categories.unshift({ folder: "", title: "Home", items, pages: flatten(items) });
+  }
+  for (const category of categories) {
+    for (const page of category.pages) {
+      page.category = category;
+    }
+  }
+  return categories;
 }
 
 function buildCategories(
@@ -294,6 +366,9 @@ function buildCategories(
 }
 
 export async function loadSite(config: Config): Promise<Site> {
+  if (!embeddedTheme) {
+    await ensureIcons(iconDirectory);
+  }
   if (!(await stat(config.source).catch(() => null))?.isDirectory()) {
     throw new Error(`Source directory not found: ${config.source}`);
   }
@@ -332,8 +407,8 @@ export async function loadSite(config: Config): Promise<Site> {
   const pages = drafts.map(({ source, modified, raw, data, body }) => {
     if (typeof data.icon !== "string" || !data.icon) {
       problems.push(`${source}: frontmatter "icon" is required (a Lucide icon name, see https://lucide.dev/icons)`);
-    } else if (!isIcon(data.icon)) {
-      problems.push(`${source}: frontmatter "icon" is not a Lucide icon: "${data.icon}"`);
+    } else if (!isIcon(normalizeIcon(data.icon))) {
+      problems.push(`${source}: frontmatter "icon" is not a known icon: "${data.icon}"`);
     }
     if (typeof data.byline !== "string" || !data.byline.trim()) {
       problems.push(`${source}: frontmatter "byline" is required`);
@@ -347,9 +422,10 @@ export async function loadSite(config: Config): Promise<Site> {
       markdownUrl: markdownUrlOf(url),
       title: typeof data.title === "string" ? data.title : "",
       description: typeof data.description === "string" ? data.description : "",
-      icon: String(data.icon ?? ""),
+      icon: normalizeIcon(String(data.icon ?? "")),
       byline: String(data.byline ?? "").trim(),
       tags: readTags(data.tags, source, problems),
+      hide: Array.isArray(data.hide) ? data.hide.map(String) : [],
       order: typeof data.order === "number" ? data.order : Infinity,
       updated: frontmatterDate(data.updated) ?? committed.get(source) ?? modified,
       markdown: body,
@@ -405,7 +481,9 @@ export async function loadSite(config: Config): Promise<Site> {
         return base + href.slice(1);
       }
       const target = new URL(href, `file:///${page.source}`);
-      const path = decodeURIComponent(target.pathname).slice(1);
+      const path = decodeURIComponent(target.pathname)
+        .slice(1)
+        .replace(/\.md\/$/, ".md");
       if (path.endsWith(".md")) {
         const linked = bySource.get(path);
         if (!linked) {
@@ -419,7 +497,12 @@ export async function loadSite(config: Config): Promise<Site> {
       }
       return base + path + target.search + target.hash;
     };
-    const rendered = renderMarkdown(page.markdown, resolveLink);
+    const rendered = renderMarkdown(page.markdown, resolveLink, {
+      root: config.root,
+      sourceDirectory: config.source,
+      pageSource: page.source,
+      warnings,
+    });
     const segments = page.slug.split("/");
     const fallbackTitle = page.slug === "index" ? config.title : titleCase(segments.at(isIndex(page.slug) ? -2 : -1)!);
     page.title ||= rendered.title ?? fallbackTitle;
@@ -454,7 +537,9 @@ export async function loadSite(config: Config): Promise<Site> {
     }
   }
 
-  const categories = buildCategories(pages, folders, bySlug, config.sidebar.dropdowns);
+  const categories = config.nav
+    ? buildCategoriesFromNav(config.nav, bySource, config, warnings)
+    : buildCategories(pages, folders, bySlug, config.sidebar.dropdowns);
   const navPages = categories.flatMap((category) => category.pages);
 
   if (config.theme.stylesheet && !(await Bun.file(config.theme.stylesheet).exists())) {

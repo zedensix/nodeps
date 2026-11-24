@@ -2,6 +2,7 @@
 import { parseArgs } from "node:util";
 import { ConfigError, loadConfig } from "./src/config.ts";
 import { exportSite } from "./src/export.ts";
+import { planMigration, renderConfig, writeMigration } from "./src/migrate.ts";
 import { serve } from "./src/server.ts";
 
 const usage = `Usage: nodeps <command> [options]   (from source: bun docs.ts <command>)
@@ -10,11 +11,13 @@ Commands:
   dev      Serve the docs with live reload
   serve    Serve the docs (production, server-side rendered, MCP enabled)
   build    Export the docs as static files
+  migrate  Convert an MkDocs or Zensical project: nodeps migrate [mkdocs.yml] [--write]
 
 Options:
   -c, --config <file>   Config file (default: docs.yaml)
   -p, --port <port>     Port for dev and serve (default: $PORT or 3000)
       --host <host>     Hostname to bind (default: 0.0.0.0)
+      --write           With migrate: write docs.yaml and add missing frontmatter
   -h, --help            Show this help`;
 
 const { values, positionals } = parseArgs({
@@ -25,6 +28,7 @@ const { values, positionals } = parseArgs({
     port: { type: "string", short: "p" },
     host: { type: "string" },
     help: { type: "boolean", short: "h" },
+    write: { type: "boolean" },
   },
 });
 
@@ -40,6 +44,21 @@ try {
     await serve(values.config, { dev: command === "dev", port, hostname: values.host });
   } else if (command === "build") {
     await exportSite(await loadConfig(values.config));
+  } else if (command === "migrate") {
+    const mkdocsPath = positionals[1] ?? "mkdocs.yml";
+    const report = await planMigration(mkdocsPath);
+    const section = (title: string, lines: string[]) =>
+      lines.length > 0 && console.log(`\n${title}\n${lines.map((line) => `  ${line}`).join("\n")}`);
+    section("Mapped to docs.yaml", report.mapped);
+    section("Supported natively", report.native);
+    section("Not supported", report.unsupported);
+    console.log(`\n${report.pages.length} pages need an icon and a byline in their frontmatter.`);
+    if (values.write) {
+      const target = await writeMigration(mkdocsPath, report);
+      console.log(`Wrote ${target} and updated ${report.pages.length} pages. Check the result with: nodeps dev`);
+    } else {
+      console.log(`\ndocs.yaml preview:\n\n${renderConfig(report.config)}\nRun again with --write to apply.`);
+    }
   } else {
     console.error(`Unknown command "${command}"\n\n${usage}`);
     process.exit(1);

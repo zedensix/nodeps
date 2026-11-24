@@ -20,7 +20,7 @@ home:
     - label: Start the tutorial
       url: tutorials/first-site.md
     - label: Read the reference
-      url: reference/formats/configuration.md
+      url: configuration/index.md
   latest: 3
 
 theme:

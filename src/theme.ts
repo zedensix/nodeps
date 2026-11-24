@@ -12,6 +12,7 @@ export interface EmbeddedTheme {
   template: string;
   assets: Record<string, BundledAsset>;
   icons: Record<string, string>;
+  extras: string;
 }
 
 declare const NODEPS_EMBEDDED_THEME: EmbeddedTheme | undefined;

@@ -10,6 +10,9 @@
         if (theme) {
           document.documentElement.dataset.theme = theme;
         }
+        if (localStorage.getItem("reader") === "on") {
+          document.documentElement.dataset.reader = "";
+        }
         const presetStyle = localStorage.getItem("theme-preset-style");
         if (presetStyle) {
           document.documentElement.style.cssText = presetStyle;
@@ -41,6 +44,16 @@
           <kbd>⌘K</kbd>
         </button>
         <nav class="header-links" aria-label="External links" data-slot="links"></nav>
+        <button
+          class="icon-button reader-toggle"
+          type="button"
+          aria-label="Reader mode"
+          data-tooltip="Reader mode"
+          data-tooltip-align="end"
+          data-if="reader"
+        >
+          <i data-icon="book-open-text"></i>
+        </button>
         <details class="theme-picker">
           <summary
             class="icon-button"
@@ -144,6 +157,7 @@
     </div>
 
     <div class="scrim" hidden></div>
+    <button class="reader-exit" type="button" data-if="reader"><i data-icon="x"></i>Exit reader mode</button>
 
     <dialog class="search-dialog" aria-label="Search">
       <div class="search-box">

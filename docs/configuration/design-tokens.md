@@ -1,7 +1,7 @@
 ---
 title: Design tokens
 description: Every CSS custom property the theme exposes.
-order: 4
+order: 8
 icon: swatch-book
 byline: The nodeps maintainers
 ---

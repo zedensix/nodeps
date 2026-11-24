@@ -1,4 +1,5 @@
 import { highlight } from "./highlight.ts";
+import { postprocessHtml, preprocessMarkdown, type ExtensionContext } from "./extensions.ts";
 import { icon } from "./icons.ts";
 
 export interface Heading {
@@ -91,7 +92,9 @@ export function decodeEntities(text: string) {
 
 function parseLineRanges(meta: string) {
   const lines = new Set<number>();
-  const ranges = /\{([\d,\s-]+)\}/.exec(meta)?.[1] ?? "";
+  const braces = /\{([\d,\s-]+)\}/.exec(meta)?.[1];
+  const highlightLines = /hl_lines=["']([\d\s-]+)["']/.exec(meta)?.[1]?.trim().split(/\s+/).join(",");
+  const ranges = braces ?? highlightLines ?? "";
   for (const range of ranges.split(",")) {
     const [start, end = start] = range.trim().split("-").map(Number);
     if (!start || !end) {
@@ -108,15 +111,26 @@ function renderCodeBlock(language: string, escapedCode: string) {
   const [name = "", encodedMeta] = language.split("::");
   const meta = encodedMeta ? Buffer.from(encodedMeta, "base64url").toString() : "";
   const title = /title=(?:"([^"]*)"|'([^']*)'|(\S+))/.exec(meta);
+  if (name === "mermaid") {
+    return `<pre class="mermaid">${escapedCode}</pre>`;
+  }
+  const lineNumbers = /linenums=["']?(\d+)/.exec(meta)?.[1];
   return renderCode(
     decodeEntities(escapedCode),
     name,
     title ? (title[1] ?? title[2] ?? title[3]) : undefined,
     parseLineRanges(meta),
+    lineNumbers ? Number(lineNumbers) : undefined,
   );
 }
 
-export function renderCode(source: string, name: string, titleText?: string, highlighted = new Set<number>()) {
+export function renderCode(
+  source: string,
+  name: string,
+  titleText?: string,
+  highlighted = new Set<number>(),
+  firstLineNumber?: number,
+) {
   const code = source.replace(/\n$/, "");
   const rawLines = code.split("\n");
   const lines = highlight(code, name).map((line, index) => {
@@ -137,7 +151,8 @@ export function renderCode(source: string, name: string, titleText?: string, hig
     ? `<figcaption><span class="code-title">${Bun.escapeHTML(titleText)}</span>${label}</figcaption>`
     : "";
   const copy = `<button class="copy-code" type="button" aria-label="Copy code" data-tooltip="Copy code" data-tooltip-side="left">${icon("copy")}${icon("check")}</button>`;
-  return `<figure class="code${titleText ? " has-title" : ""}" data-language="${Bun.escapeHTML(name)}">${caption}${copy}${titleText ? "" : label}<pre><code>${lines.join("\n")}</code></pre></figure>`;
+  const numbering = firstLineNumber === undefined ? "" : ` style="--first-line:${firstLineNumber - 1}"`;
+  return `<figure class="code${titleText ? " has-title" : ""}${firstLineNumber === undefined ? "" : " numbered"}" data-language="${Bun.escapeHTML(name)}"${numbering}>${caption}${copy}${titleText ? "" : label}<pre><code>${lines.join("\n")}</code></pre></figure>`;
 }
 
 const alerts: Record<string, { title: string; icon: string }> = {
@@ -159,8 +174,13 @@ function renderAlerts(html: string) {
   );
 }
 
-export function renderMarkdown(markdown: string, resolveLink: (href: string) => string): RenderedMarkdown {
-  let html = Bun.markdown.html(encodeFenceMeta(markdown), {
+export function renderMarkdown(
+  markdown: string,
+  resolveLink: (href: string) => string,
+  context: ExtensionContext,
+): RenderedMarkdown {
+  const preprocessed = preprocessMarkdown(markdown, context);
+  let html = Bun.markdown.html(encodeFenceMeta(preprocessed.markdown), {
     headings: { ids: true },
     autolinks: true,
   });
@@ -168,7 +188,7 @@ export function renderMarkdown(markdown: string, resolveLink: (href: string) => 
     /<pre><code(?: class="language-([^"]*)")?>([\s\S]*?)<\/code><\/pre>/g,
     (_match, language = "", code: string) => renderCodeBlock(language, code),
   );
-  html = renderAlerts(html);
+  html = renderAlerts(postprocessHtml(html, preprocessed));
 
   const headings: Heading[] = [];
   const sections: Section[] = [{ id: "", heading: "", text: "" }];

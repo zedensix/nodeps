@@ -65,4 +65,4 @@ theme:
 }
 ```
 
-See [Design tokens](../reference/design-tokens.md) for every token.
+See [Design tokens](../configuration/design-tokens.md) for every token.

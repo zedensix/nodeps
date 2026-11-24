@@ -55,6 +55,8 @@ export function llmsIndex(site: Site, origin: string, mcp: boolean) {
     for (const item of items) {
       if (item.kind === "page") {
         lines.push(link(item.page, depth));
+      } else if (item.kind === "link") {
+        lines.push(`${"  ".repeat(depth)}- [${item.title}](${item.url})`);
       } else {
         lines.push(item.index ? link(item.index, depth) : `${"  ".repeat(depth)}- ${item.title}`);
         listItems(item.children, depth + 1);

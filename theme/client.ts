@@ -69,6 +69,33 @@ themeToggle.addEventListener("click", () => {
   applyTheme(themes[(current + 1) % themes.length]!);
 });
 
+function setReaderMode(enabled: boolean) {
+  const update = () => {
+    if (enabled) {
+      root.dataset.reader = "";
+    } else {
+      delete root.dataset.reader;
+    }
+  };
+  if (document.startViewTransition && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    document.startViewTransition(update);
+  } else {
+    update();
+  }
+  try {
+    if (enabled) {
+      localStorage.setItem("reader", "on");
+    } else {
+      localStorage.removeItem("reader");
+    }
+  } catch {
+    // Storage can be blocked by the browser: reader mode then lasts until the page is reloaded.
+  }
+}
+
+document.querySelector(".reader-toggle")?.addEventListener("click", () => setReaderMode(true));
+document.querySelector(".reader-exit")?.addEventListener("click", () => setReaderMode(false));
+
 const menuToggle = document.querySelector<HTMLButtonElement>(".menu-toggle")!;
 const scrim = document.querySelector<HTMLElement>(".scrim")!;
 function setNavigation(open: boolean) {
@@ -186,6 +213,49 @@ function setupTableOfContents() {
   }
 }
 
+const mermaidModule = "https://cdn.jsdelivr.net/npm/mermaid@12.3.0/dist/mermaid.esm.min.mjs";
+const katexModule = "https://cdn.jsdelivr.net/npm/katex@0.19.1/dist/katex.mjs";
+const katexStylesheet = "https://cdn.jsdelivr.net/npm/katex@0.19.1/dist/katex.min.css";
+
+function prefersDark() {
+  return root.dataset.theme === "dark" || (!root.dataset.theme && matchMedia("(prefers-color-scheme: dark)").matches);
+}
+
+async function renderRichContent() {
+  const diagrams = [...document.querySelectorAll<HTMLElement>(".prose pre.mermaid:not([data-processed])")];
+  if (diagrams.length > 0) {
+    const { default: mermaid } = await import(mermaidModule);
+    mermaid.initialize({ startOnLoad: false, theme: prefersDark() ? "dark" : "default" });
+    await mermaid.run({ nodes: diagrams });
+  }
+  const formulas = [...document.querySelectorAll<HTMLElement>(".prose .arithmatex:not([data-rendered])")];
+  if (formulas.length > 0) {
+    if (!document.querySelector(`link[href="${katexStylesheet}"]`)) {
+      document.head.append(Object.assign(document.createElement("link"), { rel: "stylesheet", href: katexStylesheet }));
+    }
+    const { default: katex } = await import(katexModule);
+    for (const formula of formulas) {
+      const source = formula.textContent ?? "";
+      const display = source.startsWith("\\[");
+      katex.render(source.slice(2, -2), formula, { displayMode: display, throwOnError: false });
+      formula.dataset.rendered = "";
+    }
+  }
+}
+
+document.addEventListener("change", (event) => {
+  const input = event.target as HTMLInputElement;
+  if (!input.matches(".tabbed-set > input")) {
+    return;
+  }
+  const label = input.nextElementSibling?.textContent;
+  for (const other of document.querySelectorAll<HTMLInputElement>(".tabbed-set > input")) {
+    if (other !== input && other.nextElementSibling?.textContent === label) {
+      other.checked = true;
+    }
+  }
+});
+
 function revealActiveTab() {
   document.querySelector(".category-tabs a[aria-current]")?.scrollIntoView({ block: "nearest", inline: "nearest" });
 }
@@ -263,6 +333,7 @@ if (location.hash === "#edit") {
   openPageEditor();
 }
 checkPendingEdit();
+renderRichContent().catch((error) => console.error("Diagram or math rendering failed", error));
 markCurrentPreset();
 setupPromptLinks();
 setupTableOfContents();
@@ -365,6 +436,7 @@ function swapPage(next: Document) {
   revealActiveTab();
   markCurrentPreset();
   checkPendingEdit();
+  renderRichContent().catch((error) => console.error("Diagram or math rendering failed", error));
 }
 
 const navigation = (window as unknown as { navigation?: EventTarget }).navigation;
