@@ -1,2 +1,6 @@
 [tools]
 "github:oven-sh/bun" = "canary"
+prek = "0.5.11"
+
+[hooks]
+postinstall = "prek install"

@@ -28,11 +28,11 @@ The documentation lives in `docs/` and is served by the tool itself: start with 
 ## Develop
 
 ```sh
-bun fmt
-bun lint
+mise install              # installs Bun, prek and the git hooks
+prek run --all-files      # what every commit and CI run
 ```
 
-`bun lint` needs the Bun canary build, which mise installs.
+The hooks format with `bun fmt`, lint with `bun lint`, build the docs to catch broken pages, check YAML, JSON and TOML, and refuse commits with a Claude or Anthropic `Co-Authored-By` trailer. `bun lint` needs the Bun canary build, which mise installs.
 
 ## Credits
 

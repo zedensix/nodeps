@@ -1,0 +1,38 @@
+#:schema https://www.schemastore.org/prek.json
+default_install_hook_types = ["pre-commit", "commit-msg"]
+exclude = "^theme/icons/"
+
+[[repos]]
+repo = "builtin"
+hooks = [
+  { id = "trailing-whitespace" },
+  { id = "end-of-file-fixer" },
+  { id = "mixed-line-ending", args = ["--fix=lf"] },
+  { id = "check-merge-conflict" },
+  { id = "check-case-conflict" },
+  { id = "check-yaml" },
+  { id = "check-json" },
+  { id = "check-toml" },
+  { id = "check-added-large-files" },
+  { id = "detect-private-key" },
+  { id = "check-executables-have-shebangs" },
+  { id = "check-shebang-scripts-are-executable" },
+  { id = "check-commit-trailers", args = ["--deny", "Co-Authored-By=(?i)claude|anthropic"] },
+]
+
+[[repos]]
+repo = "local"
+hooks = [
+  { id = "bun-fmt", name = "bun fmt", entry = "bun fmt", language = "system", types_or = [
+    "ts",
+    "javascript",
+    "css",
+    "html",
+    "json",
+    "yaml",
+    "markdown",
+    "toml",
+  ] },
+  { id = "bun-lint", name = "bun lint", entry = "bun lint", language = "system", types_or = ["ts", "javascript"] },
+  { id = "docs-build", name = "docs build", entry = "bun docs.ts build", language = "system", pass_filenames = false, files = "^(docs/|src/|theme/|docs\\.(ts|yaml)$)" },
+]
