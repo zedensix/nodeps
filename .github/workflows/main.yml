@@ -108,7 +108,8 @@ jobs:
     permissions:
       contents: read
     steps:
-      # Fails the run when a channel the install docs advertise lacks the release; registries can lag, so each check retries.
+      # Fails the run when a channel the install docs advertise lacks the release. Registries lag and their CDNs
+      # cache 404s, so each check retries for 5 minutes with a query string that bypasses the cache.
       - name: Check every install channel has the release
         env:
           VERSION: ${{ needs.release.outputs.version }}
@@ -120,21 +121,21 @@ jobs:
           check() {
             name=$1
             shift
-            for attempt in 1 2 3 4 5 6; do
-              if "$@" > /dev/null 2>&1; then
+            for attempt in 1 2 3 4 5 6 7 8 9 10; do
+              if "${@//ATTEMPT/$attempt-$RANDOM}" > /dev/null 2>&1; then
                 echo "ok: $name"
                 return
               fi
-              sleep 20
+              sleep 30
             done
             echo "::error::$name does not have $VERSION"
             missing=1
           }
           for package in nodeps nodeps-linux-x64 nodeps-linux-arm64 nodeps-linux-x64-musl nodeps-linux-arm64-musl nodeps-darwin-x64 nodeps-darwin-arm64 nodeps-win32-x64; do
-            check "npm @zedensix/$package" curl -fsS "https://registry.npmjs.org/@zedensix%2f$package/$VERSION"
+            check "npm @zedensix/$package" curl -fsS "https://registry.npmjs.org/@zedensix%2f$package/$VERSION?ATTEMPT"
           done
-          check "PyPI zedensix-nodeps $python_version" curl -fsS "https://pypi.org/pypi/zedensix-nodeps/$python_version/json"
-          check "Docker Hub zedensix/nodeps:$VERSION" curl -fsS "https://hub.docker.com/v2/repositories/zedensix/nodeps/tags/$VERSION"
+          check "PyPI zedensix-nodeps $python_version" curl -fsS "https://pypi.org/pypi/zedensix-nodeps/$python_version/json?ATTEMPT"
+          check "Docker Hub zedensix/nodeps:$VERSION" curl -fsS "https://hub.docker.com/v2/repositories/zedensix/nodeps/tags/$VERSION?ATTEMPT"
           assets=$(gh release view "v$VERSION" --repo "$REPOSITORY" --json assets --jq '.assets[].name')
           for asset in nodeps-linux-x64 nodeps-linux-arm64 nodeps-linux-x64-musl nodeps-linux-arm64-musl nodeps-darwin-x64 nodeps-darwin-arm64 nodeps-win32-x64.exe SHA256SUMS; do
             check "GitHub release asset $asset (binaries and mise)" grep -qx "$asset" <<< "$assets"
