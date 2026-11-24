@@ -1,0 +1,137 @@
+.search-layout {
+  display: grid;
+  flex: 1;
+  grid-template-columns: 13rem minmax(0, 1fr);
+  min-height: 0;
+}
+
+.search-tags {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: 0.75rem 0.5rem;
+  border-right: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.search-tags-title {
+  margin: 0 0 0.4rem 0.5rem;
+  color: var(--text-subtle);
+  font-size: 0.72rem;
+  font-weight: 650;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.search-tag-list {
+  display: grid;
+  gap: 1px;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+  scrollbar-width: thin;
+}
+
+.search-tag {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.4rem 0.5rem;
+  border: 0;
+  border-radius: calc(var(--radius) - 4px);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  text-align: left;
+  transition:
+    background 0.12s,
+    color 0.12s;
+}
+
+.search-tag:hover {
+  background: var(--surface-strong);
+  color: var(--text);
+}
+
+.search-tag small {
+  color: var(--text-subtle);
+  font-size: 0.75rem;
+}
+
+.search-tag.on-page span::after {
+  content: "";
+  display: inline-block;
+  width: 0.35rem;
+  height: 0.35rem;
+  margin-left: 0.4rem;
+  border-radius: 50%;
+  background: var(--accent);
+  vertical-align: 0.15em;
+}
+
+.search-tag.active {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.search-main {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.search-group {
+  padding: 0.6rem 0.9rem 0.3rem;
+  color: var(--text-subtle);
+  font-size: 0.72rem;
+  font-weight: 650;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.search-result-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: 0.4rem;
+}
+
+.search-result-tags span {
+  padding: 0.05rem 0.45rem;
+  border-radius: 999px;
+  background: var(--surface-strong);
+  color: var(--text-muted);
+  font-size: 0.72rem;
+}
+
+@media (max-width: 700px) {
+  .search-layout {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+
+  .search-tags {
+    padding: 0.5rem;
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .search-tags-title {
+    display: none;
+  }
+
+  .search-tag-list {
+    display: flex;
+    gap: 0.35rem;
+    overflow-x: auto;
+  }
+
+  .search-tag {
+    width: auto;
+    white-space: nowrap;
+  }
+}

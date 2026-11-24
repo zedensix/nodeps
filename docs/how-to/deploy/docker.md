@@ -13,7 +13,7 @@ The repository ships an opt-in `Dockerfile`: it compiles the binary for musl and
 docker run -p 3000:3000 zedensix/nodeps
 ```
 
-Every release is published on Docker Hub for `linux/amd64` and `linux/arm64`: `:latest` for stable versions, `:canary` for the newest build of `main`. To build it yourself:
+Every release is published on Docker Hub for `linux/amd64` and `linux/arm64`: `:latest` for stable versions, `:beta` for the newest build of `main`. To build it yourself:
 
 ```sh
 docker build -t nodeps .

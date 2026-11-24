@@ -1,0 +1,85 @@
+<template id="nodeps-editor-template" data-if="editor">
+  <dialog class="editor-dialog" aria-label="Page editor">
+    <header class="editor-bar">
+      <div class="editor-heading">
+        <span class="editor-kicker"><i data-icon="square-pen"></i>Editing</span>
+        <strong class="editor-page-title"></strong>
+        <small class="editor-status" aria-live="polite"></small>
+      </div>
+      <div class="editor-mode" role="group" aria-label="Editing mode">
+        <button type="button" data-mode="visual" aria-pressed="true">Visual</button>
+        <button type="button" data-mode="markdown" aria-pressed="false">Markdown</button>
+      </div>
+      <div class="editor-actions">
+        <button type="button" class="pill-button" data-editor="discard" hidden>Discard draft</button>
+        <button type="button" class="pill-button" data-editor="close">Close</button>
+        <button type="button" class="pill-button primary" data-editor="publish"><i data-icon="send"></i>Publish</button>
+      </div>
+    </header>
+    <div class="editor-toolbar" role="toolbar" aria-label="Formatting">
+      <button type="button" data-command="formatBlock" data-value="p" aria-label="Paragraph" data-tooltip="Paragraph">
+        <i data-icon="pilcrow"></i>
+      </button>
+      <button type="button" data-command="formatBlock" data-value="h2" aria-label="Heading" data-tooltip="Heading">
+        <i data-icon="heading-2"></i>
+      </button>
+      <button
+        type="button"
+        data-command="formatBlock"
+        data-value="h3"
+        aria-label="Subheading"
+        data-tooltip="Subheading"
+      >
+        <i data-icon="heading-3"></i>
+      </button>
+      <span class="editor-separator"></span>
+      <button type="button" data-command="bold" aria-label="Bold" data-tooltip="Bold">
+        <strong class="editor-glyph">B</strong>
+      </button>
+      <button type="button" data-command="italic" aria-label="Italic" data-tooltip="Italic">
+        <i data-icon="italic"></i>
+      </button>
+      <button type="button" data-command="strikeThrough" aria-label="Strikethrough" data-tooltip="Strikethrough">
+        <i data-icon="strikethrough"></i>
+      </button>
+      <button type="button" data-command="code" aria-label="Inline code" data-tooltip="Inline code">
+        <i data-icon="code"></i>
+      </button>
+      <button type="button" data-command="link" aria-label="Link" data-tooltip="Link">
+        <i data-icon="link"></i>
+      </button>
+      <span class="editor-separator"></span>
+      <button type="button" data-command="insertUnorderedList" aria-label="Bulleted list" data-tooltip="Bulleted list">
+        <i data-icon="list"></i>
+      </button>
+      <button type="button" data-command="insertOrderedList" aria-label="Numbered list" data-tooltip="Numbered list">
+        <i data-icon="list-ordered"></i>
+      </button>
+      <button type="button" data-command="formatBlock" data-value="blockquote" aria-label="Quote" data-tooltip="Quote">
+        <i data-icon="text-quote"></i>
+      </button>
+      <button
+        type="button"
+        data-command="formatBlock"
+        data-value="pre"
+        aria-label="Code block"
+        data-tooltip="Code block"
+      >
+        <i data-icon="square-code"></i>
+      </button>
+      <span class="editor-separator"></span>
+      <button type="button" data-command="undo" aria-label="Undo" data-tooltip="Undo">
+        <i data-icon="undo-2"></i>
+      </button>
+      <button type="button" data-command="redo" aria-label="Redo" data-tooltip="Redo">
+        <i data-icon="redo-2"></i>
+      </button>
+      <input class="editor-link-input" type="url" placeholder="Paste a link, then press Enter" hidden />
+    </div>
+    <div class="editor-scroll">
+      <article class="prose editor-content" contenteditable="true" spellcheck="true"></article>
+      <textarea class="editor-source" spellcheck="false" aria-label="Markdown source" hidden></textarea>
+    </div>
+    <div class="editor-panel" hidden></div>
+  </dialog>
+</template>

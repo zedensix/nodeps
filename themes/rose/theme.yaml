@@ -1,0 +1,25 @@
+title: Rose
+description: Pink accents and generous curves.
+accent: "#d6336c"
+variables:
+  radius: "14px"
+light:
+  background: "#fffbfc"
+  surface: "#fcf3f6"
+  surface-strong: "#f6e6ec"
+  border: "#f0dbe3"
+  text: "#24121a"
+  text-muted: "#6b4c58"
+  text-subtle: "#a08592"
+  code-background: "#fdf7f9"
+dark:
+  background: "#130a0e"
+  surface: "#1c1015"
+  surface-strong: "#27161d"
+  border: "#331d27"
+  text: "#f6e6ec"
+  text-muted: "#c4a2b0"
+  text-subtle: "#8b6b78"
+  code-background: "#170c11"
+  accent: "#ff7aa8"
+  accent-contrast: "#22060f"

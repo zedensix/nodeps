@@ -35,7 +35,7 @@ bun docs.ts <command> [options]
 | ---------------------------- | -------------------------------------------------------------------------------- |
 | `mise run dev`               | `bun --watch docs.ts dev`, restarting when the code changes                      |
 | `mise run build`             | `bun docs.ts build`                                                              |
-| `mise run icons`             | Downloads the Lucide icons into `theme/icons`, one folder per category           |
+| `mise run icons`             | Downloads the Lucide icons into `icons`, one folder per category                 |
 | `mise run compile`           | Compiles the standalone `nodeps` binary into `build/`                            |
 | `mise run release <version>` | Builds every binary, the npm packages and the Python wheels into `build/release` |
 

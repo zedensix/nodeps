@@ -1,0 +1,37 @@
+.edit-banner {
+  align-items: center;
+  margin: 0 0 1.5rem;
+  padding: 0.9rem 1.1rem;
+  border: 1px solid color-mix(in oklab, var(--accent) 30%, var(--border));
+  border-radius: var(--radius);
+  background: var(--accent-soft);
+}
+
+.edit-banner p {
+  margin: 0;
+}
+
+.edit-banner .editor-panel-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 650;
+}
+
+.edit-banner-merged {
+  border-color: color-mix(in oklab, var(--tip) 40%, var(--border));
+  background: color-mix(in oklab, var(--tip) 10%, transparent);
+}
+
+.edit-banner-closed {
+  border-color: color-mix(in oklab, var(--caution) 40%, var(--border));
+  background: color-mix(in oklab, var(--caution) 8%, transparent);
+}
+
+.edit-banner .pill-button {
+  text-decoration: none;
+}
+
+[hidden] {
+  display: none !important;
+}

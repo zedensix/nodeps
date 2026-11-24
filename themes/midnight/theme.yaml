@@ -1,0 +1,22 @@
+title: Midnight
+description: "Indigo on deep navy, made for the dark."
+accent: "#5b6cff"
+light:
+  background: "#f8f9fd"
+  surface: "#eef0f9"
+  surface-strong: "#e2e6f4"
+  border: "#d9ddef"
+  text: "#12152b"
+  text-muted: "#4d5375"
+  text-subtle: "#8288a8"
+  code-background: "#f2f4fb"
+dark:
+  background: "#070a1a"
+  surface: "#0d1126"
+  surface-strong: "#151a34"
+  border: "#1e2442"
+  text: "#e4e7fa"
+  text-muted: "#9ea5cc"
+  text-subtle: "#6a7199"
+  code-background: "#0a0e20"
+  accent: "#8d99ff"

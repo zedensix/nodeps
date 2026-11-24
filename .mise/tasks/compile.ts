@@ -1,18 +1,20 @@
 #!/usr/bin/env bun
-//MISE description="Compile nodeps into standalone binaries in build/, embedding the theme and icons"
+//MISE description="Compile nodeps into standalone binaries in build/, embedding the themes, client and icons"
 import { join } from "node:path";
-import { ensureIcons } from "../../src/icon-download.ts";
-import { iconDirectory, readExtraBundle, readIconSources } from "../../src/icons.ts";
-import { bundle, embeddedBase, themeDirectory, type EmbeddedTheme } from "../../src/theme.ts";
+import { ensureIcons } from "../../src/icons/icon-download.ts";
+import { iconDirectory, readExtraBundle, readIconSources } from "../../src/icons/icons.ts";
+import type { EmbeddedTheme } from "../../src/theme/theme.ts";
 
 const root = process.env.MISE_PROJECT_ROOT ?? process.cwd();
 const targets = Bun.argv.slice(2);
 
 await ensureIcons(iconDirectory);
-const layout = await bundle(`${themeDirectory}/layout.html`, embeddedBase + "_assets/");
+const sources: Record<string, string> = {};
+for (const path of new Bun.Glob("{themes,client}/**/*").scanSync({ cwd: root })) {
+  sources[path] = await Bun.file(join(root, path)).text();
+}
 const embedded: EmbeddedTheme = {
-  template: layout.entry,
-  assets: Object.fromEntries(layout.assets),
+  sources,
   icons: readIconSources(),
   extras: readExtraBundle(),
 };

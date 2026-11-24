@@ -1,0 +1,174 @@
+.category-grid {
+  grid-template-columns: repeat(auto-fill, minmax(22rem, 1fr));
+  margin-bottom: 3.5rem;
+}
+
+.category-card {
+  --card: var(--accent);
+  position: relative;
+  padding: 1.5rem;
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) + 6px);
+  background: linear-gradient(155deg, color-mix(in oklab, var(--card) 8%, var(--background)), var(--background) 55%);
+  animation: rise-in 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  transition:
+    border-color 0.2s,
+    transform 0.2s,
+    box-shadow 0.2s;
+}
+
+.category-card:nth-child(2) {
+  animation-delay: 0.05s;
+}
+
+.category-card:nth-child(3) {
+  animation-delay: 0.1s;
+}
+
+.category-card:nth-child(4) {
+  animation-delay: 0.15s;
+}
+
+.category-card:hover {
+  border-color: color-mix(in oklab, var(--card) 40%, var(--border));
+  box-shadow: 0 16px 40px -20px color-mix(in oklab, var(--card) 55%, transparent);
+  transform: translateY(-2px);
+}
+
+.category-card[data-diataxis="tutorials"] {
+  --card: var(--tip);
+}
+
+.category-card[data-diataxis="how-to"] {
+  --card: var(--note);
+}
+
+.category-card[data-diataxis="reference"] {
+  --card: var(--important);
+}
+
+.category-card[data-diataxis="explanation"] {
+  --card: var(--warning);
+}
+
+.prose a.card-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  color: var(--text);
+  font-weight: inherit;
+  text-decoration: none;
+}
+
+.card-icon {
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  flex: none;
+  border-radius: 12px;
+  background: color-mix(in oklab, var(--card) 14%, transparent);
+  color: var(--card);
+}
+
+.card-icon .icon {
+  width: 1.3rem;
+  height: 1.3rem;
+}
+
+.card-heading strong {
+  display: block;
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+}
+
+.card-kind {
+  display: block;
+  color: var(--card);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.card-heading > .icon-arrow-right {
+  margin-left: auto;
+  color: var(--text-subtle);
+  transition:
+    transform 0.2s,
+    color 0.2s;
+}
+
+.category-card:hover .card-heading > .icon-arrow-right {
+  color: var(--card);
+  transform: translateX(3px);
+}
+
+.prose .card-description {
+  margin: 1rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.prose .card-latest {
+  margin: 1.25rem 0 0.4rem;
+  color: var(--text-subtle);
+  font-size: 0.72rem;
+  font-weight: 650;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.prose .category-card ul {
+  display: grid;
+  gap: 1px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.prose .category-card li {
+  margin: 0;
+  padding: 0;
+}
+
+.prose .category-card li a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 0 -0.6rem;
+  padding: 0.45rem 0.6rem;
+  border-radius: 8px;
+  color: var(--text);
+  font-size: 0.925rem;
+  text-decoration: none;
+  transition: background 0.15s;
+}
+
+.prose .category-card li a .icon {
+  width: 0.95rem;
+  height: 0.95rem;
+  color: var(--card);
+}
+
+.prose .category-card li a span {
+  flex: 1;
+}
+
+.prose .category-card li a:hover {
+  background: color-mix(in oklab, var(--card) 9%, transparent);
+}
+
+.category-card time,
+.updated time {
+  color: var(--text-subtle);
+  font-size: 0.8rem;
+  font-weight: 400;
+  white-space: nowrap;
+}
+
+.home-content > :where(p, ul, ol, h2, h3, blockquote:not(.alert)) {
+  max-width: var(--prose-width);
+}

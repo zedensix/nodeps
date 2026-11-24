@@ -1,0 +1,25 @@
+title: Ocean
+description: "Cool blues and teals, softly rounded."
+accent: "#0e8fb3"
+variables:
+  radius: "12px"
+light:
+  background: "#fbfdfe"
+  surface: "#f2f7f9"
+  surface-strong: "#e6eff3"
+  border: "#dbe6eb"
+  text: "#0f1d24"
+  text-muted: "#4a5d66"
+  text-subtle: "#7f939c"
+  code-background: "#f5f9fb"
+dark:
+  background: "#071318"
+  surface: "#0c1c23"
+  surface-strong: "#13272f"
+  border: "#1b323c"
+  text: "#e3f0f4"
+  text-muted: "#9fb6bf"
+  text-subtle: "#6b8590"
+  code-background: "#0a171d"
+  accent: "#4cc3e6"
+  accent-contrast: "#04141a"

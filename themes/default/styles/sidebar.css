@@ -1,0 +1,242 @@
+.layout {
+  display: grid;
+  grid-template-columns: var(--sidebar-width) minmax(0, 1fr) var(--toc-width);
+  min-height: calc(100dvh - var(--header-height));
+}
+
+.layout:not(:has(> .toc)) {
+  grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
+}
+
+.sidebar,
+.toc {
+  position: sticky;
+  top: var(--header-height);
+  height: calc(100dvh - var(--header-height));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+.sidebar {
+  padding: 1.75rem 1rem 3rem;
+  border-right: 1px solid var(--border);
+  background: linear-gradient(180deg, color-mix(in oklab, var(--accent) 5%, var(--background)), var(--background) 75%);
+}
+
+.tree {
+  --kind: var(--accent);
+}
+
+.tree[data-diataxis="tutorials"] {
+  --kind: var(--tip);
+}
+
+.tree[data-diataxis="how-to"] {
+  --kind: var(--note);
+}
+
+.tree[data-diataxis="reference"] {
+  --kind: var(--important);
+}
+
+.tree[data-diataxis="explanation"] {
+  --kind: var(--warning);
+}
+
+.sidebar-text {
+  display: grid;
+  min-width: 0;
+}
+
+.sidebar-text small {
+  color: var(--text-subtle);
+  font-size: 0.74rem;
+  font-weight: 400;
+  line-height: 1.35;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sidebar a[aria-current="page"] .sidebar-text small {
+  color: color-mix(in oklab, var(--kind) 60%, var(--text-subtle));
+}
+
+.tree-group:not(:first-child) {
+  margin-top: 1.5rem;
+}
+
+.tree-group + li:not(.tree-group) {
+  margin-top: 1rem;
+}
+
+.sidebar ul ul {
+  margin: 1px 0 0 1.2rem;
+  padding-left: 0.5rem;
+  border-left: 1px solid var(--border);
+}
+
+.tree-group > ul {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.tree-folder summary {
+  display: flex;
+  align-items: center;
+  padding-right: 0.25rem;
+  border-radius: calc(var(--radius) - 3px);
+  list-style: none;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+
+.tree-folder summary:hover {
+  background: var(--surface-strong);
+}
+
+.tree-folder summary:has(> a[aria-current="page"]) {
+  background: color-mix(in oklab, var(--kind) 12%, transparent);
+}
+
+.sidebar .tree-folder summary > a,
+.sidebar .tree-folder summary > a:hover,
+.sidebar .tree-folder summary > a[aria-current="page"] {
+  background: transparent;
+}
+
+.tree-folder summary::-webkit-details-marker {
+  display: none;
+}
+
+.tree-folder summary > a,
+.tree-label {
+  flex: 1;
+  min-width: 0;
+}
+
+.tree-label {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.4rem 0.75rem;
+  color: var(--text-muted);
+  font-size: 0.915rem;
+  line-height: 1.4;
+}
+
+.tree-label .icon {
+  width: 0.95rem;
+  height: 0.95rem;
+  color: var(--text-subtle);
+}
+
+.tree-toggle {
+  display: grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  flex: none;
+  color: var(--text-subtle);
+  transition:
+    background 0.12s,
+    color 0.12s;
+}
+
+.tree-toggle .icon {
+  width: 0.9rem;
+  height: 0.9rem;
+  transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.tree-folder summary:hover .tree-toggle,
+.tree-folder summary:has(> a[aria-current="page"]) .tree-toggle {
+  color: var(--text);
+}
+
+.tree-folder details[open] > summary .tree-toggle .icon {
+  transform: rotate(90deg);
+}
+
+.tree-folder details[data-toggled][open] > ul {
+  animation: pop-in 0.16s ease-out;
+}
+
+.sidebar-title {
+  margin: 0 0 0.5rem 0.75rem;
+  color: var(--text);
+  font-size: 0.8rem;
+  font-weight: 650;
+  letter-spacing: 0.01em;
+}
+
+.sidebar ul {
+  display: grid;
+  gap: 1px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sidebar a {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.4rem 0.75rem;
+  border-radius: calc(var(--radius) - 3px);
+  color: var(--text-muted);
+  font-size: 0.915rem;
+  line-height: 1.4;
+  text-decoration: none;
+  transition:
+    background 0.12s,
+    color 0.12s;
+}
+
+.sidebar a > .icon,
+.tree-label > .icon {
+  box-sizing: content-box;
+  width: 0.85rem;
+  height: 0.85rem;
+  padding: 0.35rem;
+  border-radius: 8px;
+  background: color-mix(in oklab, var(--kind) 11%, transparent);
+  color: var(--kind);
+  transition:
+    background 0.15s,
+    color 0.15s;
+}
+
+.sidebar a:hover > .icon {
+  background: color-mix(in oklab, var(--kind) 20%, transparent);
+}
+
+.sidebar a[aria-current="page"] > .icon {
+  background: var(--kind);
+  color: var(--background);
+}
+
+.sidebar-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sidebar-title .icon {
+  width: 0.9rem;
+  height: 0.9rem;
+  color: var(--kind);
+}
+
+.sidebar a:hover {
+  background: var(--surface-strong);
+  color: var(--text);
+}
+
+.sidebar a[aria-current="page"] {
+  background: color-mix(in oklab, var(--kind) 12%, transparent);
+  color: color-mix(in oklab, var(--kind) 75%, var(--text));
+}

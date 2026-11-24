@@ -17,6 +17,6 @@
     "noImplicitOverride": true,
     "types": ["bun"]
   },
-  "include": ["**/*.ts", "theme/**/*.js"],
+  "include": ["**/*.ts"],
   "exclude": ["dist"]
 }

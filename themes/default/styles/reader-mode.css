@@ -1,0 +1,98 @@
+.reader-exit {
+  display: none;
+}
+
+:root[data-reader] {
+  --font: "Iowan Old Style", "Charter", Georgia, serif;
+}
+
+:root[data-reader] body {
+  background: Canvas;
+  color: CanvasText;
+}
+
+:root[data-reader]
+  :is(
+    .site-header,
+    .sidebar,
+    .toc,
+    .page-header,
+    .pager,
+    .page-footer,
+    .diataxis-badge,
+    .copy-code,
+    .anchor,
+    .resources,
+    .edit-banner,
+    .scrim
+  ) {
+  display: none !important;
+}
+
+:root[data-reader] .layout {
+  display: block;
+}
+
+:root[data-reader] .content {
+  padding: 4rem 1.25rem 6rem;
+}
+
+:root[data-reader] .prose {
+  width: min(42rem, 100%);
+  margin: 0 auto;
+  font-size: 1.15rem;
+  line-height: 1.8;
+}
+
+:root[data-reader] .prose :is(h1, h2, h3, h4) {
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+:root[data-reader] .prose a {
+  color: inherit;
+  text-decoration-color: currentColor;
+}
+
+:root[data-reader] .prose :is(.alert, .tabbed-set, .table, .code, .category-card, .grid.cards > ul > li) {
+  border: 0;
+  border-left: 2px solid color-mix(in oklab, CanvasText 25%, transparent);
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+
+:root[data-reader] .prose .alert-title {
+  color: inherit;
+}
+
+:root[data-reader] .prose .token {
+  color: inherit;
+  font-style: normal;
+}
+
+:root[data-reader] .prose .byline .icon,
+:root[data-reader] .prose .lead {
+  color: inherit;
+}
+
+:root[data-reader] .reader-exit {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 30;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.8rem;
+  border: 1px solid color-mix(in oklab, CanvasText 20%, transparent);
+  border-radius: 999px;
+  background: Canvas;
+  color: CanvasText;
+  font: 500 0.8rem var(--font);
+}
+
+:root[data-reader] .reader-exit .icon {
+  width: 0.9rem;
+  height: 0.9rem;
+}

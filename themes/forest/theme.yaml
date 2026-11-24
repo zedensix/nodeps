@@ -1,0 +1,23 @@
+title: Forest
+description: Warm paper whites and deep greens.
+accent: "#2f7d4f"
+light:
+  background: "#fbfaf6"
+  surface: "#f3f1ea"
+  surface-strong: "#e9e6dc"
+  border: "#e2ded2"
+  text: "#1d211c"
+  text-muted: "#575c52"
+  text-subtle: "#8a8f83"
+  code-background: "#f7f5ef"
+dark:
+  background: "#0d110e"
+  surface: "#131a15"
+  surface-strong: "#1b241d"
+  border: "#243026"
+  text: "#e6ece4"
+  text-muted: "#a3afa0"
+  text-subtle: "#6f7d6c"
+  code-background: "#101611"
+  accent: "#6fcf95"
+  accent-contrast: "#0a1a10"

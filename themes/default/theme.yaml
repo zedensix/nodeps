@@ -1,0 +1,28 @@
+title: Default
+description: Neutral greys with a violet accent.
+accent: "#6d5efc"
+variables:
+  font: '"Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif'
+  mono: 'ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace'
+  radius: "10px"
+light:
+  background: "#ffffff"
+  surface: "#f7f7f9"
+  surface-strong: "#efeff3"
+  border: "#e5e5ec"
+  text: "#16161b"
+  text-muted: "#575766"
+  text-subtle: "#868695"
+  code-background: "#fafafc"
+  accent-contrast: "#ffffff"
+dark:
+  background: "#0b0b0f"
+  surface: "#121218"
+  surface-strong: "#1c1c25"
+  border: "#25252f"
+  text: "#ececf1"
+  text-muted: "#a3a3b3"
+  text-subtle: "#6f6f80"
+  code-background: "#0f0f15"
+  accent: "color-mix(in oklab, var(--brand) 72%, white)"
+  accent-contrast: "#ffffff"

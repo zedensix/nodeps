@@ -7,9 +7,9 @@ Markdown pages become a themeable site with search, instant navigation, a Diáta
 ## Install
 
 ```sh
-npm install --global @zedensix/nodeps   # or: bunx @zedensix/nodeps
-pip install zedensix-nodeps
-mise use github:zedensix/nodeps
+npm install --global @zedensix/nodeps@beta   # or: bunx @zedensix/nodeps@beta
+pip install --pre zedensix-nodeps
+mise use github:zedensix/nodeps@1.0.0-beta.1   # newest version on the releases page
 ```
 
 Standalone binaries for Linux (glibc and musl), macOS and Windows are attached to every [GitHub release](https://github.com/zedensix/nodeps/releases).
@@ -47,11 +47,11 @@ The hooks format with `bun fmt`, lint with `bun lint`, build the docs to catch b
 
 [releaser](https://github.com/zedensix/releaser) runs on every push to `main`, from Conventional Commits:
 
-- each push with a `feat` or `fix` ships a canary: a GitHub prerelease with the binaries, the `canary` npm tag, a `.devN` PyPI version and the `zedensix/nodeps:canary` image on Docker Hub;
-- it keeps a release PR open; merging it tags the stable version, writes `CHANGELOG.md`, and publishes everywhere as `latest`.
+- each push with a `feat` or `fix` ships a beta: a GitHub prerelease `vX.Y.Z-beta.N` with the binaries, the `beta` npm tag, a `X.Y.ZbN` PyPI version and the `zedensix/nodeps:beta` image on Docker Hub;
+- nothing ships as stable yet. For 1.0.0, add `release-pr: true` to the releaser step: it then keeps a release PR open, and merging it tags the stable version, writes `CHANGELOG.md` and publishes everywhere as `latest`.
 
-The workflow needs npm trusted publishing on `@zedensix/nodeps` and each `@zedensix/nodeps-*` platform package (workflow `release.yml`), PyPI trusted publishing for the `pypi` environment, a `DOCKERHUB_USERNAME` variable with a `DOCKERHUB_TOKEN` secret, and a `RELEASE_DEPLOY_KEY` deploy key so the release PR runs CI and can pass branch protection.
+The workflow needs npm trusted publishing on `@zedensix/nodeps` and each `@zedensix/nodeps-*` platform package (workflow `release.yml`), PyPI trusted publishing for the `pypi` environment, a `DOCKERHUB_USERNAME` variable with a `DOCKERHUB_TOKEN` secret, and a `RELEASE_DEPLOY_KEY` deploy key to push tags past branch protection (and later let the release PR run CI).
 
 ## Credits
 
-Icons are [Lucide](https://lucide.dev), ISC license, downloaded by `mise run icons`. The license ships next to them in `theme/icons/LICENSE`.
+Icons are [Lucide](https://lucide.dev), ISC license, downloaded by `mise run icons`. The license ships next to them in `icons/LICENSE`.

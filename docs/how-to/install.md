@@ -9,25 +9,29 @@ tags: [install, npm, pip, mise]
 
 Every channel ships the same standalone binary; none of them needs Bun.
 
+nodeps is in beta: every release is a prerelease like `1.0.0-beta.3`, so ask each channel for one explicitly.
+
 ## With npm
 
 ```sh
-npm install --global @zedensix/nodeps
+npm install --global @zedensix/nodeps@beta
 ```
 
-Or without installing: `npx @zedensix/nodeps dev`.
+Or without installing: `npx @zedensix/nodeps@beta dev`.
 
 ## With pip
 
 ```sh
-pip install zedensix-nodeps
+pip install --pre zedensix-nodeps
 ```
 
 ## With mise
 
 ```sh
-mise use github:zedensix/nodeps
+mise use github:zedensix/nodeps@1.0.0-beta.1
 ```
+
+Pick the newest version from the [releases page](https://github.com/zedensix/nodeps/releases).
 
 ## As a binary
 

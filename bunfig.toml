@@ -2,6 +2,9 @@
 printWidth = 120
 
 [lint]
+plugins = ["./lint/doc-comments.ts"]
 
 [lint.rules]
 curly = ["error", "all"]
+max-lines = ["error", { max = 300 }]
+"nodeps/require-doc-comment" = "error"

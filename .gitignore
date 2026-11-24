@@ -1,4 +1,4 @@
 .playwright-mcp/
 build/
 dist/
-theme/icons/
+/icons/

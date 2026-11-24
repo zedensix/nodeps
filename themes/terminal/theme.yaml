@@ -1,0 +1,26 @@
+title: Terminal
+description: "Monospace everything, phosphor green."
+accent: "#16a34a"
+variables:
+  font: 'ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace'
+  radius: "2px"
+light:
+  background: "#fcfdfc"
+  surface: "#f1f5f2"
+  surface-strong: "#e4ece6"
+  border: "#d8e2da"
+  text: "#0d1a11"
+  text-muted: "#45594b"
+  text-subtle: "#7a8f80"
+  code-background: "#f5f8f6"
+dark:
+  background: "#050806"
+  surface: "#0a100c"
+  surface-strong: "#101a13"
+  border: "#18261c"
+  text: "#d7f5df"
+  text-muted: "#8fb89b"
+  text-subtle: "#5e8a6b"
+  code-background: "#070b08"
+  accent: "#3ee07a"
+  accent-contrast: "#03140a"

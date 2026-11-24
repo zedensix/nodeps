@@ -1,0 +1,64 @@
+:root {
+  color-scheme: light dark;
+}
+
+:root,
+[data-theme-scope] {
+  --brand: #6d5efc;
+  --font: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+  --radius: 10px;
+  --topbar-height: 3.75rem;
+  --tabs-height: 0px;
+  --header-height: calc(var(--topbar-height) + var(--tabs-height));
+  --sidebar-width: 17rem;
+  --toc-width: 15rem;
+  --prose-width: 46rem;
+
+  --background: light-dark(var(--light-background, #ffffff), var(--dark-background, #0b0b0f));
+  --surface: light-dark(var(--light-surface, #f7f7f9), var(--dark-surface, #121218));
+  --surface-strong: light-dark(var(--light-surface-strong, #efeff3), var(--dark-surface-strong, #1c1c25));
+  --border: light-dark(var(--light-border, #e5e5ec), var(--dark-border, #25252f));
+  --text: light-dark(var(--light-text, #16161b), var(--dark-text, #ececf1));
+  --text-muted: light-dark(var(--light-text-muted, #575766), var(--dark-text-muted, #a3a3b3));
+  --text-subtle: light-dark(var(--light-text-subtle, #868695), var(--dark-text-subtle, #6f6f80));
+  --accent: light-dark(
+    var(--light-accent, var(--brand)),
+    var(--dark-accent, color-mix(in oklab, var(--brand) 72%, white))
+  );
+  --accent-soft: color-mix(in oklab, var(--accent) 12%, transparent);
+  --accent-contrast: light-dark(var(--light-accent-contrast, #ffffff), var(--dark-accent-contrast, #ffffff));
+  --shadow: light-dark(
+    var(--light-shadow, 0 20px 50px -12px rgb(20 20 40 / 0.25)),
+    var(--dark-shadow, 0 20px 60px -12px rgb(0 0 0 / 0.7))
+  );
+  --code-background: light-dark(var(--light-code-background, #fafafc), var(--dark-code-background, #0f0f15));
+  --code-highlight: color-mix(in oklab, var(--accent) 11%, transparent);
+
+  --syntax-keyword: light-dark(var(--light-syntax-keyword, #a21caf), var(--dark-syntax-keyword, #f0abfc));
+  --syntax-string: light-dark(var(--light-syntax-string, #15803d), var(--dark-syntax-string, #86efac));
+  --syntax-number: light-dark(var(--light-syntax-number, #c2410c), var(--dark-syntax-number, #fdba74));
+  --syntax-comment: light-dark(var(--light-syntax-comment, #8b8b9a), var(--dark-syntax-comment, #6b6b7c));
+  --syntax-function: light-dark(var(--light-syntax-function, #1d4ed8), var(--dark-syntax-function, #93c5fd));
+  --syntax-type: light-dark(var(--light-syntax-type, #0e7490), var(--dark-syntax-type, #67e8f9));
+  --syntax-property: light-dark(var(--light-syntax-property, #6d28d9), var(--dark-syntax-property, #c4b5fd));
+  --syntax-attribute: light-dark(var(--light-syntax-attribute, #b45309), var(--dark-syntax-attribute, #fcd34d));
+  --syntax-variable: light-dark(var(--light-syntax-variable, #be123c), var(--dark-syntax-variable, #fda4af));
+  --syntax-operator: light-dark(var(--light-syntax-operator, #64748b), var(--dark-syntax-operator, #94a3b8));
+  --syntax-inserted: light-dark(var(--light-syntax-inserted, #15803d), var(--dark-syntax-inserted, #86efac));
+  --syntax-deleted: light-dark(var(--light-syntax-deleted, #b91c1c), var(--dark-syntax-deleted, #fca5a5));
+
+  --note: light-dark(var(--light-note, #2563eb), var(--dark-note, #60a5fa));
+  --tip: light-dark(var(--light-tip, #16a34a), var(--dark-tip, #4ade80));
+  --important: light-dark(var(--light-important, #7c3aed), var(--dark-important, #a78bfa));
+  --warning: light-dark(var(--light-warning, #d97706), var(--dark-warning, #fbbf24));
+  --caution: light-dark(var(--light-caution, #dc2626), var(--dark-caution, #f87171));
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+}

@@ -1,9 +1,10 @@
 #!/usr/bin/env bun
 import { parseArgs } from "node:util";
-import { ConfigError, loadConfig } from "./src/config.ts";
-import { exportSite } from "./src/export.ts";
-import { planMigration, renderConfig, writeMigration } from "./src/migrate.ts";
-import { serve } from "./src/server.ts";
+import { loadConfig } from "./src/config/config.ts";
+import { ConfigError } from "./src/config/config-fields.ts";
+import { exportSite } from "./src/output/export.ts";
+import { planMigration, renderConfig, writeMigration } from "./src/migrate/migrate.ts";
+import { serve } from "./src/output/server.ts";
 
 const usage = `Usage: nodeps <command> [options]   (from source: bun docs.ts <command>)
 

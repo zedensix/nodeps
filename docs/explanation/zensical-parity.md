@@ -30,20 +30,20 @@ Zensical, by the team behind Material for MkDocs, reads `mkdocs.yml` and renders
 
 ## Site
 
-| Feature                                                             | nodeps                             |
-| ------------------------------------------------------------------- | ---------------------------------- |
-| `nav`, tabs, sections, index pages, breadcrumbs                     | Yes                                |
-| Instant navigation with prefetch                                    | Yes                                |
-| Search, with tag filtering                                          | Yes, English only                  |
-| Color schemes and a theme toggle                                    | Yes, plus presets readers can pick |
-| Edit and view source links, any git provider                        | Yes                                |
-| `llms.txt`, page Markdown, copy as Markdown                         | Yes                                |
-| Tags                                                                | Yes                                |
-| Back-to-top button, progress bar, header autohide, announcement bar | No                                 |
-| Blog, social cards, offline, privacy, redirects plugins             | No                                 |
-| Versioning (mike), languages other than English                     | No                                 |
-| Analytics, cookie consent, feedback widget                          | No                                 |
-| Template overrides (`custom_dir`), hooks                            | No                                 |
+| Feature                                                             | nodeps                            |
+| ------------------------------------------------------------------- | --------------------------------- |
+| `nav`, tabs, sections, index pages, breadcrumbs                     | Yes                               |
+| Instant navigation with prefetch                                    | Yes                               |
+| Search, with tag filtering                                          | Yes, English only                 |
+| Color schemes and a theme toggle                                    | Yes, plus themes readers can pick |
+| Edit and view source links, any git provider                        | Yes                               |
+| `llms.txt`, page Markdown, copy as Markdown                         | Yes                               |
+| Tags                                                                | Yes                               |
+| Back-to-top button, progress bar, header autohide, announcement bar | No                                |
+| Blog, social cards, offline, privacy, redirects plugins             | No                                |
+| Versioning (mike), languages other than English                     | No                                |
+| Analytics, cookie consent, feedback widget                          | No                                |
+| Template overrides (`custom_dir`), hooks                            | No                                |
 
 ## Only in nodeps
 

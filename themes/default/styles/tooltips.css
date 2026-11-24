@@ -1,0 +1,72 @@
+:where([data-tooltip]) {
+  position: relative;
+}
+
+[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  left: 50%;
+  z-index: 40;
+  padding: 0.35rem 0.55rem;
+  border-radius: 6px;
+  background: var(--text);
+  color: var(--background);
+  font: 500 0.75rem/1.2 var(--font);
+  letter-spacing: 0;
+  text-transform: none;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  translate: -50% -3px;
+  transition:
+    opacity 0.12s,
+    translate 0.12s;
+}
+
+[data-tooltip-align="end"]::after {
+  right: 0;
+  left: auto;
+  translate: 0 -3px;
+}
+
+[data-tooltip-side="left"]::after {
+  top: 50%;
+  right: calc(100% + 0.5rem);
+  left: auto;
+  translate: 3px -50%;
+}
+
+[data-tooltip]:hover::after,
+[data-tooltip]:focus-visible::after {
+  opacity: 1;
+  translate: -50% 0;
+  transition-delay: 0.3s;
+}
+
+[data-tooltip-align="end"]:hover::after,
+[data-tooltip-align="end"]:focus-visible::after {
+  translate: 0 0;
+}
+
+[data-tooltip-side="left"]:hover::after,
+[data-tooltip-side="left"]:focus-visible::after {
+  translate: 0 -50%;
+}
+
+details[open] > summary[data-tooltip]::after,
+.search-trigger[data-tooltip]::after {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .search-trigger[data-tooltip]::after {
+    display: block;
+  }
+}
+
+@media (hover: none) {
+  [data-tooltip]::after {
+    display: none !important;
+  }
+}

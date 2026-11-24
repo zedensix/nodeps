@@ -1,0 +1,162 @@
+.code {
+  position: relative;
+  margin: 1.5rem 0;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--code-background);
+}
+
+.code figcaption {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  height: 2.625rem;
+  padding: 0 3.25rem 0 1.125rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.code-title {
+  color: var(--text-muted);
+  font: 500 0.8rem var(--mono);
+}
+
+.code-language {
+  color: var(--text-subtle);
+  font: 500 0.7rem var(--mono);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.code:not(.has-title) > .code-language {
+  position: absolute;
+  top: 0.85rem;
+  right: 3.25rem;
+  transition: opacity 0.15s;
+}
+
+.code pre {
+  margin: 0;
+  padding: 1rem 0;
+  overflow-x: auto;
+  font: 0.865rem/1.7 var(--mono);
+  tab-size: 2;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+.code .line {
+  display: inline-block;
+  min-width: 100%;
+  padding: 0 1.25rem;
+}
+
+.code .line.highlighted {
+  background: var(--code-highlight);
+  box-shadow: inset 3px 0 var(--accent);
+}
+
+.code .line.inserted {
+  background: color-mix(in oklab, var(--syntax-inserted) 12%, transparent);
+}
+
+.code .line.deleted {
+  background: color-mix(in oklab, var(--syntax-deleted) 12%, transparent);
+}
+
+.copy-code {
+  position: absolute;
+  top: 0.4rem;
+  right: 0.4rem;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.875rem;
+  height: 1.875rem;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) - 4px);
+  background: var(--background);
+  color: var(--text-muted);
+  opacity: 0;
+  transition:
+    opacity 0.15s,
+    color 0.15s;
+}
+
+.copy-code .icon {
+  width: 0.9rem;
+  height: 0.9rem;
+}
+
+.code:hover .copy-code,
+.copy-code:focus-visible,
+.copy-code.copied {
+  opacity: 1;
+}
+
+.copy-code:hover {
+  color: var(--text);
+}
+
+@media (hover: none) {
+  .copy-code {
+    opacity: 1;
+  }
+}
+
+.token.keyword {
+  color: var(--syntax-keyword);
+}
+
+.token.string {
+  color: var(--syntax-string);
+}
+
+.token.number,
+.token.constant {
+  color: var(--syntax-number);
+}
+
+.token.comment {
+  color: var(--syntax-comment);
+  font-style: italic;
+}
+
+.token.function {
+  color: var(--syntax-function);
+}
+
+.token.type,
+.token.meta {
+  color: var(--syntax-type);
+}
+
+.token.property {
+  color: var(--syntax-property);
+}
+
+.token.attribute {
+  color: var(--syntax-attribute);
+}
+
+.token.variable,
+.token.tag {
+  color: var(--syntax-variable);
+}
+
+.token.operator,
+.token.punctuation {
+  color: var(--syntax-operator);
+}
+
+.token.inserted {
+  color: var(--syntax-inserted);
+}
+
+.token.deleted {
+  color: var(--syntax-deleted);
+}

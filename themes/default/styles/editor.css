@@ -1,0 +1,246 @@
+.editor-dialog {
+  width: 100vw;
+  max-width: none;
+  height: 100dvh;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: var(--background);
+  color: var(--text);
+}
+
+.editor-dialog[open] {
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  animation: rise 0.18s ease-out;
+}
+
+.editor-dialog::backdrop {
+  background: var(--background);
+}
+
+.editor-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.editor-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35rem 0.75rem;
+  min-width: 0;
+}
+
+.editor-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--accent);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.editor-kicker .icon {
+  width: 0.9rem;
+  height: 0.9rem;
+}
+
+.editor-page-title {
+  font-size: 1rem;
+}
+
+.editor-status {
+  color: var(--text-subtle);
+  font-size: 0.8rem;
+}
+
+.editor-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.editor-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.15rem;
+  padding: 0.4rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.editor-toolbar button {
+  display: grid;
+  place-items: center;
+  width: 2.1rem;
+  height: 2.1rem;
+  padding: 0;
+  border: 0;
+  border-radius: calc(var(--radius) - 4px);
+  background: transparent;
+  color: var(--text-muted);
+  transition:
+    background 0.12s,
+    color 0.12s;
+}
+
+.editor-toolbar button:hover {
+  background: var(--surface-strong);
+  color: var(--text);
+}
+
+.editor-toolbar .icon {
+  width: 1rem;
+  height: 1rem;
+}
+
+.editor-glyph {
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.editor-separator {
+  width: 1px;
+  height: 1.25rem;
+  margin: 0 0.4rem;
+  background: var(--border);
+}
+
+.editor-link-input {
+  flex: 1 1 16rem;
+  height: 2.1rem;
+  margin-left: 0.5rem;
+  padding: 0 0.75rem;
+  border: 1px solid var(--accent);
+  border-radius: calc(var(--radius) - 4px);
+  outline: none;
+  background: var(--background);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.875rem;
+}
+
+.editor-scroll {
+  overflow-y: auto;
+}
+
+.editor-content {
+  min-height: 100%;
+  padding: 2.5rem clamp(1.25rem, 6vw, 6rem) 6rem;
+  outline: none;
+  caret-color: var(--accent);
+}
+
+.editor-content pre {
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--code-background);
+  font: 0.865rem/1.7 var(--mono);
+  white-space: pre-wrap;
+}
+
+.editor-content blockquote {
+  max-width: var(--prose-width);
+}
+
+.editor-content table {
+  border-collapse: collapse;
+}
+
+.editor-content th,
+.editor-content td {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border);
+}
+
+.editor-panel {
+  position: fixed;
+  inset: 0;
+  z-index: 5;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: color-mix(in oklab, var(--background) 70%, transparent);
+  backdrop-filter: blur(6px);
+}
+
+.editor-panel[hidden] {
+  display: none;
+}
+
+.editor-panel-card {
+  width: min(32rem, 100%);
+  padding: 1.5rem;
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) + 6px);
+  background: var(--background);
+  box-shadow: var(--shadow);
+  animation: pop-in 0.16s ease-out;
+}
+
+.editor-panel-card p,
+.editor-panel-card ol {
+  margin: 0 0 0.9rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+.editor-panel-card ol {
+  padding-left: 1.25rem;
+}
+
+.editor-panel-card .editor-panel-title {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: var(--text);
+  font-size: 1.1rem;
+  font-weight: 650;
+}
+
+.editor-panel-actions,
+.edit-banner {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.editor-panel-card .pill-button {
+  text-decoration: none;
+}
+
+.editor-copy-area {
+  width: 100%;
+  height: 8rem;
+  margin-bottom: 0.9rem;
+  padding: 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) - 4px);
+  background: var(--code-background);
+  color: var(--text);
+  font: 0.8rem/1.5 var(--mono);
+}
+
+.editor-spinner {
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid var(--accent-soft);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    rotate: 360deg;
+  }
+}

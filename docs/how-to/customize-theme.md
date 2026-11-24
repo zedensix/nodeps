@@ -7,14 +7,14 @@ byline: The nodeps maintainers
 tags: [theme, colors, fonts, dark mode]
 ---
 
-## Start from a preset
+## Start from a theme
 
 ```yaml title="docs.yaml"
 theme:
-  preset: forest
+  name: forest
 ```
 
-Browse every preset in light and dark in the [theme gallery](../themes/index.md). Readers can also switch presets for themselves with the palette button in the header; their choice stays on their device.
+Browse every theme in light and dark in the [theme gallery](../themes/index.md). Readers can also switch themes for themselves with the palette button in the header; their choice stays on their device.
 
 ## Change the brand color
 
@@ -64,5 +64,29 @@ theme:
   border-bottom: 1px solid var(--border);
 }
 ```
+
+## Create your own theme
+
+1. Create `themes/acme/theme.yaml` next to `docs.yaml`, with only what changes:
+
+   ```yaml title="themes/acme/theme.yaml"
+   title: Acme
+   accent: "#e8590c"
+   variables:
+     radius: 0px
+   ```
+
+2. Select it:
+
+   ```yaml title="docs.yaml"
+   theme:
+     name: acme
+   ```
+
+3. To change markup, copy only the partial you need from the built-in `default` theme into `themes/acme/` and edit it, for example `header.html`. Files you leave out keep following nodeps updates.
+
+4. To restyle a component, add `themes/acme/styles/sidebar.css`: it replaces the built-in file of the same name.
+
+`nodeps dev` rebuilds the theme on every save. See [Theme folders](../configuration/theme.md#theme-folders) for every file, slot and variable.
 
 See [Design tokens](../configuration/design-tokens.md) for every token.

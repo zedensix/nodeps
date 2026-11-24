@@ -1,0 +1,177 @@
+.prose dl {
+  margin: 1.25rem 0;
+}
+
+.prose dt {
+  font-weight: 650;
+}
+
+.prose dt > p,
+.prose dd > p:first-child {
+  margin: 0;
+}
+
+.prose dd {
+  margin: 0.25rem 0 1rem 1.5rem;
+  color: var(--text-muted);
+}
+
+.prose .footnotes {
+  margin-top: 3rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.prose .footnote-ref a,
+.prose a.footnote-back {
+  text-decoration: none;
+}
+
+.prose .keys {
+  white-space: nowrap;
+}
+
+.prose .keys kbd {
+  font-size: 0.8em;
+}
+
+.prose .keys span {
+  margin: 0 0.15em;
+  color: var(--text-subtle);
+}
+
+.prose mark {
+  padding: 0 0.15em;
+  border-radius: 3px;
+  background: color-mix(in oklab, var(--warning) 30%, transparent);
+  color: inherit;
+}
+
+.prose ins {
+  text-decoration-color: var(--tip);
+}
+
+.prose abbr[title] {
+  text-decoration: underline dotted;
+  cursor: help;
+}
+
+.twemoji {
+  display: inline-flex;
+  align-items: center;
+  vertical-align: -0.15em;
+}
+
+.twemoji .icon {
+  width: 1.15em;
+  height: 1.15em;
+}
+
+.twemoji.lg .icon {
+  width: 2em;
+  height: 2em;
+}
+
+.twemoji.xl .icon {
+  width: 3em;
+  height: 3em;
+}
+
+.twemoji.middle {
+  vertical-align: middle;
+}
+
+.prose a.md-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0.25rem 0.25rem 0.25rem 0;
+  padding: 0.55rem 1.2rem;
+  border: 1px solid var(--accent);
+  border-radius: 999px;
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.15s;
+}
+
+.prose a.md-button:hover {
+  background: var(--accent-soft);
+}
+
+.prose a.md-button--primary {
+  background: var(--accent);
+  color: var(--accent-contrast);
+}
+
+.prose a.md-button--primary:hover {
+  background: color-mix(in oklab, var(--accent) 88%, black);
+}
+
+.prose .grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+
+.prose .grid.cards > ul,
+.prose .grid.cards > ol {
+  display: contents;
+}
+
+.prose .grid.cards > ul > li,
+.prose .grid.cards > ol > li,
+.prose .grid > .card {
+  margin: 0;
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  list-style: none;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
+}
+
+.prose .grid.cards > ul > li:hover,
+.prose .grid > .card:hover {
+  border-color: color-mix(in oklab, var(--accent) 40%, var(--border));
+  box-shadow: 0 10px 30px -20px color-mix(in oklab, var(--accent) 60%, transparent);
+}
+
+.prose .grid.cards hr {
+  margin: 0.75rem 0;
+}
+
+.prose pre.mermaid {
+  display: flex;
+  justify-content: center;
+  margin: 1.5rem 0;
+  padding: 1rem;
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--code-background);
+  font: 0.8rem/1.5 var(--mono);
+}
+
+.prose .arithmatex {
+  overflow-x: auto;
+}
+
+.code.numbered pre {
+  counter-reset: line var(--first-line);
+}
+
+.code.numbered .line::before {
+  counter-increment: line;
+  content: counter(line);
+  display: inline-block;
+  width: 2.5ch;
+  margin-right: 1.25rem;
+  color: var(--text-subtle);
+  text-align: right;
+  user-select: none;
+}

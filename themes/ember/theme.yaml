@@ -1,0 +1,25 @@
+title: Ember
+description: Glowing orange on warm neutrals.
+accent: "#e0571b"
+variables:
+  radius: "8px"
+light:
+  background: "#fffdfb"
+  surface: "#fbf5f1"
+  surface-strong: "#f4ebe4"
+  border: "#efe2d8"
+  text: "#22160f"
+  text-muted: "#66524a"
+  text-subtle: "#9a857b"
+  code-background: "#fcf8f5"
+dark:
+  background: "#120c09"
+  surface: "#1a120e"
+  surface-strong: "#241913"
+  border: "#2f2119"
+  text: "#f4e9e2"
+  text-muted: "#bba69a"
+  text-subtle: "#846f63"
+  code-background: "#150e0b"
+  accent: "#ff8a4c"
+  accent-contrast: "#1f0d03"

@@ -1,0 +1,26 @@
+title: Paper
+description: "Serif type on sepia, like a printed manual."
+accent: "#8b5e34"
+variables:
+  font: '"Iowan Old Style", "Charter", "Palatino Linotype", Georgia, serif'
+  radius: "6px"
+light:
+  background: "#fbf7ef"
+  surface: "#f4eee2"
+  surface-strong: "#ebe3d3"
+  border: "#e4dac7"
+  text: "#2b2118"
+  text-muted: "#5f5244"
+  text-subtle: "#95866f"
+  code-background: "#f7f1e6"
+dark:
+  background: "#17130e"
+  surface: "#1f1a13"
+  surface-strong: "#29221a"
+  border: "#352c21"
+  text: "#ece3d4"
+  text-muted: "#b5a690"
+  text-subtle: "#7f725f"
+  code-background: "#1b1610"
+  accent: "#d9a46c"
+  accent-contrast: "#1d1208"

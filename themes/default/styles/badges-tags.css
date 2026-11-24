@@ -1,0 +1,89 @@
+.page-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+  margin: 0 0 0.75rem;
+}
+
+.prose .page-title h1 {
+  margin: 0;
+}
+
+.diataxis-badge {
+  --kind: var(--accent);
+}
+
+.prose a.diataxis-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  height: 1.85rem;
+  padding: 0 0.75rem;
+  border: 1px solid color-mix(in oklab, var(--kind) 35%, transparent);
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--kind) 10%, transparent);
+  color: var(--kind);
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+
+.prose a.diataxis-badge:hover {
+  background: color-mix(in oklab, var(--kind) 18%, transparent);
+}
+
+.diataxis-badge[data-diataxis="tutorials"] {
+  --kind: var(--tip);
+}
+
+.diataxis-badge[data-diataxis="how-to"] {
+  --kind: var(--note);
+}
+
+.diataxis-badge[data-diataxis="reference"] {
+  --kind: var(--important);
+}
+
+.diataxis-badge[data-diataxis="explanation"] {
+  --kind: var(--warning);
+}
+
+.diataxis-badge .icon {
+  width: 0.9rem;
+  height: 0.9rem;
+}
+
+.toc-tags {
+  margin-top: 1.75rem;
+}
+
+.toc-tags ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  padding: 0;
+  border: 0;
+  list-style: none;
+}
+
+.tag {
+  height: 1.6rem;
+  padding: 0 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text-muted);
+  font-size: 0.76rem;
+  font-weight: 500;
+  transition:
+    border-color 0.15s,
+    color 0.15s;
+}
+
+.tag:hover {
+  border-color: color-mix(in oklab, var(--accent) 50%, var(--border));
+  color: var(--accent);
+}

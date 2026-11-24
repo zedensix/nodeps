@@ -1,0 +1,79 @@
+.prose .alert-abstract {
+  --alert: light-dark(#0284c7, #38bdf8);
+}
+
+.prose .alert-info {
+  --alert: light-dark(#0891b2, #22d3ee);
+}
+
+.prose .alert-success {
+  --alert: light-dark(#16a34a, #4ade80);
+}
+
+.prose .alert-question {
+  --alert: light-dark(#65a30d, #a3e635);
+}
+
+.prose .alert-failure {
+  --alert: light-dark(#dc2626, #f87171);
+}
+
+.prose .alert-danger {
+  --alert: light-dark(#e11d48, #fb7185);
+}
+
+.prose .alert-bug {
+  --alert: light-dark(#db2777, #f472b6);
+}
+
+.prose .alert-example {
+  --alert: light-dark(#7c3aed, #a78bfa);
+}
+
+.prose .alert-quote {
+  --alert: light-dark(#6b7280, #9ca3af);
+}
+
+.prose div.admonition,
+.prose details.admonition {
+  margin: 1.5rem 0;
+}
+
+.prose details.admonition > summary {
+  list-style: none;
+  cursor: pointer;
+}
+
+.prose details.admonition > summary::-webkit-details-marker {
+  display: none;
+}
+
+.prose details.admonition > summary::after {
+  content: "";
+  width: 0.5rem;
+  height: 0.5rem;
+  margin-left: auto;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  rotate: -45deg;
+  transition: rotate 0.2s;
+}
+
+.prose details.admonition[open] > summary::after {
+  rotate: 45deg;
+}
+
+.prose details.admonition:not([open]) > summary {
+  margin-bottom: 0;
+}
+
+.prose .admonition.inline {
+  float: left;
+  width: min(16rem, 45%);
+  margin: 0 1.25rem 1rem 0;
+}
+
+.prose .admonition.inline.end {
+  float: right;
+  margin: 0 0 1rem 1.25rem;
+}

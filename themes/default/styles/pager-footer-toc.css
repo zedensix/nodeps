@@ -1,0 +1,128 @@
+.pager {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  margin-top: 4rem;
+}
+
+.pager a {
+  display: grid;
+  gap: 0.2rem;
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  text-decoration: none;
+  transition:
+    border-color 0.15s,
+    background 0.15s;
+}
+
+.pager a:hover {
+  border-color: color-mix(in oklab, var(--accent) 55%, var(--border));
+  background: var(--surface);
+}
+
+.pager small {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--text-subtle);
+  font-size: 0.8rem;
+}
+
+.pager small .icon {
+  width: 0.85rem;
+  height: 0.85rem;
+}
+
+.pager span {
+  font-weight: 600;
+}
+
+.pager-next {
+  text-align: right;
+}
+
+.pager-next small {
+  justify-content: flex-end;
+}
+
+.page-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 2.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
+  color: var(--text-subtle);
+  font-size: 0.875rem;
+}
+
+.page-footer p {
+  margin: 0;
+}
+
+.edit-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: var(--text-muted);
+  text-decoration: none;
+}
+
+.edit-link:hover {
+  color: var(--accent);
+}
+
+.edit-link .icon {
+  width: 0.95rem;
+  height: 0.95rem;
+}
+
+.toc {
+  padding: 2.25rem 1.25rem 2rem 0.5rem;
+  font-size: 0.85rem;
+}
+
+.toc-title {
+  margin: 0 0 0.75rem;
+  color: var(--text);
+  font-size: 0.8rem;
+  font-weight: 650;
+}
+
+.toc ul {
+  margin: 0;
+  padding: 0;
+  border-left: 1px solid var(--border);
+  list-style: none;
+}
+
+.toc a {
+  display: block;
+  margin-left: -1px;
+  padding: 0.3rem 0 0.3rem 0.875rem;
+  border-left: 2px solid transparent;
+  color: var(--text-subtle);
+  line-height: 1.45;
+  text-decoration: none;
+  transition:
+    color 0.12s,
+    border-color 0.12s;
+}
+
+.toc a:hover {
+  color: var(--text);
+}
+
+.toc a.active {
+  border-left-color: var(--accent);
+  color: var(--accent);
+}
+
+.toc .toc-level-3 a {
+  padding-left: 1.75rem;
+}

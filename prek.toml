@@ -1,6 +1,6 @@
 #:schema https://www.schemastore.org/prek.json
 default_install_hook_types = ["pre-commit", "commit-msg", "pre-push"]
-exclude = "^theme/icons/"
+exclude = "^icons/"
 
 [[repos]]
 repo = "builtin"
@@ -34,9 +34,10 @@ hooks = [
     "toml",
   ] },
   { id = "bun-lint", name = "bun lint", entry = "bun lint", language = "system", types_or = ["ts", "javascript"] },
-  { id = "docs-build", name = "docs build", entry = "bun docs.ts build", language = "system", pass_filenames = false, files = "^(docs/|src/|theme/|docs\\.(ts|yaml)$)" },
+  { id = "max-lines", name = "files stay under 300 lines", entry = "awk 'FNR == 301 { print FILENAME \": more than 300 lines\"; failed = 1 } END { exit failed }'", language = "system", types_or = ["css", "html", "json", "markdown", "yaml", "toml", "shell"] },
+  { id = "docs-build", name = "docs build", entry = "bun docs.ts build", language = "system", pass_filenames = false, files = "^(docs/|src/|client/|themes/|docs\\.(ts|yaml)$)" },
   { id = "zizmor", name = "zizmor", entry = "zizmor --min-severity low", language = "system", files = "^\\.github/workflows/" },
-  { id = "pinact", name = "pinact", entry = "pinact run --check --verify-comment", language = "system", files = "^\\.github/workflows/" },
+  { id = "pinact", name = "pinact", entry = "sh -c 'GITHUB_TOKEN=\"${GITHUB_TOKEN:-$(gh auth token 2>/dev/null)}\" exec pinact run --check --verify-comment \"$@\"' pinact", language = "system", files = "^\\.github/workflows/" },
   { id = "hadolint", name = "hadolint", entry = "hadolint", language = "system", files = "(^|/)Dockerfile$" },
   { id = "binary", name = "compiled binary builds the docs", entry = "sh -c 'mise run compile && ./build/nodeps build'", language = "system", pass_filenames = false, stages = ["pre-push"] },
 ]

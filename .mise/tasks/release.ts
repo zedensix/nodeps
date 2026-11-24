@@ -6,13 +6,16 @@ import { chmod, mkdir, rm } from "node:fs/promises";
 import { join } from "node:path";
 
 const version = (process.env.usage_version ?? Bun.argv[2] ?? "").replace(/^v/, "");
-const versionMatch = /^(\d+\.\d+\.\d+)(?:-[0-9A-Za-z-]+\.(\d+))?$/.exec(version);
+const versionMatch = /^(\d+\.\d+\.\d+)(?:-([0-9A-Za-z-]+)\.(\d+))?$/.exec(version);
 if (!versionMatch) {
-  console.error(`Expected a version like 1.2.0 or 1.2.0-canary.3, got "${version}"`);
+  console.error(`Expected a version like 1.2.0 or 1.2.0-beta.3, got "${version}"`);
   process.exit(1);
 }
-// PEP 440 has no "-canary.N": a canary becomes a development release.
-const pythonVersion = versionMatch[2] ? `${versionMatch[1]}.dev${versionMatch[2]}` : versionMatch[1]!;
+// PEP 440 spells "-beta.3" as "b3"; an id it does not know becomes a development release.
+const pythonPrerelease: Record<string, string> = { alpha: "a", beta: "b", rc: "rc" };
+const pythonVersion = versionMatch[2]
+  ? `${versionMatch[1]}${pythonPrerelease[versionMatch[2]] ?? ".dev"}${versionMatch[3]}`
+  : versionMatch[1]!;
 
 const root = process.env.MISE_PROJECT_ROOT ?? process.cwd();
 const output = join(root, "build/release");
@@ -58,8 +61,12 @@ const targets = [
   { bun: "bun-windows-x64", npm: "win32-x64", os: "win32", cpu: "x64", libc: "", wheel: ["win_amd64"] },
 ];
 
+/**
+ * Builds the THIRD_PARTY_NOTICES text from the icon licenses saved by the
+ * icon download, sorted by set name.
+ */
 const thirdPartyNotice = async () => {
-  const directory = join(root, "theme/icons/licenses");
+  const directory = join(root, "icons/licenses");
   const sections = await Promise.all(
     Array.from(new Bun.Glob("*.LICENSE").scanSync({ cwd: directory }))
       .sort()
@@ -74,6 +81,10 @@ await $`mise exec bun@${stableBun} -- bun ${join(root, ".mise/tasks/compile.ts")
   root,
 );
 
+/**
+ * Returns the path of the compiled binary for a target, which carries `.exe`
+ * on Windows. Throws when the compile step did not produce it.
+ */
 async function binaryOf(target: (typeof targets)[number]) {
   const base = join(root, "build", `nodeps-${target.bun.replace(/^bun-/, "")}`);
   for (const candidate of [base, `${base}.exe`]) {
@@ -164,6 +175,10 @@ await Bun.write(
   ) + "\n",
 );
 
+/**
+ * Hashes bytes as SHA-256 in unpadded URL-safe base64, the format wheel
+ * RECORD files require.
+ */
 const urlsafeDigest = (bytes: ArrayBuffer) =>
   new Bun.CryptoHasher("sha256")
     .update(bytes)

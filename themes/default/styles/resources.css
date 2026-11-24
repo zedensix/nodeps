@@ -1,0 +1,153 @@
+.resources {
+  margin-top: 3rem;
+}
+
+.resource-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+  gap: 1rem;
+}
+
+.resource {
+  --kind: var(--text-subtle);
+  padding: 1rem 1.125rem;
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) + 4px);
+  background: var(--background);
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+}
+
+.resource[data-kind="skill"] {
+  --kind: var(--important);
+}
+
+.resource[data-kind="code"] {
+  --kind: var(--note);
+}
+
+.resource[data-kind="document"] {
+  --kind: var(--warning);
+}
+
+.resource:hover {
+  border-color: color-mix(in oklab, var(--kind) 40%, var(--border));
+  box-shadow: 0 12px 30px -20px color-mix(in oklab, var(--kind) 60%, transparent);
+}
+
+.resource:has(.resource-preview[open]) {
+  grid-column: 1 / -1;
+}
+
+.resource-head {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.resource-icon {
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  flex: none;
+  border-radius: 10px;
+  background: color-mix(in oklab, var(--kind) 13%, transparent);
+  color: var(--kind);
+}
+
+.resource-icon .icon {
+  width: 1.2rem;
+  height: 1.2rem;
+}
+
+.resource-head strong {
+  display: block;
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.resource-head small {
+  color: var(--text-subtle);
+  font-size: 0.78rem;
+}
+
+.prose .resource-description {
+  margin: 0.75rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  line-height: 1.55;
+}
+
+.resource-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.875rem;
+}
+
+.prose a.resource-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  height: 2rem;
+  padding: 0 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.82rem;
+  font-weight: 550;
+  text-decoration: none;
+  transition:
+    border-color 0.15s,
+    background 0.15s;
+}
+
+.prose a.resource-action:hover {
+  border-color: color-mix(in oklab, var(--kind) 50%, var(--border));
+  background: var(--background);
+}
+
+.resource-action .icon {
+  width: 0.9rem;
+  height: 0.9rem;
+}
+
+.resource-preview summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 0.75rem;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  font-weight: 550;
+  list-style: none;
+  cursor: pointer;
+}
+
+.resource-preview summary::-webkit-details-marker {
+  display: none;
+}
+
+.resource-preview summary .icon {
+  width: 0.85rem;
+  height: 0.85rem;
+  transition: transform 0.2s;
+}
+
+.resource-preview[open] summary .icon {
+  transform: rotate(90deg);
+}
+
+.resource-preview .code {
+  margin: 0.75rem 0 0;
+  animation: pop-in 0.16s ease-out;
+}
+
+.resource-preview .code pre {
+  max-height: 26rem;
+}
