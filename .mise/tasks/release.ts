@@ -6,10 +6,13 @@ import { chmod, mkdir, rm } from "node:fs/promises";
 import { join } from "node:path";
 
 const version = (process.env.usage_version ?? Bun.argv[2] ?? "").replace(/^v/, "");
-if (!/^\d+\.\d+\.\d+$/.test(version)) {
-  console.error(`Expected a version like 1.2.0, got "${version}"`);
+const versionMatch = /^(\d+\.\d+\.\d+)(?:-[0-9A-Za-z-]+\.(\d+))?$/.exec(version);
+if (!versionMatch) {
+  console.error(`Expected a version like 1.2.0 or 1.2.0-canary.3, got "${version}"`);
   process.exit(1);
 }
+// PEP 440 has no "-canary.N": a canary becomes a development release.
+const pythonVersion = versionMatch[2] ? `${versionMatch[1]}.dev${versionMatch[2]}` : versionMatch[1]!;
 
 const root = process.env.MISE_PROJECT_ROOT ?? process.cwd();
 const output = join(root, "build/release");
@@ -173,14 +176,14 @@ const distribution = "zedensix_nodeps";
 for (const target of targets) {
   const staging = join(output, "pypi-staging", target.npm);
   const executable = `nodeps${target.os === "win32" ? ".exe" : ""}`;
-  const dataScript = `${distribution}-${version}.data/scripts/${executable}`;
-  const distInfo = `${distribution}-${version}.dist-info`;
+  const dataScript = `${distribution}-${pythonVersion}.data/scripts/${executable}`;
+  const distInfo = `${distribution}-${pythonVersion}.dist-info`;
   const files: Record<string, string | Blob> = {
     [dataScript]: Bun.file(await binaryOf(target)),
     [`${distInfo}/METADATA`]: [
       "Metadata-Version: 2.1",
       "Name: zedensix-nodeps",
-      `Version: ${version}`,
+      `Version: ${pythonVersion}`,
       `Summary: ${description}`,
       `Project-URL: Source, ${repository}`,
       "Requires-Python: >=3.8",
@@ -207,7 +210,7 @@ for (const target of targets) {
   record.push(`${distInfo}/RECORD,,`);
   await Bun.write(join(staging, distInfo, "RECORD"), record.join("\n") + "\n");
   await mkdir(join(output, "pypi"), { recursive: true });
-  const wheel = join(output, "pypi", `${distribution}-${version}-py3-none-${target.wheel.join(".")}.whl`);
+  const wheel = join(output, "pypi", `${distribution}-${pythonVersion}-py3-none-${target.wheel.join(".")}.whl`);
   await $`zip -qrX ${wheel} .`.cwd(staging);
 }
 await rm(join(output, "pypi-staging"), { recursive: true, force: true });

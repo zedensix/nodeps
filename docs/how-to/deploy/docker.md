@@ -10,8 +10,13 @@ tags: [deploy, docker]
 The repository ships an opt-in `Dockerfile`: it compiles the binary, then copies it into a distroless image together with the nodeps documentation, served from `/site`.
 
 ```sh
+docker run -p 3000:3000 ghcr.io/zedensix/nodeps
+```
+
+Every release is published there for `linux/amd64` and `linux/arm64`: `:latest` for stable versions, `:canary` for the newest build of `main`. To build it yourself:
+
+```sh
 docker build -t nodeps .
-docker run -p 3000:3000 nodeps
 ```
 
 The server listens on `$PORT`, 3000 by default, which suits platforms that assign the port.

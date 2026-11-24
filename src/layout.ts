@@ -167,6 +167,7 @@ function editorSettings(site: Site, page: Page, options: RenderOptions) {
     editUrl: config.repository ? editUrl(config.repository, page.source) : null,
     provider: config.repository ? gitProviders[config.repository.provider] : null,
     oauth: options.server && config.editor.oauth !== undefined,
+    render: options.server ? `${config.base}_editor/render` : null,
     base: config.base,
   };
   return `<script type="application/json" id="nodeps-editor">${JSON.stringify(settings).replaceAll("<", "\\u003c")}</script>`;

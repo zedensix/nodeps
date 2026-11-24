@@ -190,6 +190,10 @@
             <strong class="editor-page-title"></strong>
             <small class="editor-status" aria-live="polite"></small>
           </div>
+          <div class="editor-mode" role="group" aria-label="Editing mode">
+            <button type="button" data-mode="visual" aria-pressed="true">Visual</button>
+            <button type="button" data-mode="markdown" aria-pressed="false">Markdown</button>
+          </div>
           <div class="editor-actions">
             <button type="button" class="pill-button" data-editor="discard" hidden>Discard draft</button>
             <button type="button" class="pill-button" data-editor="close">Close</button>
@@ -282,6 +286,7 @@
         </div>
         <div class="editor-scroll">
           <article class="prose editor-content" contenteditable="true" spellcheck="true"></article>
+          <textarea class="editor-source" spellcheck="false" aria-label="Markdown source" hidden></textarea>
         </div>
         <div class="editor-panel" hidden></div>
       </dialog>

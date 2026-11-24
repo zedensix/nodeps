@@ -2,7 +2,7 @@ import { watch } from "node:fs";
 import { basename } from "node:path";
 import { handleMcp, llmsFull, llmsIndex, searchIndex } from "./ai.ts";
 import { loadConfig, type Config } from "./config.ts";
-import { createEditorRoutes, editorPayload } from "./editor.ts";
+import { createEditorRoutes, editorHtml, editorPayload } from "./editor.ts";
 import { renderNotFound, renderPage, type RenderOptions } from "./layout.ts";
 import { loadSite, type Site } from "./site.ts";
 import { embeddedTheme, themeDirectory } from "./theme.ts";
@@ -63,6 +63,13 @@ export function createHandler(getSite: () => Site, options: RenderOptions) {
       if (page) {
         return Response.json(editorPayload(page), { headers: { "cache-control": "no-cache" } });
       }
+    }
+    if (options.server && config.editor.enabled && path === "/_editor/render" && request.method === "POST") {
+      const input = (await request.json().catch(() => ({}))) as { markdown?: unknown };
+      if (typeof input.markdown !== "string" || input.markdown.length > 1_000_000) {
+        return Response.json({ error: "Expected { markdown }" }, { status: 400 });
+      }
+      return Response.json({ html: editorHtml(input.markdown) });
     }
     const editorResponse = await editorRoutes?.(request, path);
     if (editorResponse) {

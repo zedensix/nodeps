@@ -6,6 +6,7 @@ export interface EditorSettings {
   provider: string | null;
   oauth: boolean;
   base: string;
+  render: string | null;
 }
 
 interface Payload {
@@ -58,7 +59,7 @@ function escapeMarkdown(text: string) {
 
 function inline(node: Node): string {
   if (node.nodeType === Node.TEXT_NODE) {
-    return escapeMarkdown((node.textContent ?? "").replace(/\s+/g, " "));
+    return escapeMarkdown((node.textContent ?? "").replace(/\u200b/g, "").replace(/\s+/g, " "));
   }
   if (!(node instanceof HTMLElement)) {
     return "";
@@ -78,7 +79,8 @@ function inline(node: Node): string {
     case "CODE": {
       const code = node.textContent ?? "";
       const fence = code.includes("`") ? "``" : "`";
-      return code ? `${fence}${code}${fence}` : "";
+      const padding = code.startsWith("`") || code.endsWith("`") ? " " : "";
+      return code ? `${fence}${padding}${code}${padding}${fence}` : "";
     }
     case "A":
       return `[${children()}](${node.getAttribute("href") ?? ""})`;
@@ -143,17 +145,21 @@ function list(element: Element, ordered: boolean): string {
       const task = checkbox ? (checkbox.checked ? "[x] " : "[ ] ") : "";
       const parts: string[] = [];
       let text = "";
+      let paragraphs = 0;
       for (const child of item.childNodes) {
         if (child instanceof Element && (child.tagName === "UL" || child.tagName === "OL")) {
           parts.push(list(child, child.tagName === "OL"));
-        } else if (child instanceof Element && child.tagName === "P") {
+        } else if (child instanceof Element && child.tagName === "P" && paragraphs === 0 && parts.length === 0) {
           text += (text ? " " : "") + inline(child).trim();
+          paragraphs++;
+        } else if (child instanceof Element && blockTags.has(child.tagName)) {
+          parts.push(`\n${blocks({ childNodes: [child] } as unknown as Node).join("\n\n")}`);
         } else {
           text += inline(child);
         }
       }
       const indent = " ".repeat(marker.length);
-      const nested = parts.map((part) => part.replace(/^/gm, indent)).join("\n");
+      const nested = parts.map((part) => part.replace(/^(?=.)/gm, indent)).join("\n");
       return `${marker}${task}${text.trim()}${nested ? `\n${nested}` : ""}`;
     })
     .join("\n");
@@ -183,6 +189,17 @@ function codeBlock(element: Element) {
   return `${fence}${language}${meta}\n${text}\n${fence}`;
 }
 
+function decodeBase64(encoded: string) {
+  return new TextDecoder().decode(Uint8Array.from(atob(encoded), (character) => character.charCodeAt(0)));
+}
+
+function encodeBase64Url(text: string) {
+  return btoa(String.fromCharCode(...new TextEncoder().encode(text)))
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/, "");
+}
+
 function blocks(parent: Node): string[] {
   const output: string[] = [];
   let pendingInline = "";
@@ -193,6 +210,11 @@ function blocks(parent: Node): string[] {
     pendingInline = "";
   };
   for (const node of parent.childNodes) {
+    if (node instanceof HTMLElement && node.dataset.rawMarkdown !== undefined) {
+      flush();
+      output.push(decodeBase64(node.dataset.rawMarkdown));
+      continue;
+    }
     if (!(node instanceof Element) || (!blockTags.has(node.tagName) && !hasBlockChildren(node))) {
       pendingInline += inline(node);
       continue;
@@ -305,26 +327,281 @@ export async function openEditor(settings: EditorSettings) {
     throw new Error(`Could not load ${settings.payload}`);
   }
   const payload = (await response.json()) as Payload;
-  const draft = storage.get(draftKey(settings));
-  content.innerHTML = draft ?? payload.html;
+  const source = element<HTMLTextAreaElement>(dialog, ".editor-source");
+  const toolbar = element<HTMLElement>(dialog, ".editor-toolbar");
+  let mode: "visual" | "markdown" = "visual";
+
+  const showMode = (next: "visual" | "markdown") => {
+    mode = next;
+    content.hidden = next !== "visual";
+    source.hidden = next !== "markdown";
+    toolbar.classList.toggle("disabled", next !== "visual");
+    for (const button of dialog.querySelectorAll<HTMLButtonElement>("[data-mode]")) {
+      button.setAttribute("aria-pressed", String(button.dataset.mode === next));
+    }
+  };
+
+  const storedDraft = storage.get(draftKey(settings));
+  let draft: { mode: "visual" | "markdown"; value: string } | null = null;
+  if (storedDraft !== null) {
+    try {
+      draft = JSON.parse(storedDraft);
+    } catch {
+      draft = { mode: "visual", value: storedDraft };
+    }
+  }
+  content.innerHTML = draft?.mode === "visual" ? draft.value : payload.html;
+  source.value = draft?.mode === "markdown" ? draft.value : payload.body.trim();
+  showMode(draft?.mode ?? "visual");
   discard.hidden = draft === null;
   status.textContent = draft === null ? "" : "Restored your unpublished draft";
+
+  const setMode = async (next: "visual" | "markdown") => {
+    if (next === mode) {
+      return;
+    }
+    if (next === "markdown") {
+      source.value = htmlToMarkdown(content);
+      showMode("markdown");
+      source.focus();
+      return;
+    }
+    if (!settings.render) {
+      status.textContent = "The visual mode needs the server; keep editing the Markdown, publishing uses it as is";
+      return;
+    }
+    const response = await fetch(settings.render, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ markdown: source.value }),
+    });
+    if (!response.ok) {
+      status.textContent = "Could not switch back to the visual mode";
+      return;
+    }
+    content.innerHTML = ((await response.json()) as { html: string }).html;
+    showMode("visual");
+    content.focus();
+  };
 
   dialog.addEventListener("close", () => dialog.remove());
   dialog.showModal();
   document.execCommand("defaultParagraphSeparator", false, "p");
   content.focus();
 
+  const selectionRange = () => {
+    const selection = getSelection();
+    return selection && selection.rangeCount > 0 ? selection.getRangeAt(0) : null;
+  };
+
+  const currentBlock = () => {
+    const anchor = getSelection()?.anchorNode;
+    const block = (anchor instanceof Element ? anchor : anchor?.parentElement)?.closest(
+      "p, h1, h2, h3, h4, h5, h6, li, pre, blockquote",
+    );
+    return block && content.contains(block) ? block : null;
+  };
+
+  const textBeforeCaret = (block: Element) => {
+    const range = selectionRange();
+    if (!range) {
+      return "";
+    }
+    const before = range.cloneRange();
+    before.selectNodeContents(block);
+    before.setEnd(range.startContainer, range.startOffset);
+    return before.toString().replace(/\u00a0/g, " ");
+  };
+
+  const placeCaret = (node: Node, offset = 0) => {
+    const range = document.createRange();
+    range.setStart(node, offset);
+    range.collapse(true);
+    getSelection()?.removeAllRanges();
+    getSelection()?.addRange(range);
+  };
+
+  const turnIntoList = (tag: "ul" | "ol") => {
+    const paragraph = currentBlock();
+    if (!paragraph || paragraph.tagName !== "P") {
+      return;
+    }
+    const listElement = document.createElement(tag);
+    const item = document.createElement("li");
+    item.append(...paragraph.childNodes);
+    if (!item.textContent) {
+      item.innerHTML = "<br>";
+    }
+    listElement.append(item);
+    paragraph.replaceWith(listElement);
+    placeCaret(item.firstChild ?? item, 0);
+  };
+
+  const blockShortcuts: [RegExp, (match: RegExpExecArray) => void][] = [
+    [/^(#{1,6}) $/, (match) => document.execCommand("formatBlock", false, `h${match[1]!.length}`)],
+    [/^[-*+] $/, () => turnIntoList("ul")],
+    [/^1[.)] $/, () => turnIntoList("ol")],
+    [/^> $/, () => document.execCommand("formatBlock", false, "blockquote")],
+  ];
+
+  const inlineShortcuts: [RegExp, (match: RegExpExecArray) => HTMLElement][] = [
+    [/\*\*([^*]+)\*\*$/, (match) => Object.assign(document.createElement("strong"), { textContent: match[1] })],
+    [/~~([^~]+)~~$/, (match) => Object.assign(document.createElement("s"), { textContent: match[1] })],
+    [/`([^`]+)`$/, (match) => Object.assign(document.createElement("code"), { textContent: match[1] })],
+    [/(?<![*\w])\*([^*\s][^*]*)\*$/, (match) => Object.assign(document.createElement("em"), { textContent: match[1] })],
+    [
+      /\[([^\]]+)\]\(([^)\s]+)\)$/,
+      (match) => Object.assign(document.createElement("a"), { textContent: match[1], href: match[2] }),
+    ],
+  ];
+
+  content.addEventListener("input", (event) => {
+    const inputEvent = event as InputEvent;
+    if (inputEvent.inputType !== "insertText" || !inputEvent.data) {
+      return;
+    }
+    const block = currentBlock();
+    if (inputEvent.data === " " && block?.tagName === "P") {
+      const before = textBeforeCaret(block);
+      for (const [pattern, apply] of blockShortcuts) {
+        const match = pattern.exec(before);
+        if (match) {
+          const rest = (block.textContent ?? "").replace(/\u00a0/g, " ").slice(before.length);
+          block.textContent = rest;
+          if (!rest) {
+            block.innerHTML = "<br>";
+          }
+          placeCaret(block.firstChild ?? block, 0);
+          apply(match);
+          return;
+        }
+      }
+    }
+    const range = selectionRange();
+    const node = range?.startContainer;
+    if (!range || !node || node.nodeType !== Node.TEXT_NODE || block?.closest("pre, code")) {
+      return;
+    }
+    const text = (node.textContent ?? "").slice(0, range.startOffset);
+    for (const [pattern, create] of inlineShortcuts) {
+      const match = pattern.exec(text);
+      if (match) {
+        const start = range.startOffset - match[0].length;
+        const target = document.createRange();
+        target.setStart(node, start);
+        target.setEnd(node, range.startOffset);
+        target.deleteContents();
+        const created = create(match);
+        target.insertNode(created);
+        const separator = document.createTextNode("\u200b");
+        created.after(separator);
+        placeCaret(separator, 1);
+        return;
+      }
+    }
+  });
+
+  content.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter" || event.shiftKey || event.isComposing) {
+      return;
+    }
+    const block = currentBlock();
+    const pre = block?.closest("pre");
+    if (pre) {
+      event.preventDefault();
+      const before = textBeforeCaret(pre);
+      const lastLine = before.slice(before.lastIndexOf("\n") + 1).trim();
+      if (/^(```|~~~)$/.test(lastLine)) {
+        const codeElement = pre.querySelector("code") ?? pre;
+        codeElement.textContent = (codeElement.textContent ?? "").replace(/\n?(```|~~~)\s*$/, "");
+        const paragraph = document.createElement("p");
+        paragraph.innerHTML = "<br>";
+        pre.after(paragraph);
+        placeCaret(paragraph, 0);
+      } else {
+        const range = selectionRange();
+        if (range) {
+          range.deleteContents();
+          let node = range.startContainer;
+          let offset = range.startOffset;
+          if (node.nodeType !== Node.TEXT_NODE) {
+            const text = document.createTextNode("");
+            range.insertNode(text);
+            node = text;
+            offset = 0;
+          }
+          const atEnd = textBeforeCaret(pre).length >= (pre.textContent ?? "").replace(/\n$/, "").length;
+          (node as Text).insertData(
+            offset,
+            atEnd && !(node.textContent ?? "").slice(offset).startsWith("\n") ? "\n\n" : "\n",
+          );
+          placeCaret(node, offset + 1);
+        }
+      }
+      content.dispatchEvent(new Event("input"));
+      return;
+    }
+    if (block?.tagName !== "P") {
+      return;
+    }
+    const text = (block.textContent ?? "").replace(/\u00a0/g, " ").trim();
+    const fence = /^(```|~~~)\s*([\w+-]*)\s*(.*)$/.exec(text);
+    if (fence) {
+      event.preventDefault();
+      const code = document.createElement("code");
+      if (fence[2]) {
+        code.className = `language-${fence[2]}${fence[3] ? `::${encodeBase64Url(fence[3])}` : ""}`;
+      }
+      code.textContent = "\n";
+      const codeBlock = document.createElement("pre");
+      codeBlock.append(code);
+      block.replaceWith(codeBlock);
+      placeCaret(code.firstChild!, 0);
+      content.dispatchEvent(new Event("input"));
+    } else if (/^(-{3,}|\*{3,}|_{3,})$/.test(text)) {
+      event.preventDefault();
+      const paragraph = document.createElement("p");
+      paragraph.innerHTML = "<br>";
+      block.replaceWith(document.createElement("hr"), paragraph);
+      placeCaret(paragraph, 0);
+      content.dispatchEvent(new Event("input"));
+    }
+  });
+
+  content.addEventListener("paste", (event) => {
+    const html = event.clipboardData?.getData("text/html");
+    const text = event.clipboardData?.getData("text/plain") ?? "";
+    if (!settings.render || html || !/(^|\n)\s*(#{1,6}\s|[-*+]\s|\d+\.\s|>|```)|\*\*|`|\[[^\]]+\]\(/.test(text)) {
+      return;
+    }
+    event.preventDefault();
+    fetch(settings.render, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ markdown: text }),
+    })
+      .then((response) => response.json() as Promise<{ html: string }>)
+      .then((rendered) => {
+        document.execCommand("insertHTML", false, rendered.html);
+      })
+      .catch(() => document.execCommand("insertText", false, text));
+  });
+
   let saveTimer: Timer | undefined;
-  content.addEventListener("input", () => {
+  const scheduleSave = () => {
     clearTimeout(saveTimer);
     status.textContent = "Editing…";
     saveTimer = setTimeout(() => {
-      storage.set(draftKey(settings), content.innerHTML);
+      storage.set(
+        draftKey(settings),
+        JSON.stringify({ mode, value: mode === "visual" ? content.innerHTML : source.value }),
+      );
       discard.hidden = false;
       status.textContent = "Draft saved on this device";
     }, 400);
-  });
+  };
+  content.addEventListener("input", scheduleSave);
+  source.addEventListener("input", scheduleSave);
 
   let savedRange: Range | null = null;
   const applyLink = () => {
@@ -385,7 +662,7 @@ export async function openEditor(settings: EditorSettings) {
   });
 
   const markdown = () => {
-    const body = htmlToMarkdown(content);
+    const body = mode === "markdown" ? source.value.trim() : htmlToMarkdown(content);
     return payload.frontmatter ? `${payload.frontmatter.trimEnd()}\n\n${body}\n` : `${body}\n`;
   };
 
@@ -424,7 +701,10 @@ ${copied ? "" : `<textarea class="editor-copy-area" readonly>${escapeHtml(text)}
   const publishWithAccount = async () => {
     const me = await fetch(`${settings.base}_auth/me`, { credentials: "same-origin" });
     if (me.status === 401) {
-      storage.set(draftKey(settings), content.innerHTML);
+      storage.set(
+        draftKey(settings),
+        JSON.stringify({ mode, value: mode === "visual" ? content.innerHTML : source.value }),
+      );
       showPanel(
         panel,
         `<p class="editor-panel-title">Sign in to send your changes</p><p>Your draft is saved. After signing in with GitHub you come back here and your changes are sent for review.</p><div class="editor-panel-actions"><a class="pill-button primary" href="${escapeHtml(`${settings.base}_auth/login?return=${encodeURIComponent(location.pathname)}`)}">Sign in with GitHub</a><button type="button" class="pill-button" data-editor="dismiss">Back to editing</button></div>`,
@@ -475,7 +755,17 @@ ${copied ? "" : `<textarea class="editor-copy-area" readonly>${escapeHtml(text)}
 
   dialog.addEventListener("click", (event) => {
     const target = event.target as HTMLElement;
+    const modeButton = target.closest<HTMLElement>("[data-mode]");
+    if (modeButton) {
+      setMode(modeButton.dataset.mode as "visual" | "markdown").catch(() => {
+        status.textContent = "Could not switch modes";
+      });
+      return;
+    }
     const command = target.closest<HTMLElement>("[data-command]");
+    if (command && mode !== "visual") {
+      return;
+    }
     if (command) {
       runCommand(command.dataset.command!, command.dataset.value);
       return;
@@ -489,6 +779,8 @@ ${copied ? "" : `<textarea class="editor-copy-area" readonly>${escapeHtml(text)}
     } else if (action === "discard") {
       storage.remove(draftKey(settings));
       content.innerHTML = payload.html;
+      source.value = payload.body.trim();
+      showMode("visual");
       discard.hidden = true;
       status.textContent = "Draft discarded";
     } else if (action === "publish") {
