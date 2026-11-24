@@ -30,6 +30,8 @@ export async function exportSite(config: Config) {
     "/llms.txt",
     "/llms-full.txt",
     "/search.json",
+    "/robots.txt",
+    ...(config.url ? ["/sitemap.xml", "/feed.xml"] : []),
     ...(config.editor.enabled ? site.pages.map(editorSourcePath) : []),
   ];
 

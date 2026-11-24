@@ -21,13 +21,14 @@ bun docs.ts <command> [options]
 
 ## Options
 
-| Option           | Default            | Description                                                   |
-| ---------------- | ------------------ | ------------------------------------------------------------- |
-| `-c`, `--config` | `docs.yaml`        | Config file                                                   |
-| `-p`, `--port`   | `$PORT`, then 3000 | Port to listen on                                             |
-| `--host`         | `0.0.0.0`          | Hostname to bind                                              |
-| `--write`        |                    | With `migrate`: write `docs.yaml` and add missing frontmatter |
-| `-h`, `--help`   |                    | Show the help                                                 |
+| Option            | Default            | Description                                                   |
+| ----------------- | ------------------ | ------------------------------------------------------------- |
+| `-c`, `--config`  | `docs.yaml`        | Config file                                                   |
+| `-p`, `--port`    | `$PORT`, then 3000 | Port to listen on                                             |
+| `--host`          | `0.0.0.0`          | Hostname to bind                                              |
+| `--write`         |                    | With `migrate`: write `docs.yaml` and add missing frontmatter |
+| `-v`, `--version` |                    | Print the nodeps version: the release, or `dev` from source   |
+| `-h`, `--help`    |                    | Show the help                                                 |
 
 ## mise tasks
 

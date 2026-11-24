@@ -1,6 +1,7 @@
 import { existsSync, watch } from "node:fs";
 import { basename, join } from "node:path";
 import { handleMcp, llmsFull, llmsIndex, searchIndex } from "./ai.ts";
+import { feed, robots, sitemap } from "./feeds.ts";
 import { loadConfig, type Config } from "../config/config.ts";
 import { editorHtml, editorPayload } from "../editor/editor.ts";
 import { createEditorRoutes } from "../editor/editor-routes.ts";
@@ -12,6 +13,7 @@ import { embeddedTheme, sourceRoot } from "../theme/theme.ts";
 const html = "text/html;charset=utf-8";
 const markdown = "text/markdown;charset=utf-8";
 const plain = "text/plain;charset=utf-8";
+const xml = "application/xml;charset=utf-8";
 
 /**
  * Builds the request handler shared by the dev server, the production server
@@ -90,6 +92,15 @@ export function createHandler(getSite: () => Site, options: RenderOptions) {
     }
     if (path === "/search.json") {
       return Response.json(searchIndex(site));
+    }
+    if (path === "/robots.txt") {
+      return respond(robots(site, origin), plain);
+    }
+    if (origin && path === "/sitemap.xml") {
+      return respond(sitemap(site, origin), xml);
+    }
+    if (origin && path === "/feed.xml") {
+      return respond(feed(site, origin), "application/rss+xml;charset=utf-8");
     }
     if (path === "/404.html") {
       return respond(

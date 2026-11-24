@@ -5,6 +5,7 @@ import { ConfigError } from "./src/config/config-fields.ts";
 import { exportSite } from "./src/output/export.ts";
 import { planMigration, renderConfig, writeMigration } from "./src/migrate/migrate.ts";
 import { serve } from "./src/output/server.ts";
+import { version } from "./src/version.ts";
 
 const usage = `Usage: nodeps <command> [options]   (from source: bun docs.ts <command>)
 
@@ -19,6 +20,7 @@ Options:
   -p, --port <port>     Port for dev and serve (default: $PORT or 3000)
       --host <host>     Hostname to bind (default: 0.0.0.0)
       --write           With migrate: write docs.yaml and add missing frontmatter
+  -v, --version         Print the nodeps version
   -h, --help            Show this help`;
 
 const { values, positionals } = parseArgs({
@@ -29,6 +31,7 @@ const { values, positionals } = parseArgs({
     port: { type: "string", short: "p" },
     host: { type: "string" },
     help: { type: "boolean", short: "h" },
+    version: { type: "boolean", short: "v" },
     write: { type: "boolean" },
   },
 });
@@ -37,7 +40,9 @@ const command = positionals[0];
 const port = values.port === undefined ? undefined : Number(values.port);
 
 try {
-  if (values.help || !command) {
+  if (values.version) {
+    console.log(version);
+  } else if (values.help || !command) {
     console.log(usage);
   } else if (port !== undefined && !(Number.isInteger(port) && port >= 0 && port < 65536)) {
     throw new ConfigError(`--port must be a number between 0 and 65535, got "${values.port}"`);

@@ -1,10 +1,11 @@
 ARG BUILDPLATFORM
 FROM --platform=$BUILDPLATFORM oven/bun:1.4.5@sha256:3aa040e5445efa09d75bb428a64ba50db13e2b3ac9b6b0c7f145615f62b2ee18 AS build
 ARG TARGETARCH
+ARG VERSION=dev
 WORKDIR /app
 COPY . .
 RUN target="bun-linux-$(if [ "$TARGETARCH" = amd64 ]; then echo x64; else echo arm64; fi)-musl" \
-  && bun .mise/tasks/compile.ts "$target" \
+  && NODEPS_VERSION="$VERSION" bun .mise/tasks/compile.ts "$target" \
   && mv "build/nodeps-${target#bun-}" build/nodeps
 
 FROM alpine:3.22@sha256:49340b346798875b5592e5d420241f2f9cfba5f47e62ebb1446a1b34734e898f AS runtime

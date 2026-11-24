@@ -77,9 +77,9 @@ const thirdPartyNotice = async () => {
 
 await rm(output, { recursive: true, force: true });
 // Cross-compiling downloads the Bun runtime of the running version, and canary runtimes are not published.
-await $`mise exec bun@${stableBun} -- bun ${join(root, ".mise/tasks/compile.ts")} ${targets.map((target) => target.bun)}`.cwd(
-  root,
-);
+await $`mise exec bun@${stableBun} -- bun ${join(root, ".mise/tasks/compile.ts")} ${targets.map((target) => target.bun)}`
+  .cwd(root)
+  .env({ ...process.env, NODEPS_VERSION: version });
 
 /**
  * Returns the path of the compiled binary for a target, which carries `.exe`

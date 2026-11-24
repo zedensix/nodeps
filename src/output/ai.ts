@@ -1,5 +1,6 @@
 import type { NavItem } from "../site/navigation.ts";
 import type { Page, Site } from "../site/site.ts";
+import { version } from "../version.ts";
 import { searchEntries, snippet, type SearchIndex } from "../../client/search/search.ts";
 
 /**
@@ -238,7 +239,7 @@ export async function handleMcp(request: Request, site: Site, origin: string) {
       return reply({
         protocolVersion: protocolVersions.includes(requested) ? requested : protocolVersions[0],
         capabilities: { tools: { listChanged: false } },
-        serverInfo: { name: site.config.title, version: "1.0.0" },
+        serverInfo: { name: site.config.title, version },
         instructions: `Documentation for ${site.config.title}. Use search_docs to find relevant sections, then read_page to read a full page.`,
       });
     }

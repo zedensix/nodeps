@@ -25,7 +25,10 @@ for (const target of targets.length > 0 ? targets : [undefined]) {
     entrypoints: [join(root, "docs.ts")],
     compile: target ? { target: target as Bun.Build.CompileTarget, outfile } : { outfile },
     minify: true,
-    define: { NODEPS_EMBEDDED_THEME: JSON.stringify(embedded) },
+    define: {
+      NODEPS_EMBEDDED_THEME: JSON.stringify(embedded),
+      NODEPS_VERSION: JSON.stringify(process.env.NODEPS_VERSION ?? "dev"),
+    },
     throw: false,
   });
   if (!result.success) {

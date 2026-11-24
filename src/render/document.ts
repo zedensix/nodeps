@@ -144,6 +144,9 @@ export function renderDocument(site: Site, options: RenderOptions, parts: Docume
     page
       ? `<link rel="alternate" type="text/markdown" href="${escape(markdownHref(site, page))}" title="Markdown">`
       : "",
+    config.url
+      ? `<link rel="alternate" type="application/rss+xml" href="${escape(config.base)}feed.xml" title="${escape(config.title)}">`
+      : "",
     logo ? `<link rel="icon" href="${escape(logo)}">` : "",
     themeStyle(config.theme),
     site.customStylesheet ? `<link rel="stylesheet" href="${escape(site.customStylesheet)}">` : "",

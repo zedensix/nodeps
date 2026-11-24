@@ -41,5 +41,6 @@ jobs:
         with:
           context: .
           platforms: linux/amd64,linux/arm64
+          build-args: VERSION=${{ inputs.version || 'dev' }}
           push: ${{ inputs.version != '' }}
           tags: ${{ inputs.version != '' && format('{0}:{1},{0}:{2}', env.IMAGE, inputs.version, inputs.alias) || '' }}

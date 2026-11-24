@@ -1,4 +1,5 @@
 title: nodeps
+url: https://docs.zedensix.com
 description: A documentation site generator and server built only on Bun's native APIs.
 source: docs
 output: dist

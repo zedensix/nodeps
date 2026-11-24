@@ -9,19 +9,22 @@ tags: [http, mcp, llms.txt]
 
 Paths are relative to `base`.
 
-| Route                                                           | Content                                                                                            | Static export |
-| --------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- | ------------- |
-| `/<page>/`                                                      | Page HTML, or Markdown when `Accept` includes `text/markdown`                                      | HTML only     |
-| `/<page>.md`                                                    | Page Markdown                                                                                      | Yes           |
-| `/llms.txt`                                                     | Index of pages in the [llms.txt](https://llmstxt.org) format                                       | Yes           |
-| `/llms-full.txt`                                                | Every page in one Markdown file                                                                    | Yes           |
-| `/search.json`                                                  | Search index: `pages` (title, URL, description, section, tags) and `sections` (heading, URL, text) | Yes           |
-| `/mcp`                                                          | MCP server, Streamable HTTP                                                                        | No            |
-| `/_assets/*`                                                    | Bundled CSS and JavaScript, cached for a year                                                      | Yes           |
-| `/_editor/source/<file>.json`                                   | Editor payload for one page: frontmatter, body and editable HTML. Only with `editor.enabled`       | Yes           |
-| `/_auth/login`, `/_auth/callback`, `/_auth/me`, `/_auth/logout` | GitHub sign-in for the editor. Only with `editor.oauth`                                            | No            |
-| `/_editor/publish`, `/_editor/status`                           | Open a pull request with an edit, and read its state. Only with `editor.oauth`                     | No            |
-| `/404.html`                                                     | Not found page                                                                                     | Yes           |
+| Route                                                           | Content                                                                                                                                 | Static export |
+| --------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- | ------------- |
+| `/<page>/`                                                      | Page HTML, or Markdown when `Accept` includes `text/markdown`                                                                           | HTML only     |
+| `/<page>.md`                                                    | Page Markdown                                                                                                                           | Yes           |
+| `/llms.txt`                                                     | Index of pages in the [llms.txt](https://llmstxt.org) format                                                                            | Yes           |
+| `/llms-full.txt`                                                | Every page in one Markdown file                                                                                                         | Yes           |
+| `/search.json`                                                  | Search index: `pages` (title, URL, description, section, tags) and `sections` (heading, URL, text)                                      | Yes           |
+| `/robots.txt`                                                   | Allows every crawler and points to the sitemap when `url` is set                                                                        | Yes           |
+| `/sitemap.xml`                                                  | Every page with its last update, in the [sitemaps.org](https://www.sitemaps.org) format. Needs `url`, or a request origin on the server | With `url`    |
+| `/feed.xml`                                                     | RSS 2.0 feed of the 20 most recently updated pages. Needs `url`, or a request origin on the server                                      | With `url`    |
+| `/mcp`                                                          | MCP server, Streamable HTTP                                                                                                             | No            |
+| `/_assets/*`                                                    | Bundled CSS and JavaScript, cached for a year                                                                                           | Yes           |
+| `/_editor/source/<file>.json`                                   | Editor payload for one page: frontmatter, body and editable HTML. Only with `editor.enabled`                                            | Yes           |
+| `/_auth/login`, `/_auth/callback`, `/_auth/me`, `/_auth/logout` | GitHub sign-in for the editor. Only with `editor.oauth`                                                                                 | No            |
+| `/_editor/publish`, `/_editor/status`                           | Open a pull request with an edit, and read its state. Only with `editor.oauth`                                                          | No            |
+| `/404.html`                                                     | Not found page                                                                                                                          | Yes           |
 
 A page URL without its trailing slash redirects to it.
 
