@@ -65,15 +65,14 @@ jobs:
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 24
-          registry-url: https://registry.npmjs.org
+      # Trusted publishing: npm trades the job's OIDC token for a publish token and adds provenance itself.
       - name: Publish the platform packages, then the launcher
         run: |
           chmod +x build/release/npm/*/bin/*
           for package in build/release/npm/nodeps-*/ build/release/npm/nodeps; do
-            npm publish "$package" --access public --provenance --tag "$NPM_TAG"
+            npm publish "$package" --access public --tag "$NPM_TAG"
           done
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_TAG: ${{ needs.release.outputs.prerelease == 'true' && 'canary' || 'latest' }}
 
   pypi:

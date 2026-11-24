@@ -50,7 +50,7 @@ The hooks format with `bun fmt`, lint with `bun lint`, build the docs to catch b
 - each push with a `feat` or `fix` ships a canary: a GitHub prerelease with the binaries, the `canary` npm tag, a `.devN` PyPI version and the `zedensix/nodeps:canary` image on Docker Hub;
 - it keeps a release PR open; merging it tags the stable version, writes `CHANGELOG.md`, and publishes everywhere as `latest`.
 
-The workflow needs an `NPM_TOKEN` secret, PyPI trusted publishing for the `pypi` environment, a `DOCKERHUB_USERNAME` variable with a `DOCKERHUB_TOKEN` secret, and a `RELEASE_DEPLOY_KEY` deploy key so the release PR runs CI and can pass branch protection.
+The workflow needs npm trusted publishing on `@zedensix/nodeps` and each `@zedensix/nodeps-*` platform package (workflow `release.yml`), PyPI trusted publishing for the `pypi` environment, a `DOCKERHUB_USERNAME` variable with a `DOCKERHUB_TOKEN` secret, and a `RELEASE_DEPLOY_KEY` deploy key so the release PR runs CI and can pass branch protection.
 
 ## Credits
 
