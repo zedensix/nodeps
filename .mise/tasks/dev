@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+#MISE description="Serve the docs with live reload"
+set -euo pipefail
+exec bun --watch docs.ts dev "$@"

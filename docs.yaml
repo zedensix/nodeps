@@ -1,0 +1,23 @@
+title: nodeps
+description: A documentation site generator and server built only on Bun's native APIs.
+source: docs
+output: dist
+logo: logo.svg
+footer: Built with nodeps. Icons by Lucide (ISC).
+
+links:
+  - label: llms.txt
+    url: /llms.txt
+
+home:
+  headline: Docs that ship without dependencies
+  tagline: Markdown in, a fast, themeable, AI-ready documentation site out. No package.json, no node_modules, only Bun.
+  actions:
+    - label: Start the tutorial
+      url: tutorials/first-site.md
+    - label: Read the reference
+      url: reference/formats/configuration.md
+  latest: 3
+
+theme:
+  accent: "#6d5efc"

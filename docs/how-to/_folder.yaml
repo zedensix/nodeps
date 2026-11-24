@@ -1,0 +1,5 @@
+title: How-to guides
+icon: wrench
+order: 2
+diataxis: how-to
+description: Recipes for real tasks, from theming to deploying behind nginx.

@@ -1,0 +1,37 @@
+title: Acme
+description: Everything about Acme.
+url: https://docs.acme.dev
+base: /
+source: docs
+output: dist
+logo: logo.svg
+repository:
+  url: https://github.com/acme/acme
+  branch: main
+  path: docs
+  edit: true
+footer: © Acme
+
+links:
+  - label: GitHub
+    url: https://github.com/acme/acme
+
+home:
+  headline: Acme documentation
+  tagline: Learn to turn coffee into software.
+  actions:
+    - label: Get started
+      url: tutorials/first-steps.md
+  latest: 3
+
+sidebar:
+  dropdowns: true
+  bylines: true
+
+theme:
+  accent: "#6d5efc"
+  radius: 8px
+  light:
+    background: "#ffffff"
+  dark:
+    background: "#0b0b0f"

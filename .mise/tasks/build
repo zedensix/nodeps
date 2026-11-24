@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+#MISE description="Export the docs as static files"
+set -euo pipefail
+exec bun docs.ts build "$@"
