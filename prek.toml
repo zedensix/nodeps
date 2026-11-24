@@ -1,5 +1,5 @@
 #:schema https://www.schemastore.org/prek.json
-default_install_hook_types = ["pre-commit", "commit-msg"]
+default_install_hook_types = ["pre-commit", "commit-msg", "pre-push"]
 exclude = "^theme/icons/"
 
 [[repos]]
@@ -17,7 +17,7 @@ hooks = [
   { id = "detect-private-key" },
   { id = "check-executables-have-shebangs" },
   { id = "check-shebang-scripts-are-executable" },
-  { id = "check-commit-trailers", args = ["--deny", "Co-Authored-By=(?i)claude|anthropic"] },
+  { id = "check-commit-trailers", args = ["--deny", "Co-Authored-By=(?i)claude|anthropic"], stages = ["commit-msg"] },
 ]
 
 [[repos]]
@@ -35,4 +35,8 @@ hooks = [
   ] },
   { id = "bun-lint", name = "bun lint", entry = "bun lint", language = "system", types_or = ["ts", "javascript"] },
   { id = "docs-build", name = "docs build", entry = "bun docs.ts build", language = "system", pass_filenames = false, files = "^(docs/|src/|theme/|docs\\.(ts|yaml)$)" },
+  { id = "zizmor", name = "zizmor", entry = "zizmor --min-severity low", language = "system", files = "^\\.github/workflows/" },
+  { id = "pinact", name = "pinact", entry = "pinact run --check --verify-comment", language = "system", files = "^\\.github/workflows/" },
+  { id = "hadolint", name = "hadolint", entry = "hadolint", language = "system", files = "(^|/)Dockerfile$" },
+  { id = "binary", name = "compiled binary builds the docs", entry = "sh -c 'mise run compile && ./build/nodeps build'", language = "system", pass_filenames = false, stages = ["pre-push"] },
 ]

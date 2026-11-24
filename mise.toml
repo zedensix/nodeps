@@ -1,6 +1,9 @@
 [tools]
 "github:oven-sh/bun" = "canary"
+hadolint = "2.15.1"
+pinact = "5.0.2"
 prek = "0.5.11"
+zizmor = "1.33.1"
 
 [hooks]
 postinstall = "prek install"

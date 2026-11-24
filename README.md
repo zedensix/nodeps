@@ -38,19 +38,19 @@ Admonitions, content tabs, snippets, icons, Mermaid, math and the rest of the Py
 
 ```sh
 mise install              # installs Bun, prek and the git hooks
-prek run --all-files      # what every commit and CI run
+prek run --all-files --stage pre-push   # everything CI runs, including the compiled binary
 ```
 
-The hooks format with `bun fmt`, lint with `bun lint`, build the docs to catch broken pages, check YAML, JSON and TOML, and refuse commits with a Claude or Anthropic `Co-Authored-By` trailer. `bun lint` needs the Bun canary build, which mise installs.
+The hooks format with `bun fmt`, lint with `bun lint`, build the docs to catch broken pages, check YAML, JSON and TOML, audit workflows with zizmor and pinact, lint the Dockerfile with hadolint, and refuse commits with a Claude or Anthropic `Co-Authored-By` trailer. Pushing also compiles the binary and builds the docs with it. CI runs exactly the same prek command. `bun lint` needs the Bun canary build, which mise installs.
 
 ## Releases
 
 [releaser](https://github.com/zedensix/releaser) runs on every push to `main`, from Conventional Commits:
 
-- each push with a `feat` or `fix` ships a canary: a GitHub prerelease with the binaries, the `canary` npm tag, a `.devN` PyPI version and the `:canary` image;
+- each push with a `feat` or `fix` ships a canary: a GitHub prerelease with the binaries, the `canary` npm tag, a `.devN` PyPI version and the `zedensix/nodeps:canary` image on Docker Hub;
 - it keeps a release PR open; merging it tags the stable version, writes `CHANGELOG.md`, and publishes everywhere as `latest`.
 
-The workflow needs an `NPM_TOKEN` secret, PyPI trusted publishing for the `pypi` environment, and a `RELEASE_DEPLOY_KEY` deploy key so the release PR runs CI and can pass branch protection.
+The workflow needs an `NPM_TOKEN` secret, PyPI trusted publishing for the `pypi` environment, a `DOCKERHUB_USERNAME` variable with a `DOCKERHUB_TOKEN` secret, and a `RELEASE_DEPLOY_KEY` deploy key so the release PR runs CI and can pass branch protection.
 
 ## Credits
 
