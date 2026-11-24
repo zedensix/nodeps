@@ -1,0 +1,21 @@
+name: Pull request
+
+on:
+  pull_request:
+
+concurrency:
+  group: pull-request-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions: {}
+
+jobs:
+  code-quality:
+    uses: $/.github/workflows/code_quality.yml
+    permissions:
+      contents: read
+
+  docker:
+    uses: $/.github/workflows/docker.yml
+    permissions:
+      contents: read

@@ -16,7 +16,8 @@ FROM scratch
 COPY --from=runtime /lib/ld-musl-*.so.1 /lib/
 COPY --from=runtime /usr/lib/libstdc++.so.6* /usr/lib/libgcc_s.so.1 /usr/lib/
 COPY --from=runtime /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
-COPY --from=runtime /runtime/tmp /tmp
+# Copying the parent keeps /tmp's 1777 mode; copying /runtime/tmp itself would create a root-only /tmp.
+COPY --from=runtime /runtime/ /
 COPY --from=build /app/build/nodeps /usr/local/bin/nodeps
 WORKDIR /app
 COPY --from=build /app/docs.yaml ./docs.yaml

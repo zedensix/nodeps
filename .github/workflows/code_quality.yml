@@ -1,16 +1,16 @@
-name: CI
+name: Code quality
 
 on:
-  push:
-    branches: [main, releaser/release]
-  pull_request:
+  workflow_call:
 
-permissions:
-  contents: read
+permissions: {}
 
 jobs:
   prek:
+    name: prek
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:

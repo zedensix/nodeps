@@ -1,16 +1,22 @@
-name: Release
+name: Main
 
 on:
   push:
     branches: [main]
 
-concurrency: release
+concurrency:
+  group: main
 
-permissions:
-  contents: read
+permissions: {}
 
 jobs:
+  code-quality:
+    uses: $/.github/workflows/code_quality.yml
+    permissions:
+      contents: read
+
   release:
+    needs: code-quality
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -19,21 +25,15 @@ jobs:
       version: ${{ steps.release.outputs.version }}
       prerelease: ${{ steps.release.outputs.prerelease }}
     steps:
-      # releaser pushes the release PR, tags and the release commit through origin, so the credentials must persist.
+      # releaser pushes tags (and later the release PR) through origin, so the credentials must persist.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ssh-key: ${{ secrets.RELEASE_DEPLOY_KEY }} # zizmor: ignore[artipacked]
-      # Releasing only needs bun: the linters are for the CI job.
+      # Releasing only needs bun: the linters are for the code quality job.
       - uses: jdx/mise-action@924e7c586e33d7d4bae9c14e26c5d22e2beb6e78 # v5.3.0
         with:
           cache: false
           install_args: github:oven-sh/bun
-      - uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4.8.0
-        with:
-          username: ${{ vars.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - uses: docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1 # v4.4.0
-      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
       - id: release
         uses: zedensix/releaser@47b2d8752a479df019b4dea98d5bcb2f7b14e221 # v1.7.4
         env:
@@ -42,15 +42,24 @@ jobs:
           prerelease: beta
           prepare: mise run release ${version}
           artifacts: build/release/assets/*
-          docker: true
-          docker-image: docker.io/zedensix/nodeps
-          docker-platforms: linux/amd64,linux/arm64
       - if: steps.release.outputs.released == 'true'
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: release
           path: build/release
           if-no-files-found: error
+
+  docker:
+    needs: release
+    if: needs.release.outputs.released == 'true'
+    uses: $/.github/workflows/docker.yml
+    permissions:
+      contents: read
+    with:
+      version: ${{ needs.release.outputs.version }}
+      alias: ${{ needs.release.outputs.prerelease == 'true' && 'beta' || 'latest' }}
+    secrets:
+      dockerhub-token: ${{ secrets.DOCKERHUB_TOKEN }}
 
   npm:
     needs: release

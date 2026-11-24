@@ -50,7 +50,7 @@ The hooks format with `bun fmt`, lint with `bun lint`, build the docs to catch b
 - each push with a `feat` or `fix` ships a beta: a GitHub prerelease `vX.Y.Z-beta.N` with the binaries, the `beta` npm tag, a `X.Y.ZbN` PyPI version and the `zedensix/nodeps:beta` image on Docker Hub;
 - nothing ships as stable yet. For 1.0.0, add `release-pr: true` to the releaser step: it then keeps a release PR open, and merging it tags the stable version, writes `CHANGELOG.md` and publishes everywhere as `latest`.
 
-The workflow needs npm trusted publishing on `@zedensix/nodeps` and each `@zedensix/nodeps-*` platform package (workflow `release.yml`), PyPI trusted publishing for the `pypi` environment, a `DOCKERHUB_USERNAME` variable with a `DOCKERHUB_TOKEN` secret, and a `RELEASE_DEPLOY_KEY` deploy key to push tags past branch protection (and later let the release PR run CI).
+Pull requests run code quality (every prek hook) and a Docker build; pushes to `main` run the same checks before releasing. Publishing needs npm trusted publishing on `@zedensix/nodeps` and each `@zedensix/nodeps-*` platform package, and PyPI trusted publishing for the `pypi` environment, both bound to the `main.yml` workflow, a `DOCKERHUB_USERNAME` variable with a `DOCKERHUB_TOKEN` secret, and a `RELEASE_DEPLOY_KEY` deploy key to push tags past branch protection (and later let the release PR run CI).
 
 ## Credits
 
