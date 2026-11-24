@@ -57,6 +57,11 @@ export function editUrl(repository: Repository, source: string) {
   }
 }
 
+export interface Editor {
+  enabled: boolean;
+  oauth?: { clientId: string; clientSecret: string; scope: string };
+}
+
 export interface Config {
   file: string;
   root: string;
@@ -73,6 +78,7 @@ export interface Config {
   home?: Home;
   sidebar: { dropdowns: boolean; bylines: boolean };
   diataxis: { badge: boolean };
+  editor: Editor;
   theme: Theme;
 }
 
@@ -188,6 +194,36 @@ function readRepository(data: Mapping, root: string, source: string): Repository
   };
 }
 
+function readEditor(data: Mapping): Editor {
+  const mapping = readMapping(data, "editor") ?? {};
+  const enabled = readBoolean(mapping, "enabled", "editor.enabled", true);
+  const oauthMapping = readMapping(mapping, "oauth", "editor.oauth");
+  const clientId =
+    (oauthMapping && readString(oauthMapping, "client_id", "editor.oauth.client_id")) ?? Bun.env.NODEPS_OAUTH_CLIENT_ID;
+  if (!enabled || !clientId) {
+    return { enabled };
+  }
+  if (oauthMapping?.client_secret !== undefined) {
+    fail(
+      "editor.oauth.client_secret",
+      "set in the NODEPS_OAUTH_CLIENT_SECRET environment variable, never in a committed file",
+    );
+  }
+  const clientSecret = Bun.env.NODEPS_OAUTH_CLIENT_SECRET;
+  if (!clientSecret) {
+    fail("editor.oauth.client_id", "paired with the NODEPS_OAUTH_CLIENT_SECRET environment variable");
+  }
+  const repository = readRepository(data, "", "");
+  if (repository?.provider !== "github") {
+    fail("editor.oauth", "used with a GitHub repository (other providers publish through their web editor)");
+  }
+  if (!readString(data, "url")) {
+    fail("url", "set when editor.oauth is enabled, to build the OAuth callback URL");
+  }
+  const scope = (oauthMapping && readString(oauthMapping, "scope", "editor.oauth.scope")) ?? "public_repo";
+  return { enabled, oauth: { clientId, clientSecret, scope } };
+}
+
 function contains(parent: string, child: string) {
   const path = relative(parent, child);
   return !path.startsWith("..") && !isAbsolute(path);
@@ -265,6 +301,7 @@ function parseConfig(file: string, data: Mapping): Config {
     output,
     logo: readString(data, "logo"),
     repository: readRepository(data, root, source),
+    editor: readEditor(data),
     footer: readString(data, "footer"),
     links: readLinks(data, "links"),
     home,

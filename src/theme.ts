@@ -28,6 +28,7 @@ export async function bundle(entrypoint: string, publicPath: string): Promise<Bu
     entrypoints: [entrypoint],
     target: "browser",
     minify: true,
+    splitting: true,
     publicPath,
     naming: "[name]-[hash].[ext]",
     throw: false,

@@ -1,5 +1,6 @@
 import { markdownHref, pageHref } from "./ai.ts";
 import { editUrl, gitProviders, type Theme } from "./config.ts";
+import { editorSourcePath } from "./editor.ts";
 import { presets, themeDeclarations } from "./presets.ts";
 import { icon } from "./icons.ts";
 import { renderCode } from "./markdown.ts";
@@ -151,12 +152,28 @@ function time(date: Date) {
   return `<time datetime="${date.toISOString()}">${dateFormat.format(date)}</time>`;
 }
 
+function editorSettings(site: Site, page: Page, options: RenderOptions) {
+  const { config } = site;
+  const settings = {
+    source: page.source,
+    title: page.title,
+    payload: config.base + editorSourcePath(page).slice(1),
+    editUrl: config.repository ? editUrl(config.repository, page.source) : null,
+    provider: config.repository ? gitProviders[config.repository.provider] : null,
+    oauth: options.server && config.editor.oauth !== undefined,
+    base: config.base,
+  };
+  return `<script type="application/json" id="nodeps-editor">${JSON.stringify(settings).replaceAll("<", "\\u003c")}</script>`;
+}
+
 function footer(site: Site, page?: Page) {
   const repository = site.config.repository;
-  const edit =
-    repository?.edit && page
-      ? `<a class="edit-link" href="${escape(editUrl(repository, page.source))}">${icon("square-pen")}Edit this page on ${gitProviders[repository.provider]}</a>`
-      : "";
+  let edit = "";
+  if (page && site.config.editor.enabled) {
+    edit = `<a class="edit-link" href="#edit" data-edit-page>${icon("square-pen")}Edit this page</a>`;
+  } else if (page && repository?.edit) {
+    edit = `<a class="edit-link" href="${escape(editUrl(repository, page.source))}">${icon("square-pen")}Edit this page on ${gitProviders[repository.provider]}</a>`;
+  }
   const text = site.config.footer ? `<p>${escape(site.config.footer)}</p>` : "";
   return edit ? `<div class="page-meta">${edit}</div>${text}` : text;
 }
@@ -186,6 +203,7 @@ function renderDocument(site: Site, options: RenderOptions, parts: DocumentParts
     themeStyle(config.theme),
     site.customStylesheet ? `<link rel="stylesheet" href="${escape(site.customStylesheet)}">` : "",
     options.dev ? liveReload(config.base) : "",
+    page && !parts.home && config.editor.enabled ? editorSettings(site, page, options) : "",
   ].join("");
 
   const pagerHtml = page ? pager(site, page) : "";
@@ -222,6 +240,7 @@ function renderDocument(site: Site, options: RenderOptions, parts: DocumentParts
     toc: (tocHtml !== "" || tagsHtml !== "") && !parts.home,
     headings: tocHtml !== "",
     tags: tagsHtml !== "",
+    editor: config.editor.enabled,
     tabs: tabsHtml !== "",
   };
 

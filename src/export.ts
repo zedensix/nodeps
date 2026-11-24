@@ -1,6 +1,7 @@
 import { rm } from "node:fs/promises";
 import { join } from "node:path";
 import type { Config } from "./config.ts";
+import { editorSourcePath } from "./editor.ts";
 import { createHandler } from "./server.ts";
 import { loadSite } from "./site.ts";
 
@@ -19,6 +20,7 @@ export async function exportSite(config: Config) {
     "/llms.txt",
     "/llms-full.txt",
     "/search.json",
+    ...(config.editor.enabled ? site.pages.map(editorSourcePath) : []),
   ];
 
   await rm(config.output, { recursive: true, force: true });

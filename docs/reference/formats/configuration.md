@@ -106,6 +106,24 @@ An action `url` ending in `.md` is resolved to that page.
 | `dropdowns` | `true`  | Folders render as collapsible branches, or as categories when `false` |
 | `bylines`   | `true`  | Show each page's byline under its title in the sidebar                |
 
+## editor
+
+```yaml
+editor:
+  enabled: true
+  oauth:
+    client_id: Ov23liExampleClientId
+    scope: public_repo
+```
+
+| Key               | Default       | Description                                                         |
+| ----------------- | ------------- | ------------------------------------------------------------------- |
+| `enabled`         | `true`        | "Edit this page" opens the visual editor                            |
+| `oauth.client_id` |               | GitHub OAuth app client id; also read from `NODEPS_OAUTH_CLIENT_ID` |
+| `oauth.scope`     | `public_repo` | GitHub scope requested at sign-in; `repo` for private repositories  |
+
+The client secret is only read from the `NODEPS_OAUTH_CLIENT_SECRET` environment variable; putting it in `docs.yaml` fails the build. OAuth needs a GitHub `repository`, `url`, and the Bun server.
+
 ## diataxis
 
 | Key     | Default | Description                                                                          |

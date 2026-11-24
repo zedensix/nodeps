@@ -8,6 +8,7 @@ import {
   type PageSummary,
   type SearchIndex,
 } from "./search.ts";
+import type { EditorSettings } from "./editor.ts";
 
 interface PageNavigateEvent extends Event {
   canIntercept: boolean;
@@ -113,6 +114,12 @@ document.addEventListener("click", (event) => {
   const copyTextButton = target.closest<HTMLButtonElement>("[data-copy-text]");
   if (copyTextButton) {
     copyText(copyTextButton, copyTextButton.dataset.copyText!);
+  }
+
+  const editButton = target.closest<HTMLElement>("[data-edit-page]");
+  if (editButton) {
+    event.preventDefault();
+    openPageEditor();
   }
 
   const tagButton = target.closest<HTMLButtonElement>("[data-search]");
@@ -222,6 +229,40 @@ function applyPreset(name: string, style: string) {
   markCurrentPreset();
 }
 
+function editorSettings() {
+  const script = document.querySelector("script#nodeps-editor");
+  return script ? (JSON.parse(script.textContent ?? "{}") as EditorSettings) : undefined;
+}
+
+function openPageEditor() {
+  const settings = editorSettings();
+  if (settings) {
+    import("./editor.ts")
+      .then((editor) => editor.openEditor(settings))
+      .catch((error) => console.error("Editor failed to open", error));
+  }
+}
+
+function hasPendingEdit(settings: EditorSettings) {
+  try {
+    return localStorage.getItem(`nodeps-pending:${settings.source}`) !== null;
+  } catch {
+    return false;
+  }
+}
+
+function checkPendingEdit() {
+  const settings = editorSettings();
+  if (settings && hasPendingEdit(settings)) {
+    import("./editor.ts").then((editor) => editor.showPendingBanner(settings)).catch(() => {});
+  }
+}
+
+if (location.hash === "#edit") {
+  history.replaceState(history.state, "", location.pathname + location.search);
+  openPageEditor();
+}
+checkPendingEdit();
 markCurrentPreset();
 setupPromptLinks();
 setupTableOfContents();
@@ -288,6 +329,7 @@ function swapPage(next: Document) {
     'meta[property="og:description"]',
     'link[rel="canonical"]',
     'link[rel="alternate"][type="text/markdown"]',
+    "script#nodeps-editor",
   ]) {
     const current = document.head.querySelector(selector);
     const replacement = next.head.querySelector(selector);
@@ -322,6 +364,7 @@ function swapPage(next: Document) {
   setupTableOfContents();
   revealActiveTab();
   markCurrentPreset();
+  checkPendingEdit();
 }
 
 const navigation = (window as unknown as { navigation?: EventTarget }).navigation;

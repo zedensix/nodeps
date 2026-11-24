@@ -43,7 +43,7 @@ export function parseFrontmatter(source: string, file: string) {
 const fencePattern = /^([ \t>]*)(`{3,}|~{3,})(.*)$/;
 
 // md4c only keeps the first word of a fence info string, so the rest rides along base64url-encoded.
-function encodeFenceMeta(markdown: string) {
+export function encodeFenceMeta(markdown: string) {
   let openFence: string | null = null;
   return markdown
     .split("\n")

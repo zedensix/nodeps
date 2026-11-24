@@ -4,6 +4,16 @@ A documentation site generator and server built only on Bun's native APIs: no `p
 
 Markdown pages become a themeable site with search, instant navigation, a Diátaxis homepage, downloadable resources and AI skills, `llms.txt`, Markdown twins of every page and an MCP server. It runs as a Bun server behind nginx, or exports static files.
 
+## Install
+
+```sh
+npm install --global @zedensix/nodeps   # or: bunx @zedensix/nodeps
+pip install zedensix-nodeps
+mise use github:zedensix/nodeps
+```
+
+Standalone binaries for Linux (glibc and musl), macOS and Windows are attached to every [GitHub release](https://github.com/zedensix/nodeps/releases).
+
 ## Use it
 
 ```sh

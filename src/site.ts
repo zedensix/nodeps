@@ -22,6 +22,7 @@ export interface Page {
   trail: string[];
   resources: Resource[];
   markdown: string;
+  raw: string;
   html: string;
   hasTitleHeading: boolean;
   headings: Heading[];
@@ -299,7 +300,7 @@ export async function loadSite(config: Config): Promise<Site> {
 
   const files = new Map<string, Asset>();
   const folders = new Map<string, FolderSettings>();
-  const drafts: { source: string; modified: Date; data: Record<string, unknown>; body: string }[] = [];
+  const drafts: { source: string; modified: Date; raw: string; data: Record<string, unknown>; body: string }[] = [];
 
   const sourcePaths = Array.from(new Bun.Glob("**/*").scanSync({ cwd: config.source }), (path) =>
     path.split("\\").join("/"),
@@ -320,14 +321,15 @@ export async function loadSite(config: Config): Promise<Site> {
       assetPaths.add(path);
       continue;
     }
-    drafts.push({ source: path, modified: (await file.stat()).mtime, ...parseFrontmatter(await file.text(), path) });
+    const raw = await file.text();
+    drafts.push({ source: path, modified: (await file.stat()).mtime, raw, ...parseFrontmatter(raw, path) });
   }
 
   const warnings: string[] = [];
   const bySource = new Map<string, Page>();
   const committed = await lastCommitDates(config.source);
   const problems: string[] = [];
-  const pages = drafts.map(({ source, modified, data, body }) => {
+  const pages = drafts.map(({ source, modified, raw, data, body }) => {
     if (typeof data.icon !== "string" || !data.icon) {
       problems.push(`${source}: frontmatter "icon" is required (a Lucide icon name, see https://lucide.dev/icons)`);
     } else if (!isIcon(data.icon)) {
@@ -351,6 +353,7 @@ export async function loadSite(config: Config): Promise<Site> {
       order: typeof data.order === "number" ? data.order : Infinity,
       updated: frontmatterDate(data.updated) ?? committed.get(source) ?? modified,
       markdown: body,
+      raw,
       html: "",
       hasTitleHeading: false,
       trail: [],

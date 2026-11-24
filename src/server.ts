@@ -2,6 +2,7 @@ import { watch } from "node:fs";
 import { basename } from "node:path";
 import { handleMcp, llmsFull, llmsIndex, searchIndex } from "./ai.ts";
 import { loadConfig, type Config } from "./config.ts";
+import { createEditorRoutes, editorPayload } from "./editor.ts";
 import { renderNotFound, renderPage, type RenderOptions } from "./layout.ts";
 import { loadSite, type Site } from "./site.ts";
 import { embeddedTheme, themeDirectory } from "./theme.ts";
@@ -11,6 +12,7 @@ const markdown = "text/markdown;charset=utf-8";
 const plain = "text/plain;charset=utf-8";
 
 export function createHandler(getSite: () => Site, options: RenderOptions) {
+  const editorRoutes = options.server ? createEditorRoutes(getSite) : undefined;
   const rendered = new Map<string, string>();
   let renderedFor: Site | null = null;
 
@@ -55,6 +57,16 @@ export function createHandler(getSite: () => Site, options: RenderOptions) {
 
     if (options.server && path === "/mcp") {
       return handleMcp(request, site, origin);
+    }
+    if (config.editor.enabled && path.startsWith("/_editor/source/") && path.endsWith(".json")) {
+      const page = site.pages.find((candidate) => `/_editor/source/${candidate.source}.json` === path);
+      if (page) {
+        return Response.json(editorPayload(page), { headers: { "cache-control": "no-cache" } });
+      }
+    }
+    const editorResponse = await editorRoutes?.(request, path);
+    if (editorResponse) {
+      return editorResponse;
     }
     if (path === "/llms.txt") {
       return respond(llmsIndex(site, origin, options.server), plain);
