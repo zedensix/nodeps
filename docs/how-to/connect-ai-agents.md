@@ -7,6 +7,7 @@ byline: The nodeps maintainers
 resources:
   - path: skills/nodeps-writer
     title: nodeps-writer skill
+tags: [ai, mcp, llms.txt, claude]
 ---
 
 ## Add the docs to Claude Code

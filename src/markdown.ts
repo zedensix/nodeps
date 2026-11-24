@@ -136,7 +136,7 @@ export function renderCode(source: string, name: string, titleText?: string, hig
   const caption = titleText
     ? `<figcaption><span class="code-title">${Bun.escapeHTML(titleText)}</span>${label}</figcaption>`
     : "";
-  const copy = `<button class="copy-code" type="button" aria-label="Copy code">${icon("copy")}${icon("check")}</button>`;
+  const copy = `<button class="copy-code" type="button" aria-label="Copy code" data-tooltip="Copy code" data-tooltip-side="left">${icon("copy")}${icon("check")}</button>`;
   return `<figure class="code${titleText ? " has-title" : ""}" data-language="${Bun.escapeHTML(name)}">${caption}${copy}${titleText ? "" : label}<pre><code>${lines.join("\n")}</code></pre></figure>`;
 }
 

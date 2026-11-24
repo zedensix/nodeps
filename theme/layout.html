@@ -10,6 +10,10 @@
         if (theme) {
           document.documentElement.dataset.theme = theme;
         }
+        const presetStyle = localStorage.getItem("theme-preset-style");
+        if (presetStyle) {
+          document.documentElement.style.cssText = presetStyle;
+        }
       } catch {}
     </script>
     <link rel="stylesheet" href="./style.css" />
@@ -24,19 +28,37 @@
           class="icon-button menu-toggle"
           type="button"
           aria-label="Toggle navigation"
+          data-tooltip="Toggle navigation"
           aria-controls="sidebar"
           aria-expanded="false"
         >
           <i data-icon="menu"></i>
         </button>
         <a class="brand" data-slot="brand" href="/"></a>
-        <button class="search-trigger" type="button" aria-label="Search documentation">
+        <button class="search-trigger" type="button" aria-label="Search documentation" data-tooltip="Search">
           <i data-icon="search"></i>
           <span>Search</span>
           <kbd>⌘K</kbd>
         </button>
         <nav class="header-links" aria-label="External links" data-slot="links"></nav>
-        <button class="icon-button theme-toggle" type="button" aria-label="Color theme: device">
+        <details class="theme-picker">
+          <summary
+            class="icon-button"
+            aria-label="Choose a theme"
+            data-tooltip="Choose a theme"
+            data-tooltip-align="end"
+          >
+            <i data-icon="palette"></i>
+          </summary>
+          <div class="menu theme-menu" role="menu" data-slot="theme-picker"></div>
+        </details>
+        <button
+          class="icon-button theme-toggle"
+          type="button"
+          aria-label="Color mode: device"
+          data-tooltip="Color mode: device"
+          data-tooltip-align="end"
+        >
           <i data-icon="monitor"></i>
           <i data-icon="sun"></i>
           <i data-icon="moon"></i>
@@ -60,7 +82,9 @@
               <span>Copy page</span>
             </button>
             <details class="actions-menu">
-              <summary aria-label="More page actions"><i data-icon="chevron-down"></i></summary>
+              <summary aria-label="More page actions" data-tooltip="More page actions" data-tooltip-align="end">
+                <i data-icon="chevron-down"></i>
+              </summary>
               <div class="menu">
                 <a class="menu-item" data-action="markdown" href="#">
                   <i data-icon="file-text"></i>
@@ -104,10 +128,14 @@
       </main>
 
       <aside class="toc" data-if="toc">
-        <nav aria-label="On this page">
+        <nav aria-label="On this page" data-if="headings">
           <p class="toc-title">On this page</p>
           <ul data-slot="toc"></ul>
         </nav>
+        <section class="toc-tags" aria-label="Tags" data-if="tags">
+          <p class="toc-title">Tags</p>
+          <ul data-slot="tags"></ul>
+        </section>
       </aside>
     </div>
 
@@ -125,8 +153,16 @@
         />
         <kbd>Esc</kbd>
       </div>
-      <ul class="search-results" role="listbox"></ul>
-      <p class="search-status"></p>
+      <div class="search-layout">
+        <aside class="search-tags" aria-label="Tags">
+          <p class="search-tags-title">Tags</p>
+          <ul class="search-tag-list"></ul>
+        </aside>
+        <div class="search-main">
+          <ul class="search-results" role="listbox"></ul>
+          <p class="search-status"></p>
+        </div>
+      </div>
     </dialog>
   </body>
 </html>

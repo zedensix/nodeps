@@ -1,4 +1,13 @@
-import { searchEntries, snippet, type SearchEntry } from "./search.ts";
+import {
+  pagesWithTags,
+  parseQuery,
+  relatedPages,
+  searchEntries,
+  snippet,
+  tagCounts,
+  type PageSummary,
+  type SearchIndex,
+} from "./search.ts";
 
 interface PageNavigateEvent extends Event {
   canIntercept: boolean;
@@ -41,8 +50,8 @@ function applyTheme(theme: (typeof themes)[number]) {
   } else {
     root.dataset.theme = theme;
   }
-  themeToggle.setAttribute("aria-label", `Color theme: ${theme}`);
-  themeToggle.title = `Color theme: ${theme}`;
+  themeToggle.setAttribute("aria-label", `Color mode: ${theme}`);
+  themeToggle.dataset.tooltip = `Color mode: ${theme}`;
   try {
     if (theme === "device") {
       localStorage.removeItem("theme");
@@ -101,7 +110,24 @@ document.addEventListener("click", (event) => {
     copyText(copyMcp, `claude mcp add --transport http ${name} ${location.origin}${base}mcp`);
   }
 
-  for (const menu of document.querySelectorAll<HTMLDetailsElement>("details.actions-menu[open]")) {
+  const copyTextButton = target.closest<HTMLButtonElement>("[data-copy-text]");
+  if (copyTextButton) {
+    copyText(copyTextButton, copyTextButton.dataset.copyText!);
+  }
+
+  const tagButton = target.closest<HTMLButtonElement>("[data-search]");
+  if (tagButton) {
+    openSearch(tagButton.dataset.search);
+  }
+
+  const presetButton = target.closest<HTMLElement>("[data-preset]");
+  if (presetButton) {
+    applyPreset(presetButton.dataset.preset!, presetButton.dataset.style ?? "");
+  }
+
+  for (const menu of document.querySelectorAll<HTMLDetailsElement>(
+    "details.actions-menu[open], details.theme-picker[open]",
+  )) {
     if (!menu.contains(target) || target.closest(".menu-item")) {
       menu.open = false;
     }
@@ -157,6 +183,46 @@ function revealActiveTab() {
   document.querySelector(".category-tabs a[aria-current]")?.scrollIntoView({ block: "nearest", inline: "nearest" });
 }
 
+function storedPreset() {
+  try {
+    return localStorage.getItem("theme-preset");
+  } catch {
+    return null;
+  }
+}
+
+function markCurrentPreset() {
+  const current = storedPreset();
+  for (const option of document.querySelectorAll<HTMLElement>("[data-preset]")) {
+    const selected = current ? option.dataset.preset === current : option.dataset.style === "";
+    option.setAttribute("aria-checked", String(selected));
+  }
+}
+
+function applyPreset(name: string, style: string) {
+  const update = () => {
+    root.style.cssText = style;
+  };
+  if (document.startViewTransition && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    document.startViewTransition(update);
+  } else {
+    update();
+  }
+  try {
+    if (style) {
+      localStorage.setItem("theme-preset", name);
+      localStorage.setItem("theme-preset-style", style);
+    } else {
+      localStorage.removeItem("theme-preset");
+      localStorage.removeItem("theme-preset-style");
+    }
+  } catch {
+    // Storage can be blocked by the browser: the theme still applies to this page.
+  }
+  markCurrentPreset();
+}
+
+markCurrentPreset();
 setupPromptLinks();
 setupTableOfContents();
 revealActiveTab();
@@ -255,6 +321,7 @@ function swapPage(next: Document) {
   setupPromptLinks();
   setupTableOfContents();
   revealActiveTab();
+  markCurrentPreset();
 }
 
 const navigation = (window as unknown as { navigation?: EventTarget }).navigation;
@@ -296,7 +363,8 @@ const dialog = document.querySelector<HTMLDialogElement>(".search-dialog")!;
 const input = dialog.querySelector("input")!;
 const results = dialog.querySelector<HTMLUListElement>(".search-results")!;
 const status = dialog.querySelector<HTMLParagraphElement>(".search-status")!;
-let index: Promise<SearchEntry[]> | null = null;
+const tagList = dialog.querySelector<HTMLUListElement>(".search-tag-list")!;
+let index: Promise<SearchIndex> | null = null;
 let selected = 0;
 
 const escapeHtml = (text: string) => text.replace(/[&<>"']/g, (character) => `&#${character.charCodeAt(0)};`);
@@ -314,7 +382,7 @@ function markTerms(text: string, query: string) {
 }
 
 function select(position: number) {
-  const items = results.querySelectorAll("li");
+  const items = results.querySelectorAll('li[role="option"]');
   if (items.length === 0) {
     return;
   }
@@ -323,39 +391,105 @@ function select(position: number) {
   items[selected]!.scrollIntoView({ block: "nearest" });
 }
 
+function currentPageTags() {
+  return [...document.querySelectorAll<HTMLElement>(".toc-tags [data-search]")].map((tag) =>
+    tag.dataset.search!.slice(1),
+  );
+}
+
+function renderTags(data: SearchIndex, activeTags: string[]) {
+  const pageTags = currentPageTags();
+  const counts = tagCounts(data.pages).sort(
+    ([left], [right]) => Number(pageTags.includes(right)) - Number(pageTags.includes(left)),
+  );
+  tagList.innerHTML = counts
+    .map(([tag, count]) => {
+      const classes = ["search-tag", pageTags.includes(tag) ? "on-page" : "", activeTags.includes(tag) ? "active" : ""]
+        .join(" ")
+        .trim();
+      return `<li><button type="button" class="${classes}" data-tag-filter="${escapeHtml(tag)}"><span>#${escapeHtml(tag)}</span><small>${count}</small></button></li>`;
+    })
+    .join("");
+}
+
+function renderPages(pages: PageSummary[], heading: string) {
+  if (pages.length === 0) {
+    return "";
+  }
+  const items = pages
+    .map(
+      (page) => `<li role="option"><a href="${escapeHtml(page.url)}">
+<span class="search-result-title">${page.section ? `<span>${escapeHtml(page.section)}</span> › ` : ""}${escapeHtml(page.title)}</span>
+${page.description ? `<span class="search-result-text">${escapeHtml(page.description)}</span>` : ""}
+${page.tags.length > 0 ? `<span class="search-result-tags">${page.tags.map((tag) => `<span>#${escapeHtml(tag)}</span>`).join("")}</span>` : ""}</a></li>`,
+    )
+    .join("");
+  return `<li class="search-group" role="presentation">${escapeHtml(heading)}</li>${items}`;
+}
+
 async function runSearch() {
   const query = input.value.trim();
-  if (!query) {
-    results.innerHTML = "";
-    status.textContent = "Type to search the documentation.";
-    return;
-  }
   index ??= fetch(`${base}search.json`).then((response) => response.json());
-  const matches = searchEntries(await index, query, 20);
+  const data = await index;
   if (input.value.trim() !== query) {
     return;
   }
+  const { tags, text } = parseQuery(query);
+  renderTags(data, tags);
+
+  if (!text) {
+    const pages = tags.length > 0 ? pagesWithTags(data.pages, tags) : relatedPages(data.pages, location.pathname);
+    const heading = tags.length > 0 ? `Tagged ${tags.map((tag) => `#${tag}`).join(" ")}` : "Related to this page";
+    results.innerHTML = renderPages(pages, heading);
+    status.textContent =
+      pages.length > 0
+        ? ""
+        : tags.length > 0
+          ? "No page has these tags."
+          : "Type to search the documentation, or pick a tag.";
+    select(0);
+    return;
+  }
+
+  const allowed = tags.length > 0 ? new Set(pagesWithTags(data.pages, tags).map((page) => page.url)) : null;
+  const sections = allowed ? data.sections.filter((entry) => allowed.has(entry.url.split("#")[0]!)) : data.sections;
+  const matches = searchEntries(sections, text, 20);
   status.textContent = matches.length === 0 ? `No results for “${query}”.` : "";
   results.innerHTML = matches
     .map(
       (entry) => `<li role="option"><a href="${escapeHtml(entry.url)}">
-<span class="search-result-title">${entry.heading ? `<span>${escapeHtml(entry.title)}</span> › ` : ""}${markTerms(entry.heading || entry.title, query)}</span>
-<span class="search-result-text">${markTerms(snippet(entry.text, query), query)}</span></a></li>`,
+<span class="search-result-title">${entry.heading ? `<span>${escapeHtml(entry.title)}</span> › ` : ""}${markTerms(entry.heading || entry.title, text)}</span>
+<span class="search-result-text">${markTerms(snippet(entry.text, text), text)}</span></a></li>`,
     )
     .join("");
   select(0);
 }
 
-function openSearch() {
+tagList.addEventListener("click", (event) => {
+  const button = (event.target as HTMLElement).closest<HTMLButtonElement>("[data-tag-filter]");
+  if (!button) {
+    return;
+  }
+  const tag = button.dataset.tagFilter!;
+  const { tags, text } = parseQuery(input.value);
+  input.value = tags.includes(tag) ? text : [`#${tag}`, text].filter(Boolean).join(" ");
+  input.focus();
+  runSearch();
+});
+
+function openSearch(query?: string) {
   if (dialog.open) {
     return;
+  }
+  if (query !== undefined) {
+    input.value = query;
   }
   dialog.showModal();
   input.select();
   runSearch();
 }
 
-document.querySelector(".search-trigger")?.addEventListener("click", openSearch);
+document.querySelector(".search-trigger")?.addEventListener("click", () => openSearch());
 input.addEventListener("input", runSearch);
 dialog.addEventListener("click", (event) => {
   if (event.target === dialog || (event.target as HTMLElement).closest("a")) {
@@ -367,7 +501,7 @@ input.addEventListener("keydown", (event) => {
     event.preventDefault();
     select(selected + (event.key === "ArrowDown" ? 1 : -1));
   } else if (event.key === "Enter") {
-    const link = results.querySelectorAll("a")[selected];
+    const link = results.querySelectorAll('li[role="option"] a')[selected];
     if (link) {
       event.preventDefault();
       dialog.close();

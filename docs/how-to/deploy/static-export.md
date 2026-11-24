@@ -4,6 +4,7 @@ description: Export the site and serve the files from any web server.
 order: 3
 icon: files
 byline: The nodeps maintainers
+tags: [deploy, static]
 ---
 
 ```sh

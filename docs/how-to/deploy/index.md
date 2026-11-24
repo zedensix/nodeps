@@ -4,6 +4,7 @@ description: Pick how to put the docs online.
 order: 5
 icon: cloud-upload
 byline: The nodeps maintainers
+tags: [deploy, hosting]
 ---
 
 | You want                               | Use                                   |

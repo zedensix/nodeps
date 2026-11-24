@@ -8,6 +8,7 @@ resources:
   - path: files/docs.yaml
     title: Complete docs.yaml
     description: Every option set, ready to copy.
+tags: [config, yaml]
 ---
 
 The site is configured in one YAML file, `docs.yaml` by default. Every key is optional. Paths are relative to the file.
@@ -105,12 +106,21 @@ An action `url` ending in `.md` is resolved to that page.
 | `dropdowns` | `true`  | Folders render as collapsible branches, or as categories when `false` |
 | `bylines`   | `true`  | Show each page's byline under its title in the sidebar                |
 
+## diataxis
+
+| Key     | Default | Description                                                                          |
+| ------- | ------- | ------------------------------------------------------------------------------------ |
+| `badge` | `true`  | Show a pill next to each page title naming its Diátaxis kind, linking to diataxis.fr |
+
+The pill only appears in sections whose `_folder.yaml` sets `diataxis`.
+
 ## theme
 
-| Key          | Description                                                  |
-| ------------ | ------------------------------------------------------------ |
-| `accent`     | Brand color, any CSS color                                   |
-| `stylesheet` | Extra CSS file, loaded after the theme                       |
-| `light`      | Token values for light mode                                  |
-| `dark`       | Token values for dark mode                                   |
-| any token    | Sets that [design token](../design-tokens.md) for both modes |
+| Key          | Description                                                                                       |
+| ------------ | ------------------------------------------------------------------------------------------------- |
+| `preset`     | Built-in preset to start from, see the [theme gallery](../../themes/index.md). Default: `default` |
+| `accent`     | Brand color, any CSS color                                                                        |
+| `stylesheet` | Extra CSS file, loaded after the theme                                                            |
+| `light`      | Token values for light mode                                                                       |
+| `dark`       | Token values for dark mode                                                                        |
+| any token    | Sets that [design token](../design-tokens.md) for both modes                                      |

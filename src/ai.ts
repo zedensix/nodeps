@@ -1,5 +1,5 @@
 import type { NavItem, Page, Site } from "./site.ts";
-import { searchEntries, snippet, type SearchEntry } from "../theme/search.ts";
+import { searchEntries, snippet, type SearchIndex } from "../theme/search.ts";
 
 export function pageHref(site: Site, page: Page) {
   return site.config.base + page.url.slice(1);
@@ -9,15 +9,25 @@ export function markdownHref(site: Site, page: Page) {
   return site.config.base + page.markdownUrl.slice(1);
 }
 
-export function searchIndex(site: Site): SearchEntry[] {
-  return site.pages.flatMap((page) =>
-    page.sections.map((section) => ({
+export function searchIndex(site: Site): SearchIndex {
+  return {
+    pages: site.navPages.map((page) => ({
       title: page.title,
-      heading: section.heading,
-      url: pageHref(site, page) + (section.id ? `#${section.id}` : ""),
-      text: section.text,
+      url: pageHref(site, page),
+      description: page.description,
+      section: page.category?.title ?? "",
+      tags: page.tags,
     })),
-  );
+    sections: site.navPages.flatMap((page) =>
+      page.sections.map((section, index) => ({
+        title: page.title,
+        heading: section.heading,
+        url: pageHref(site, page) + (section.id ? `#${section.id}` : ""),
+        text: section.text,
+        tags: index === 0 ? page.tags : [],
+      })),
+    ),
+  };
 }
 
 export function llmsIndex(site: Site, origin: string, mcp: boolean) {
@@ -119,7 +129,7 @@ function callTool(site: Site, name: string, input: Record<string, unknown>, orig
   if (name === "search_docs") {
     const query = String(input.query ?? "");
     const limit = Math.min(Math.max(Number(input.limit) || 10, 1), 50);
-    const results = searchEntries(searchIndex(site), query, limit);
+    const results = searchEntries(searchIndex(site).sections, query, limit);
     if (results.length === 0) {
       return `No results for "${query}".`;
     }
@@ -139,7 +149,10 @@ function callTool(site: Site, name: string, input: Record<string, unknown>, orig
   }
   if (name === "list_pages") {
     return site.navPages
-      .map((page) => `- ${page.title}: ${pageHref(site, page)}${page.description ? ` (${page.description})` : ""}`)
+      .map(
+        (page) =>
+          `- ${page.title}: ${pageHref(site, page)}${page.description ? ` (${page.description})` : ""}${page.tags.length > 0 ? ` [${page.tags.join(", ")}]` : ""}`,
+      )
       .join("\n");
   }
   throw new Error(`Unknown tool: ${name}`);

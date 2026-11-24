@@ -12,18 +12,19 @@ Tokens are CSS custom properties. Set one for both modes under `theme`, or per m
 
 Each color has a light and a dark value, combined with `light-dark()`.
 
-| Token             | Used for                           |
-| ----------------- | ---------------------------------- |
-| `background`      | Page                               |
-| `surface`         | Panels, inline code, table headers |
-| `surface-strong`  | Hovered items                      |
-| `border`          | Lines and outlines                 |
-| `text`            | Body text                          |
-| `text-muted`      | Secondary text                     |
-| `text-subtle`     | Hints, labels, dates               |
-| `accent`          | Links, active items, buttons       |
-| `code-background` | Code blocks                        |
-| `shadow`          | Menus, dialogs, cards              |
+| Token             | Used for                             |
+| ----------------- | ------------------------------------ |
+| `background`      | Page                                 |
+| `surface`         | Panels, inline code, table headers   |
+| `surface-strong`  | Hovered items                        |
+| `border`          | Lines and outlines                   |
+| `text`            | Body text                            |
+| `text-muted`      | Secondary text                       |
+| `text-subtle`     | Hints, labels, dates                 |
+| `accent`          | Links, active items, buttons         |
+| `accent-contrast` | Text and icons on accent backgrounds |
+| `code-background` | Code blocks                          |
+| `shadow`          | Menus, dialogs, cards                |
 
 ## Syntax highlighting
 

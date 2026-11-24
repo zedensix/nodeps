@@ -1,4 +1,5 @@
 import { basename, dirname, isAbsolute, relative, resolve } from "node:path";
+import { findPreset, presets } from "./presets.ts";
 
 export interface Link {
   label: string;
@@ -13,6 +14,7 @@ export interface Home {
 }
 
 export interface Theme {
+  preset: string;
   accent: string;
   tokens: Record<string, string>;
   light: Record<string, string>;
@@ -70,6 +72,7 @@ export interface Config {
   links: Link[];
   home?: Home;
   sidebar: { dropdowns: boolean; bylines: boolean };
+  diataxis: { badge: boolean };
   theme: Theme;
 }
 
@@ -88,6 +91,14 @@ function readString(mapping: Mapping, key: string, path = key): string | undefin
   }
   if (typeof value !== "string") {
     fail(path, "a string");
+  }
+  return value;
+}
+
+function readBoolean(mapping: Mapping, key: string, path: string, fallback: boolean): boolean {
+  const value = mapping[key] ?? fallback;
+  if (typeof value !== "boolean") {
+    fail(path, "true or false");
   }
   return value;
 }
@@ -228,12 +239,20 @@ function parseConfig(file: string, data: Mapping): Config {
   }
 
   const themeMapping = readMapping(data, "theme") ?? {};
-  const accent = readString(themeMapping, "accent", "theme.accent") ?? "#6d5efc";
-  if (!Bun.color(accent, "css")) {
+  const presetName = readString(themeMapping, "preset", "theme.preset") ?? "default";
+  const preset = findPreset(presetName);
+  if (!preset) {
+    fail("theme.preset", `one of ${presets.map((candidate) => candidate.name).join(", ")}`);
+  }
+  const userAccent = readString(themeMapping, "accent", "theme.accent");
+  if (userAccent && !Bun.color(userAccent, "css")) {
     fail("theme.accent", "a CSS color");
   }
   const stylesheet = readString(themeMapping, "stylesheet", "theme.stylesheet");
-  const { light, dark, accent: _accent, stylesheet: _stylesheet, ...tokens } = themeMapping;
+  const { light, dark, accent: _accent, stylesheet: _stylesheet, preset: _preset, ...tokens } = themeMapping;
+  const userDark = readTokens(readMapping(themeMapping, "dark", "theme.dark") ?? {}, "theme.dark");
+  const derivedDarkAccent =
+    userAccent && !userDark.accent ? { accent: "color-mix(in oklab, var(--brand) 72%, white)" } : {};
 
   return {
     file,
@@ -250,11 +269,13 @@ function parseConfig(file: string, data: Mapping): Config {
     links: readLinks(data, "links"),
     home,
     sidebar: { dropdowns, bylines },
+    diataxis: { badge: readBoolean(readMapping(data, "diataxis") ?? {}, "badge", "diataxis.badge", true) },
     theme: {
-      accent,
-      tokens: readTokens(tokens, "theme"),
-      light: readTokens(readMapping(themeMapping, "light", "theme.light") ?? {}, "theme.light"),
-      dark: readTokens(readMapping(themeMapping, "dark", "theme.dark") ?? {}, "theme.dark"),
+      preset: preset.name,
+      accent: userAccent ?? preset.accent,
+      tokens: { ...preset.tokens, ...readTokens(tokens, "theme") },
+      light: { ...preset.light, ...readTokens(readMapping(themeMapping, "light", "theme.light") ?? {}, "theme.light") },
+      dark: { ...preset.dark, ...derivedDarkAccent, ...userDark },
       stylesheet: stylesheet ? resolve(root, stylesheet) : undefined,
     },
   };

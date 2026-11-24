@@ -4,6 +4,7 @@ description: From an empty folder to a running documentation site with a homepag
 order: 1
 icon: rocket
 byline: The nodeps maintainers
+tags: [getting started]
 ---
 
 In this tutorial you will create a small documentation site for an imaginary project called Acme, run it locally and see your changes appear live. It takes about ten minutes.

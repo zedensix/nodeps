@@ -4,7 +4,17 @@ description: Change colors, fonts and sizes, separately for light and dark mode.
 order: 1
 icon: palette
 byline: The nodeps maintainers
+tags: [theme, colors, fonts, dark mode]
 ---
+
+## Start from a preset
+
+```yaml title="docs.yaml"
+theme:
+  preset: forest
+```
+
+Browse every preset in light and dark in the [theme gallery](../themes/index.md). Readers can also switch presets for themselves with the palette button in the header; their choice stays on their device.
 
 ## Change the brand color
 

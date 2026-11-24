@@ -7,6 +7,7 @@ byline: The nodeps maintainers
 resources:
   - path: files/nginx.conf
     description: Reverse proxy to the Bun server with compression.
+tags: [deploy, nginx, binary]
 ---
 
 Compile the standalone binary once, copy it to the server, and run it from the folder holding `docs.yaml`:

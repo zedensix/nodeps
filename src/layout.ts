@@ -1,5 +1,6 @@
 import { markdownHref, pageHref } from "./ai.ts";
 import { editUrl, gitProviders, type Theme } from "./config.ts";
+import { presets, themeDeclarations } from "./presets.ts";
 import { icon } from "./icons.ts";
 import { renderCode } from "./markdown.ts";
 import { formatSize, resourceIcon } from "./resources.ts";
@@ -13,17 +14,37 @@ export interface RenderOptions {
 const escape = Bun.escapeHTML;
 
 function themeStyle(theme: Theme) {
-  const declarations = [`--brand:${theme.accent}`];
-  for (const [name, value] of Object.entries(theme.tokens)) {
-    declarations.push(`--${name}:${value}`);
-  }
-  for (const [name, value] of Object.entries(theme.light)) {
-    declarations.push(`--light-${name}:${value}`);
-  }
-  for (const [name, value] of Object.entries(theme.dark)) {
-    declarations.push(`--dark-${name}:${value}`);
-  }
-  return `<style>:root{${declarations.join(";")}}</style>`;
+  return `<style>:root{${themeDeclarations(theme)}}</style>`;
+}
+
+const galleryPlaceholder = /<div data-nodeps="theme-gallery"><\/div>/g;
+
+function themeGallery(site: Site) {
+  const sample = (mode: "light" | "dark") =>
+    `<div class="sample sample-${mode}" aria-hidden="true"><div class="sample-bar"><span class="sample-dot"></span><span class="sample-line"></span></div><div class="sample-body"><div class="sample-side"><span></span><span class="active"></span><span></span></div><div class="sample-main"><span class="sample-title"></span><span class="sample-line"></span><span class="sample-line short"></span><span class="sample-code"></span><span class="sample-button"></span></div></div></div>`;
+  const cards = presets.map((preset) => {
+    const declarations = themeDeclarations(preset);
+    const isSiteDefault = preset.name === site.config.theme.preset;
+    const config = `theme:\n  preset: ${preset.name}`;
+    return `<article class="theme-card" data-theme-scope style="${escape(declarations)}">
+<div class="theme-samples">${sample("light")}${sample("dark")}</div>
+<div class="theme-card-body"><strong>${escape(preset.title)}</strong>${isSiteDefault ? `<span class="theme-card-badge">Site default</span>` : ""}<p>${escape(preset.description)}</p>
+<div class="theme-card-actions"><button type="button" class="pill-button primary" data-preset="${preset.name}" data-style="${isSiteDefault ? "" : escape(declarations)}">${icon("paintbrush")}Apply</button><button type="button" class="pill-button" data-copy-text="${escape(config)}">${icon("copy")}${icon("check")}Copy config</button></div></div>
+</article>`;
+  });
+  return `<div class="theme-gallery">${cards.join("")}</div>`;
+}
+
+function themePicker(site: Site) {
+  const items = presets
+    .map((preset) => {
+      const isSiteDefault = preset.name === site.config.theme.preset;
+      const label = isSiteDefault ? `${escape(preset.title)} <small>site default</small>` : escape(preset.title);
+      const style = isSiteDefault ? "" : themeDeclarations(preset);
+      return `<button type="button" class="menu-item theme-option" data-preset="${preset.name}" data-style="${escape(style)}" role="menuitemradio"><span class="swatch" style="${escape(themeDeclarations(preset))}" data-theme-scope></span><span><strong>${label}</strong><small>${escape(preset.description)}</small></span>${icon("check")}</button>`;
+    })
+    .join("");
+  return items;
 }
 
 const liveReload = (base: string) =>
@@ -81,7 +102,8 @@ function sidebarItems(site: Site, items: NavItem[], current?: Page): string {
 
 function sidebar(site: Site, current?: Page) {
   const category = currentCategory(site, current);
-  return category ? `<ul class="tree">${sidebarItems(site, category.items, current)}</ul>` : "";
+  const kind = category?.diataxis ? ` data-diataxis="${category.diataxis}"` : "";
+  return category ? `<ul class="tree"${kind}>${sidebarItems(site, category.items, current)}</ul>` : "";
 }
 
 function categoryTabs(site: Site, current?: Page) {
@@ -169,6 +191,9 @@ function renderDocument(site: Site, options: RenderOptions, parts: DocumentParts
   const pagerHtml = page ? pager(site, page) : "";
   const footerHtml = footer(site, page);
   const tocHtml = page ? tableOfContents(page) : "";
+  const tagsHtml = (page?.tags ?? [])
+    .map((tag) => `<li><button type="button" class="tag" data-search="#${escape(tag)}">#${escape(tag)}</button></li>`)
+    .join("");
   const tabsHtml = categoryTabs(site, page);
   const slots: Record<string, string> = {
     title: escape(fullTitle),
@@ -179,12 +204,14 @@ function renderDocument(site: Site, options: RenderOptions, parts: DocumentParts
         ? `<a class="repository-link" href="${escape(config.repository.url)}" title="Source on ${gitProviders[config.repository.provider]}">${icon(config.repository.provider)}<span>${escape(config.repository.label)}</span></a>`
         : ""),
     sidebar: sidebar(site, page),
+    "theme-picker": themePicker(site),
     tabs: tabsHtml,
     breadcrumb: escape([page?.category?.title, ...(page?.trail ?? [])].filter(Boolean).join(" › ")),
     article: parts.article,
     pager: pagerHtml,
     footer: footerHtml,
     toc: tocHtml,
+    tags: tagsHtml,
   };
   const flags: Record<string, boolean> = {
     page: page !== undefined && !parts.home,
@@ -192,7 +219,9 @@ function renderDocument(site: Site, options: RenderOptions, parts: DocumentParts
     mcp: options.server,
     pager: pagerHtml !== "" && !parts.home,
     footer: footerHtml !== "",
-    toc: tocHtml !== "" && !parts.home,
+    toc: (tocHtml !== "" || tagsHtml !== "") && !parts.home,
+    headings: tocHtml !== "",
+    tags: tagsHtml !== "",
     tabs: tabsHtml !== "",
   };
 
@@ -243,6 +272,22 @@ function renderDocument(site: Site, options: RenderOptions, parts: DocumentParts
       },
     })
     .transform(site.template);
+}
+
+const diataxisPages: Record<DiataxisKind, { label: string; url: string; icon: string }> = {
+  tutorials: { label: "Tutorial", url: "https://diataxis.fr/tutorials/", icon: "graduation-cap" },
+  "how-to": { label: "How-to guide", url: "https://diataxis.fr/how-to-guides/", icon: "wrench" },
+  reference: { label: "Reference", url: "https://diataxis.fr/reference/", icon: "library" },
+  explanation: { label: "Explanation", url: "https://diataxis.fr/explanation/", icon: "lightbulb" },
+};
+
+function diataxisBadge(site: Site, page: Page) {
+  const kind = page.category?.diataxis;
+  if (!kind || !site.config.diataxis.badge) {
+    return "";
+  }
+  const { label, url, icon: kindIcon } = diataxisPages[kind];
+  return `<a class="diataxis-badge" data-diataxis="${kind}" href="${url}" target="_blank" rel="noopener" data-tooltip="What makes a ${label.toLowerCase()}, on diataxis.fr">${icon(kindIcon)}${label}</a>`;
 }
 
 const diataxisLabels: Record<DiataxisKind, string> = {
@@ -354,6 +399,16 @@ ${resource.description ? `<p class="resource-description">${escape(resource.desc
   return `<section class="resources"><h2 id="resources"><a class="anchor" href="#resources" aria-hidden="true" tabindex="-1">#</a>Resources</h2><div class="resource-grid">${cards.join("")}</div></section>`;
 }
 
+function withTitleBadge(html: string, badge: string) {
+  if (!badge) {
+    return html;
+  }
+  return html.replace(
+    /<h1(?:\s[^>]*)?>[\s\S]*?<\/h1>/,
+    (heading) => `<div class="page-title">${heading}${badge}</div>`,
+  );
+}
+
 export function renderPage(site: Site, page: Page, options: RenderOptions) {
   if (site.config.home && page.url === "/") {
     return renderHome(site, page, options);
@@ -365,7 +420,11 @@ export function renderPage(site: Site, page: Page, options: RenderOptions) {
     title: page.title,
     description: page.description || site.config.description,
     page,
-    article: title + description + byline + page.html + resourcesSection(site, page),
+    article:
+      withTitleBadge(title + description + byline + page.html, diataxisBadge(site, page)).replace(
+        galleryPlaceholder,
+        () => themeGallery(site),
+      ) + resourcesSection(site, page),
   });
 }
 

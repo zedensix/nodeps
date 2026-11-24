@@ -15,6 +15,7 @@ export interface Page {
   description: string;
   icon: string;
   byline: string;
+  tags: string[];
   order: number;
   updated: Date;
   category?: Category;
@@ -106,6 +107,18 @@ const folderFile = "_folder.yaml";
 
 export function resourceUrl(config: Config, path: string) {
   return config.base + path.split("/").map(encodeURIComponent).join("/");
+}
+
+function readTags(value: unknown, source: string, problems: string[]) {
+  if (value === undefined || value === null) {
+    return [];
+  }
+  const tags = typeof value === "string" ? value.split(",") : value;
+  if (!Array.isArray(tags) || tags.some((tag) => typeof tag !== "string" && typeof tag !== "number")) {
+    problems.push(`${source}: frontmatter "tags" must be a list of words`);
+    return [];
+  }
+  return [...new Set(tags.map((tag) => String(tag).trim().toLowerCase()).filter(Boolean))];
 }
 
 function frontmatterDate(value: unknown) {
@@ -334,6 +347,7 @@ export async function loadSite(config: Config): Promise<Site> {
       description: typeof data.description === "string" ? data.description : "",
       icon: String(data.icon ?? ""),
       byline: String(data.byline ?? "").trim(),
+      tags: readTags(data.tags, source, problems),
       order: typeof data.order === "number" ? data.order : Infinity,
       updated: frontmatterDate(data.updated) ?? committed.get(source) ?? modified,
       markdown: body,
@@ -424,6 +438,9 @@ export async function loadSite(config: Config): Promise<Site> {
         return `- ${link} (${resource.kind}${archive})${resource.description ? `: ${resource.description}` : ""}`;
       });
       page.markdown = `${page.markdown.trimEnd()}\n\n## Resources\n\n${list.join("\n")}\n`;
+    }
+    if (page.tags.length > 0) {
+      page.markdown = `${page.markdown.trimEnd()}\n\nTags: ${page.tags.join(", ")}\n`;
     }
   }
 

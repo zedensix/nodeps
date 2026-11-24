@@ -64,6 +64,16 @@ sidebar:
   bylines: false
 ```
 
+## Tag pages
+
+```yaml title="docs/how-to/deploy/docker.md"
+---
+tags: [deploy, docker]
+---
+```
+
+Tags appear under the table of contents. In search, the tag list sits on the left, and `#docker` lists every page with that tag; `#deploy nginx` searches "nginx" inside pages tagged `deploy`. With an empty query, search suggests the pages sharing the most tags with the current one.
+
 ## Order pages
 
 Set `order` in a page's frontmatter. Lower comes first, an `index.md` always leads its folder, and pages without an order sort by title.
@@ -79,4 +89,4 @@ diataxis: tutorials
 description: Lessons that take you by the hand.
 ```
 
-With `home` set in `docs.yaml`, the homepage lays out the four kinds as a compass and lists the latest pages of each.
+With `home` set in `docs.yaml`, the homepage lays out the four kinds as a compass and lists the latest pages of each. Each page also gets a pill next to its title naming its kind; turn it off with `diataxis.badge: false`.

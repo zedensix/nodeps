@@ -65,6 +65,7 @@ description: Lessons that take you by the hand.
 title: Install Acme
 icon: download
 byline: The Acme team
+tags: [install, cli]
 description: Shown under the title, in search engines and in llms.txt.
 order: 1
 updated: 2026-11-20
@@ -78,6 +79,7 @@ updated: 2026-11-20
 | `title`       | Default: the first `# heading`, then the file name                                           |
 | `description` | Lead paragraph and meta description                                                          |
 | `order`       | Position in the sidebar, lower first                                                         |
+| `tags`        | List of words. Shown under the table of contents, boosted in search, filterable with `#tag`  |
 | `updated`     | Last update date. Default: the last git commit touching the file, then its modification time |
 
 ## Resources

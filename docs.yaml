@@ -5,6 +5,10 @@ output: dist
 logo: logo.svg
 footer: Built with nodeps. Icons by Lucide (ISC).
 
+repository:
+  url: https://github.com/zedensix/nodeps
+  edit: true
+
 links:
   - label: llms.txt
     url: /llms.txt
