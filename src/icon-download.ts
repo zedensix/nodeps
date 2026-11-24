@@ -114,7 +114,11 @@ export async function downloadIcons(target: string, log: (message: string) => vo
 
 export async function ensureIcons(target: string, log: (message: string) => void = console.log) {
   const current = Bun.file(join(target, "VERSION"));
-  if ((await current.exists()) && (await current.text()) === stamp) {
+  const complete =
+    (await current.exists()) &&
+    (await current.text()) === stamp &&
+    (await Bun.file(join(target, "extra.json.zst")).exists());
+  if (complete) {
     return;
   }
   log("  icons: downloading the icon sets once, this takes a few seconds");
