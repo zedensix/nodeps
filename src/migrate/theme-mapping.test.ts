@@ -6,6 +6,8 @@ import { loadConfig } from "../config/config.ts";
 import { loadSite } from "../site/site.ts";
 import { planMigration, writeMigration } from "./migrate.ts";
 
+// Loading a site downloads the icon sets on a fresh checkout, which takes longer than the default 5 s.
+const siteTimeout = 60_000;
 /**
  * Writes a throwaway MkDocs project into a temp folder and returns the path
  * of its mkdocs.yml.
@@ -20,28 +22,32 @@ async function project(files: Record<string, string>) {
 
 const home = "# Home\n\nText.\n";
 
-test("several extra_css files are imported in order through one generated stylesheet", async () => {
-  const mkdocsPath = await project({
-    "mkdocs.yml": "site_name: Styles\ndocs_dir: content-root\nextra_css:\n  - css/c.css\n  - css/a.css\n  - b.css\n",
-    "content-root/index.md": home,
-    "content-root/css/c.css": ".first { color: red; }\n",
-    "content-root/css/a.css": ".second { color: green; }\n",
-    "content-root/b.css": ".third { color: blue; }\n",
-  });
-  const report = await planMigration(mkdocsPath);
-  expect(report.config.theme).toEqual({ stylesheet: "extra.css" });
-  expect(report.files).toEqual([
-    {
-      path: "extra.css",
-      content:
-        '@import "./content-root/css/c.css";\n@import "./content-root/css/a.css";\n@import "./content-root/b.css";\n',
-    },
-  ]);
-  const site = await loadSite(await loadConfig(await writeMigration(mkdocsPath, report)));
-  const bundle = [...site.files.values()].map((file) => String(file.body)).find((body) => body.includes(".second{"))!;
-  expect(bundle.indexOf(".first")).toBeLessThan(bundle.indexOf(".second"));
-  expect(bundle.indexOf(".second")).toBeLessThan(bundle.indexOf(".third"));
-});
+test(
+  "several extra_css files are imported in order through one generated stylesheet",
+  async () => {
+    const mkdocsPath = await project({
+      "mkdocs.yml": "site_name: Styles\ndocs_dir: content-root\nextra_css:\n  - css/c.css\n  - css/a.css\n  - b.css\n",
+      "content-root/index.md": home,
+      "content-root/css/c.css": ".first { color: red; }\n",
+      "content-root/css/a.css": ".second { color: green; }\n",
+      "content-root/b.css": ".third { color: blue; }\n",
+    });
+    const report = await planMigration(mkdocsPath);
+    expect(report.config.theme).toEqual({ stylesheet: "extra.css" });
+    expect(report.files).toEqual([
+      {
+        path: "extra.css",
+        content:
+          '@import "./content-root/css/c.css";\n@import "./content-root/css/a.css";\n@import "./content-root/b.css";\n',
+      },
+    ]);
+    const site = await loadSite(await loadConfig(await writeMigration(mkdocsPath, report)));
+    const bundle = [...site.files.values()].map((file) => String(file.body)).find((body) => body.includes(".second{"))!;
+    expect(bundle.indexOf(".first")).toBeLessThan(bundle.indexOf(".second"));
+    expect(bundle.indexOf(".second")).toBeLessThan(bundle.indexOf(".third"));
+  },
+  siteTimeout,
+);
 
 test("one extra_css file is used as is, resolved from the docs.yaml folder", async () => {
   const mkdocsPath = await project({

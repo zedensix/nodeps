@@ -6,6 +6,8 @@ import { loadConfig } from "../config/config.ts";
 import { loadSite } from "../site/site.ts";
 import { planMigration, writeMigration } from "./migrate.ts";
 
+// Loading a site downloads the icon sets on a fresh checkout, which takes longer than the default 5 s.
+const siteTimeout = 60_000;
 /**
  * Writes a throwaway MkDocs project into a temp folder and returns the path
  * of its mkdocs.yml.
@@ -57,20 +59,24 @@ test("keys awesome-nav options nodeps cannot express are named with their file",
   expect(report.warnings.some((warning) => warning.startsWith('docs/reference/.nav.yml: "sort.by"'))).toBe(true);
 });
 
-test("the migrated nav renders the pages in the .nav.yml order", async () => {
-  const mkdocsPath = await project(nestedProject);
-  const configPath = await writeMigration(mkdocsPath, await planMigration(mkdocsPath));
-  const site = await loadSite(await loadConfig(configPath));
-  expect(site.navPages.map((navPage) => navPage.source)).toEqual([
-    "index.md",
-    "guide/b.md",
-    "guide/a.md",
-    "guide/advanced/z.md",
-    "reference/y.md",
-    "reference/x.md",
-  ]);
-  expect(site.warnings.filter((warning) => warning.includes("nav entry"))).toEqual([]);
-});
+test(
+  "the migrated nav renders the pages in the .nav.yml order",
+  async () => {
+    const mkdocsPath = await project(nestedProject);
+    const configPath = await writeMigration(mkdocsPath, await planMigration(mkdocsPath));
+    const site = await loadSite(await loadConfig(configPath));
+    expect(site.navPages.map((navPage) => navPage.source)).toEqual([
+      "index.md",
+      "guide/b.md",
+      "guide/a.md",
+      "guide/advanced/z.md",
+      "reference/y.md",
+      "reference/x.md",
+    ]);
+    expect(site.warnings.filter((warning) => warning.includes("nav entry"))).toEqual([]);
+  },
+  siteTimeout,
+);
 
 test("globs expand in name order with a warning, hidden folders are skipped", async () => {
   const report = await planMigration(
