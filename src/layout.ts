@@ -222,7 +222,7 @@ function renderDocument(site: Site, options: RenderOptions, parts: DocumentParts
   ].join("");
 
   const pagerHtml = page ? pager(site, page) : "";
-  const footerHtml = footer(site, page);
+  const footerHtml = footer(site, parts.home ? undefined : page);
   const tocHtml = page ? tableOfContents(page) : "";
   const tagsHtml = (page?.tags ?? [])
     .map((tag) => `<li><button type="button" class="tag" data-search="#${escape(tag)}">#${escape(tag)}</button></li>`)

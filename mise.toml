@@ -6,4 +6,4 @@ prek = "0.5.11"
 zizmor = "1.33.1"
 
 [hooks]
-postinstall = "prek install"
+postinstall = "[ -n \"$CI\" ] || prek install"
