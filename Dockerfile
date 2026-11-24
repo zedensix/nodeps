@@ -6,6 +6,8 @@ RUN bun .mise/tasks/compile.ts
 FROM gcr.io/distroless/cc-debian12:nonroot
 COPY --from=build /src/build/nodeps /usr/local/bin/nodeps
 WORKDIR /site
+COPY --from=build /src/docs.yaml ./docs.yaml
+COPY --from=build /src/docs ./docs
 EXPOSE 3000
 ENTRYPOINT ["nodeps"]
 CMD ["serve"]
