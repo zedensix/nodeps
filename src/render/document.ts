@@ -184,6 +184,7 @@ export function renderDocument(site: Site, options: RenderOptions, parts: Docume
     "theme-picker": themePicker(site),
     tabs: tabsHtml,
     breadcrumb: escape([page?.category?.title, ...(page?.trail ?? [])].filter(Boolean).join(" › ")),
+    section: escape(page?.category?.title ?? ""),
     article: parts.article,
     pager: pagerHtml,
     footer: footerHtml,

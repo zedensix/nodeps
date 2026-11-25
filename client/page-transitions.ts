@@ -124,6 +124,7 @@ function swapPage(next: Document) {
   const nextSidebar = nextLayout.querySelector(":scope > .sidebar");
   if (sidebar && nextSidebar) {
     sidebar.querySelector("nav")!.replaceWith(nextSidebar.querySelector("nav")!);
+    sidebar.querySelector(".drawer-bar")?.replaceWith(nextSidebar.querySelector(".drawer-bar")!);
   } else {
     syncElement(layout, nextLayout, ".sidebar", "prepend");
   }
