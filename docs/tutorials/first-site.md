@@ -51,7 +51,7 @@ bun --watch docs.ts dev --config acme.yaml
 
 Open `http://localhost:3000`. You should see your welcome page with the Acme title in the header, and a coffee cup next to it in the sidebar.
 
-Every page needs an `icon`, any [Lucide icon](https://lucide.dev/icons) name, and a `byline` naming who wrote it. Remove one and the terminal tells you which page is missing what.
+`icon` takes any [Lucide icon](https://lucide.dev/icons) name and `byline` names who wrote the page. Both are optional: remove them and the page renders without. Misspell the icon and the terminal tells you which page has it wrong.
 
 ## 4. Add a section
 

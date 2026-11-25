@@ -34,17 +34,17 @@ resources:
 ---
 ```
 
-| Key           | Description                                                                                                           |
-| ------------- | --------------------------------------------------------------------------------------------------------------------- |
-| `icon`        | Required. [Icon name](../reference/markdown/icons-and-emoji.md), in either form: `rocket` or `material/rocket-launch` |
-| `byline`      | Required. Author line under the title and in the sidebar                                                              |
-| `title`       | Default: the first `# heading`, then the file name                                                                    |
-| `description` | Lead paragraph and meta description                                                                                   |
-| `order`       | Position in the sidebar, lower first                                                                                  |
-| `tags`        | Shown under the table of contents, boosted in search, filterable with `#tag`                                          |
-| `updated`     | Last update date. Default: the last git commit touching the file, then its modification time                          |
-| `hide`        | Any of `navigation`, `toc`, `footer`                                                                                  |
-| `resources`   | Attached files, see below                                                                                             |
+| Key           | Description                                                                                                                                      |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `icon`        | [Icon name](../reference/markdown/icons-and-emoji.md), in either form: `rocket` or `material/rocket-launch`. Shown in the sidebar and the byline |
+| `byline`      | Author line under the title and in the sidebar                                                                                                   |
+| `title`       | Default: the first `# heading`, then the file name                                                                                               |
+| `description` | Lead paragraph and meta description                                                                                                              |
+| `order`       | Position in the sidebar, lower first                                                                                                             |
+| `tags`        | Shown under the table of contents, boosted in search, filterable with `#tag`                                                                     |
+| `updated`     | Last update date. Default: the last git commit touching the file, then its modification time                                                     |
+| `hide`        | Any of `navigation`, `toc`, `footer`                                                                                                             |
+| `resources`   | Attached files, see below                                                                                                                        |
 
 ## Resources
 

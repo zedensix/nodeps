@@ -75,7 +75,6 @@ export interface MigrationReport {
   unsupported: string[];
   warnings: string[];
   files: { path: string; content: string }[];
-  pages: { path: string; added: string[] }[];
 }
 
 const unsupportedKeys: Record<string, string> = {
@@ -90,9 +89,8 @@ const unsupportedKeys: Record<string, string> = {
 
 /**
  * Reads an mkdocs.yml and works out the docs.yaml equivalent without writing
- * anything: settings that map, those nodeps covers natively, those it cannot, and
- * the frontmatter each page needs added (an icon and a byline). Throws when the
- * file does not exist.
+ * anything: settings that map, those nodeps covers natively and those it cannot.
+ * Throws when the file does not exist.
  */
 export async function planMigration(mkdocsPath: string): Promise<MigrationReport> {
   const file = Bun.file(resolve(mkdocsPath));
@@ -109,7 +107,6 @@ export async function planMigration(mkdocsPath: string): Promise<MigrationReport
     unsupported: [],
     warnings: [],
     files: [],
-    pages: [],
   };
   const config = report.config;
   const map = (from: string, to: string, value: unknown) => {
@@ -212,22 +209,6 @@ export async function planMigration(mkdocsPath: string): Promise<MigrationReport
       `theme.language: ${theme.language}: the interface is English only, page content is untouched.`,
     );
   }
-
-  const byline = (mkdocs.site_author as string | undefined) ?? `${mkdocs.site_name ?? "The"} contributors`;
-  for (const path of new Bun.Glob("**/*.md").scanSync({ cwd: source })) {
-    const text = await Bun.file(join(source, path)).text();
-    const frontmatter = /^---\r?\n([\s\S]*?)\r?\n---/.exec(text)?.[1] ?? "";
-    const added: string[] = [];
-    if (!/^icon:/m.test(frontmatter)) {
-      added.push("icon: file-text");
-    }
-    if (!/^byline:/m.test(frontmatter)) {
-      added.push(`byline: ${yamlValue(byline)}`);
-    }
-    if (added.length > 0) {
-      report.pages.push({ path: join(source, path), added });
-    }
-  }
   return report;
 }
 
@@ -239,9 +220,8 @@ export function renderConfig(config: Mapping) {
 }
 
 /**
- * Writes docs.yaml and the generated files next to the mkdocs.yml and adds the
- * planned frontmatter to each page, creating the block when a page has none.
- * Refuses to run when any of those files exists so nothing is overwritten.
+ * Writes docs.yaml and the generated files next to the mkdocs.yml. Refuses to
+ * run when any of those files exists so nothing is overwritten.
  */
 export async function writeMigration(mkdocsPath: string, report: MigrationReport) {
   const target = join(dirname(resolve(mkdocsPath)), "docs.yaml");
@@ -254,13 +234,6 @@ export async function writeMigration(mkdocsPath: string, report: MigrationReport
   await Bun.write(target, renderConfig(report.config));
   for (const file of files) {
     await Bun.write(file.path, file.content);
-  }
-  for (const page of report.pages) {
-    const text = await Bun.file(page.path).text();
-    const updated = /^---\r?\n/.test(text)
-      ? text.replace(/^---\r?\n/, `---\n${page.added.join("\n")}\n`)
-      : `---\n${page.added.join("\n")}\n---\n\n${text}`;
-    await Bun.write(page.path, updated);
   }
   return target;
 }

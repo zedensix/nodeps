@@ -19,7 +19,7 @@ Options:
   -c, --config <file>   Config file (default: docs.yaml)
   -p, --port <port>     Port for dev and serve (default: $PORT or 3000)
       --host <host>     Hostname to bind (default: 0.0.0.0)
-      --write           With migrate: write docs.yaml and add missing frontmatter
+      --write           With migrate: write docs.yaml
   -v, --version         Print the nodeps version
   -h, --help            Show this help`;
 
@@ -63,10 +63,9 @@ try {
       values.write ? "Generated files" : "Files --write will generate",
       report.files.map((file) => file.path),
     );
-    console.log(`\n${report.pages.length} pages need an icon and a byline in their frontmatter.`);
     if (values.write) {
       const target = await writeMigration(mkdocsPath, report);
-      console.log(`Wrote ${target} and updated ${report.pages.length} pages. Check the result with: nodeps dev`);
+      console.log(`\nWrote ${target}. Check the result with: nodeps dev`);
     } else {
       console.log(`\ndocs.yaml preview:\n\n${renderConfig(report.config)}\nRun again with --write to apply.`);
     }

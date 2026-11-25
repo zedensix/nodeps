@@ -26,8 +26,8 @@ export interface Page {
   markdownUrl: string;
   title: string;
   description: string;
-  icon: string;
-  byline: string;
+  icon?: string;
+  byline?: string;
   tags: string[];
   hide: string[];
   order: number;
@@ -116,13 +116,13 @@ export async function loadSite(config: Config): Promise<Site> {
   const committed = await lastCommitDates(config.source);
   const problems: string[] = [];
   const pages = drafts.map(({ source, modified, raw, data, body }) => {
-    if (typeof data.icon !== "string" || !data.icon) {
-      problems.push(`${source}: frontmatter "icon" is required (a Lucide icon name, see https://lucide.dev/icons)`);
-    } else if (!isIcon(normalizeIcon(data.icon))) {
-      problems.push(`${source}: frontmatter "icon" is not a known icon: "${data.icon}"`);
+    if (data.icon != null && (typeof data.icon !== "string" || !isIcon(normalizeIcon(data.icon)))) {
+      problems.push(
+        `${source}: frontmatter "icon" is not a known icon: "${data.icon}" (a Lucide icon name, see https://lucide.dev/icons)`,
+      );
     }
-    if (typeof data.byline !== "string" || !data.byline.trim()) {
-      problems.push(`${source}: frontmatter "byline" is required`);
+    if (data.byline != null && typeof data.byline !== "string") {
+      problems.push(`${source}: frontmatter "byline" must be text`);
     }
     const slug = source.replace(/\.md$/, "");
     const url = pageUrl(slug);
@@ -133,8 +133,8 @@ export async function loadSite(config: Config): Promise<Site> {
       markdownUrl: markdownUrlOf(url),
       title: typeof data.title === "string" ? data.title : "",
       description: typeof data.description === "string" ? data.description : "",
-      icon: normalizeIcon(String(data.icon ?? "")),
-      byline: String(data.byline ?? "").trim(),
+      icon: typeof data.icon === "string" ? normalizeIcon(data.icon) : undefined,
+      byline: typeof data.byline === "string" ? data.byline.trim() || undefined : undefined,
       tags: readTags(data.tags, source, problems),
       hide: Array.isArray(data.hide) ? data.hide.map(String) : [],
       order: typeof data.order === "number" ? data.order : Infinity,

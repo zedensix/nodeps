@@ -31,13 +31,13 @@ function containsPage(item: NavItem, page?: Page): boolean {
 }
 
 /**
- * Renders one sidebar link with the page icon and, when the site enables
- * bylines, the byline under the label. Marks it as current for the active page.
+ * Renders one sidebar link with the page icon, if any, and, when the site
+ * enables bylines and the page has one, the byline under the label. Marks it as current for the active page.
  */
 function sidebarLink(site: Site, page: Page, current?: Page, label = page.title) {
   const active = page === current ? ` aria-current="page"` : "";
-  const byline = site.config.sidebar.bylines ? `<small>${escape(page.byline)}</small>` : "";
-  return `<a href="${escape(pageHref(site, page))}"${active}>${icon(page.icon)}<span class="sidebar-text"><span>${escape(label)}</span>${byline}</span></a>`;
+  const byline = site.config.sidebar.bylines && page.byline ? `<small>${escape(page.byline)}</small>` : "";
+  return `<a href="${escape(pageHref(site, page))}"${active}>${page.icon ? icon(page.icon) : ""}<span class="sidebar-text"><span>${escape(label)}</span>${byline}</span></a>`;
 }
 
 /**

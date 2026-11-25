@@ -18,7 +18,7 @@ Never mix two kinds in one page. Split it and link between them.
 
 ## Frontmatter
 
-Every page needs `icon` (a Lucide icon name from https://lucide.dev/icons) and `byline`:
+`icon` (a Lucide icon name from https://lucide.dev/icons) and `byline` are optional. Set them to show an icon and an author line in the sidebar and under the title:
 
 ```yaml
 ---
@@ -39,4 +39,4 @@ order: 1
 
 ## Check your work
 
-Run `mise run build`. It fails on a missing icon, byline or resource, and warns on broken links.
+Run `mise run build`. It fails on an unknown icon or a missing resource, and warns on broken links.

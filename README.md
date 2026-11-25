@@ -29,7 +29,7 @@ The documentation lives in `docs/` and is served by the tool itself: start with 
 
 ```sh
 nodeps migrate mkdocs.yml           # report only
-nodeps migrate mkdocs.yml --write   # write docs.yaml and add missing frontmatter
+nodeps migrate mkdocs.yml --write   # write docs.yaml
 ```
 
 Admonitions, content tabs, snippets, icons, Mermaid, math and the rest of the PyMdown syntax render as they are.

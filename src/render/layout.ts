@@ -117,7 +117,8 @@ export function renderPage(site: Site, page: Page, options: RenderOptions) {
   }
   const title = page.hasTitleHeading ? "" : `<h1>${escape(page.title)}</h1>`;
   const description = page.description ? `<p class="lead">${escape(page.description)}</p>` : "";
-  const byline = `<p class="byline">${icon(page.icon)}<span>${escape(page.byline)}</span><span aria-hidden="true">·</span>${time(page.updated)}</p>`;
+  const author = page.byline ? `<span>${escape(page.byline)}</span><span aria-hidden="true">·</span>` : "";
+  const byline = `<p class="byline">${page.icon ? icon(page.icon) : ""}${author}${time(page.updated)}</p>`;
   return renderDocument(site, options, {
     title: page.title,
     description: page.description || site.config.description,

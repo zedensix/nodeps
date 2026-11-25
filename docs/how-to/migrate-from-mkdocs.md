@@ -24,10 +24,7 @@ nodeps migrate mkdocs.yml --write
 nodeps dev
 ```
 
-`--write` creates `docs.yaml` and adds `icon: file-text` and a byline (from `site_author`) to every page missing them, since nodeps requires both. Pages keep their content: admonitions, tabs, icons, snippets, footnotes and the rest of the PyMdown syntax render as they are. Existing `icon: material/…` frontmatter keeps working.
-
-> [!WARNING]
-> `--write` edits your Markdown files. Run it on a clean git working tree so you can review the diff.
+`--write` creates `docs.yaml` and leaves your Markdown files alone. Pages keep their content: admonitions, tabs, icons, snippets, footnotes and the rest of the PyMdown syntax render as they are. Existing `icon: material/…` frontmatter keeps working.
 
 ## What is converted
 

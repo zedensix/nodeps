@@ -28,7 +28,7 @@ function categoryCard(site: Site, category: Category, home: Page) {
     .slice(0, site.config.home!.latest)
     .map(
       (page) =>
-        `<li><a href="${escape(pageHref(site, page))}">${icon(page.icon)}<span>${escape(page.title)}</span>${time(page.updated)}</a></li>`,
+        `<li><a href="${escape(pageHref(site, page))}">${page.icon ? icon(page.icon) : ""}<span>${escape(page.title)}</span>${time(page.updated)}</a></li>`,
     )
     .join("");
   const first = category.pages.find((page) => page !== home)!;
