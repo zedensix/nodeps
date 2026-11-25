@@ -4,6 +4,7 @@ description: Every CSS custom property the theme exposes.
 order: 8
 icon: swatch-book
 byline: The nodeps maintainers
+tags: [config, theme, colors, fonts, dark-mode]
 ---
 
 Tokens are CSS custom properties. Set one for both modes under `theme`, or per mode under `theme.light` and `theme.dark`. In CSS, a mode value is `--light-<token>` or `--dark-<token>`.

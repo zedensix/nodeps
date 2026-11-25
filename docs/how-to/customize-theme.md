@@ -4,7 +4,7 @@ description: Change colors, fonts and sizes, separately for light and dark mode.
 order: 1
 icon: palette
 byline: The nodeps maintainers
-tags: [theme, colors, fonts, dark mode]
+tags: [theme, colors, fonts, dark-mode]
 ---
 
 ## Start from a theme

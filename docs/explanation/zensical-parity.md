@@ -4,7 +4,7 @@ description: Where nodeps matches Zensical and Material for MkDocs, and where it
 order: 4
 icon: scale
 byline: The nodeps maintainers
-tags: [zensical, mkdocs, migration]
+tags: [zensical, mkdocs, migration, markdown]
 ---
 
 Zensical, by the team behind Material for MkDocs, reads `mkdocs.yml` and renders the Material feature set. nodeps aims at the same authoring experience so existing sites can move over with `nodeps migrate`, while keeping its own design: one Bun binary, server rendering, and docs written for agents as much as people.

@@ -4,7 +4,7 @@ description: Show the repository in the header and add edit links to every page.
 order: 1.5
 icon: git-branch
 byline: The nodeps maintainers
-tags: [git, github, gitlab, gitea, bitbucket]
+tags: [git, github, editor]
 ---
 
 ## Link a repository

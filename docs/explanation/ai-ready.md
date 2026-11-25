@@ -4,6 +4,7 @@ description: Why every page exists twice, and what the MCP server is for.
 order: 3
 icon: brain
 byline: The nodeps maintainers
+tags: [ai, mcp, llms.txt, server]
 ---
 
 Documentation now has two audiences: people reading in a browser, and models reading on their behalf. HTML serves the first well and the second badly: navigation, scripts and markup cost tokens and hide structure.

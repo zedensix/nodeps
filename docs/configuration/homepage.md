@@ -4,7 +4,7 @@ description: The hero, the Diátaxis compass and the badge next to page titles.
 order: 6
 icon: house
 byline: The nodeps maintainers
-tags: [config, home, diataxis]
+tags: [config, diataxis, navigation]
 ---
 
 ```yaml title="docs.yaml"

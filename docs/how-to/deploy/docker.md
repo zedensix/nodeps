@@ -4,7 +4,7 @@ description: Build the opt-in image and mount your docs into it.
 order: 2
 icon: container
 byline: The nodeps maintainers
-tags: [deploy, docker]
+tags: [deploy, server, install]
 ---
 
 The repository ships an opt-in `Dockerfile`: it compiles the binary for musl and copies it into an empty `scratch` image, with only the three libraries it needs, CA certificates and the nodeps documentation in `/app`. It runs as a non-root user and weighs about 60 MB to download.

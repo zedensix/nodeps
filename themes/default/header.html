@@ -3,9 +3,9 @@
     <button
       class="icon-button menu-toggle"
       type="button"
-      aria-label="Toggle navigation"
-      data-tooltip="Toggle navigation"
-      aria-controls="sidebar"
+      aria-label="Main menu"
+      data-tooltip="Main menu"
+      aria-controls="main-menu"
       aria-expanded="false"
     >
       <i data-icon="menu"></i>
@@ -47,3 +47,11 @@
   </div>
   <nav class="category-tabs" aria-label="Sections" data-slot="tabs" data-if="tabs"></nav>
 </header>
+<div class="main-menu drawer" id="main-menu">
+  <div class="drawer-head">
+    <a class="brand" data-slot="brand" href="/"></a>
+    <button class="icon-button drawer-close" type="button" aria-label="Close menu"><i data-icon="x"></i></button>
+  </div>
+  <nav class="main-menu-sections" aria-label="Sections" data-slot="tabs" data-if="tabs"></nav>
+  <nav class="main-menu-links" aria-label="External links" data-slot="links"></nav>
+</div>

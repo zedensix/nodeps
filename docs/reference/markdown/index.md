@@ -4,6 +4,7 @@ description: Supported syntax, and how links are resolved.
 order: 3
 icon: file-text
 byline: The nodeps maintainers
+tags: [markdown]
 ---
 
 ## Syntax

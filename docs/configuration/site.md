@@ -4,7 +4,7 @@ description: Name, address, folders and the links around every page.
 order: 1
 icon: globe
 byline: The nodeps maintainers
-tags: [config]
+tags: [config, deploy]
 ---
 
 ```yaml title="docs.yaml"

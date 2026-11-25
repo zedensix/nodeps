@@ -4,7 +4,7 @@ description: Five icon sets and every GitHub emoji shortcode.
 order: 5
 icon: material/emoticon-happy-outline
 byline: The nodeps maintainers
-tags: [markdown, icons, emoji]
+tags: [markdown, icons]
 ---
 
 ```md

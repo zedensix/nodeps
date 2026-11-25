@@ -40,8 +40,8 @@ export function ensureTitleHeading(markdown: string, title: string, hasTitleHead
 
 /**
  * Normalizes frontmatter tags, given as a list or a comma-separated string,
- * to unique lowercase words. Invalid values are reported in `problems` and
- * yield no tags.
+ * to unique lowercase words, spaces becoming dashes so a `#tag` search can
+ * match them. Invalid values are reported in `problems` and yield no tags.
  */
 export function readTags(value: unknown, source: string, problems: string[]) {
   if (value === undefined || value === null) {
@@ -52,7 +52,7 @@ export function readTags(value: unknown, source: string, problems: string[]) {
     problems.push(`${source}: frontmatter "tags" must be a list of words`);
     return [];
   }
-  return [...new Set(tags.map((tag) => String(tag).trim().toLowerCase()).filter(Boolean))];
+  return [...new Set(tags.map((tag) => String(tag).trim().toLowerCase().replace(/\s+/g, "-")).filter(Boolean))];
 }
 
 /**

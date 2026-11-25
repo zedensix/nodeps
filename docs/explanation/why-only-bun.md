@@ -4,6 +4,7 @@ description: What a documentation tool gains from having no dependencies.
 order: 1
 icon: package
 byline: The nodeps maintainers
+tags: [bun, install]
 ---
 
 Most documentation generators install hundreds of packages before rendering a single page: a Markdown parser and its plugins, a highlighter and its grammars, a bundler, a dev server, a YAML parser. Each one is a version to pin, an advisory to triage and a cold start to wait for.

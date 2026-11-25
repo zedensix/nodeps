@@ -4,7 +4,7 @@ description: Convert a Material for MkDocs or Zensical project in one command.
 order: 1.2
 icon: arrow-right-left
 byline: The nodeps maintainers
-tags: [migration, mkdocs, zensical]
+tags: [migration, mkdocs, zensical, cli]
 ---
 
 ## Preview the migration

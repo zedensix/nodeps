@@ -2,7 +2,7 @@ import { markCurrentPreset } from "./appearance.ts";
 import { checkPendingEdit } from "./editor/launcher.ts";
 import { renderRichContent, revealActiveTab, setupPromptLinks, setupTableOfContents } from "./page-enhancements.ts";
 import { closeSearch } from "./search/dialog.ts";
-import { setNavigation } from "./sidebar.ts";
+import { setDrawer } from "./sidebar.ts";
 import { base } from "./site-paths.ts";
 
 interface PageNavigateEvent extends Event {
@@ -88,7 +88,7 @@ function syncElement(parent: Element, nextParent: Element, selector: string, pos
 
 /**
  * Replaces the parts of the page that change between pages (title, metadata,
- * category tabs, sidebar navigation, content, table of contents) and reruns
+ * category tabs and the main menu, sidebar navigation, content, table of contents) and reruns
  * the per-page setup. The sidebar element itself is kept when both pages have
  * one so its scroll position survives.
  */
@@ -113,7 +113,10 @@ function swapPage(next: Document) {
     }
   }
 
-  syncElement(document.querySelector(".site-header")!, next.querySelector(".site-header")!, ".category-tabs", "append");
+  const header = document.querySelector(".site-header")!;
+  const nextHeader = next.querySelector(".site-header")!;
+  syncElement(header, nextHeader, ".category-tabs", "append");
+  syncElement(document.body, next.body, ".main-menu", "append");
 
   const layout = document.querySelector(".layout")!;
   const nextLayout = next.querySelector(".layout")!;
@@ -127,7 +130,7 @@ function swapPage(next: Document) {
   layout.querySelector(":scope > .content")!.replaceWith(nextLayout.querySelector(":scope > .content")!);
   syncElement(layout, nextLayout, ".toc", "append");
 
-  setNavigation(false);
+  setDrawer(null);
   closeSearch();
   setupPromptLinks();
   setupTableOfContents();

@@ -4,7 +4,7 @@ description: Tabs, the sidebar tree, explicit nav and folder settings.
 order: 2
 icon: list-tree
 byline: The nodeps maintainers
-tags: [config, nav, sidebar]
+tags: [config, navigation, diataxis, icons]
 ---
 
 ## From folders

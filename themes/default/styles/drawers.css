@@ -1,0 +1,125 @@
+.drawer-head,
+.main-menu {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .drawer {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    z-index: 30;
+    display: flex;
+    flex-direction: column;
+    width: min(22rem, 85vw);
+    height: auto;
+    overflow-y: auto;
+    background: var(--background);
+    visibility: hidden;
+    transition:
+      transform 0.2s ease,
+      visibility 0.2s;
+  }
+
+  .main-menu.drawer {
+    left: 0;
+    transform: translateX(-100%);
+  }
+
+  .sidebar.drawer {
+    top: var(--header-height);
+    right: 0;
+    padding: 0;
+    border-right: 0;
+    border-left: 1px solid var(--border);
+    transform: translateX(100%);
+  }
+
+  .navigation-open .sidebar.drawer,
+  .main-menu-open .main-menu.drawer {
+    visibility: visible;
+    transform: none;
+  }
+
+  .main-menu-open .main-menu.drawer {
+    box-shadow: var(--shadow);
+  }
+
+  .navigation-open .scrim {
+    background: none;
+    backdrop-filter: none;
+  }
+
+  .drawer-head {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    display: flex;
+    flex: none;
+    align-items: center;
+    justify-content: space-between;
+    height: var(--topbar-height);
+    padding: 0 0.75rem 0 1.25rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--header-background, color-mix(in oklab, var(--accent) 9%, var(--background)));
+  }
+
+  .drawer-head .brand {
+    margin: 0;
+  }
+
+  .drawer-head .icon-button {
+    color: var(--header-text, var(--text-muted));
+  }
+
+  .sidebar.drawer > nav {
+    padding: 1rem;
+  }
+
+  .main-menu nav {
+    display: grid;
+    gap: 0.125rem;
+    padding: 0.75rem;
+  }
+
+  .main-menu nav + nav {
+    border-top: 1px solid var(--border);
+  }
+
+  .main-menu a {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: calc(var(--radius) - 2px);
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-decoration: none;
+  }
+
+  .main-menu a:hover,
+  .main-menu a[aria-current] {
+    background: var(--surface);
+    color: var(--text);
+  }
+
+  .main-menu a[aria-current] .icon {
+    color: var(--accent);
+  }
+
+  .main-menu .icon {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  .main-menu .tab-indicator {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .drawer {
+    width: 100%;
+  }
+}

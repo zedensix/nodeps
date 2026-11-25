@@ -4,7 +4,7 @@ description: Ship code samples, documents and Claude skills with a page.
 order: 3
 icon: paperclip
 byline: The nodeps maintainers
-tags: [resources, skills, downloads]
+tags: [resources, ai, claude, frontmatter, code]
 ---
 
 ## Attach a file

@@ -4,7 +4,7 @@ description: Alternative content side by side, linked across the page.
 order: 3
 icon: app-window
 byline: The nodeps maintainers
-tags: [markdown, tabs, mkdocs]
+tags: [markdown, mkdocs]
 ---
 
 ````md

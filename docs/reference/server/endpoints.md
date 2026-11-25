@@ -4,7 +4,7 @@ description: Every route the server answers, and what the static export contains
 order: 6
 icon: globe
 byline: The nodeps maintainers
-tags: [http, mcp, llms.txt]
+tags: [server, static, mcp, llms.txt, ai]
 ---
 
 Paths are relative to `base`.

@@ -4,7 +4,7 @@ description: Themes, theme folders, colors, fonts and custom CSS.
 order: 3
 icon: palette
 byline: The nodeps maintainers
-tags: [config, theme]
+tags: [config, theme, colors, fonts, dark-mode]
 ---
 
 ```yaml title="docs.yaml"
@@ -47,7 +47,7 @@ A theme only holds what it changes. Every other file comes from the theme it ext
 | `theme.yaml`        | Title, description, parent theme and CSS variables                                                                                           |
 | `layout.html`       | The page shell. nodeps adds its script; everything else comes from the theme                                                                 |
 | `head.html`         | Partial, empty by default: extra `<script>`, `<link>` or `<meta>` tags for every page. Files it references are bundled from the theme folder |
-| `header.html`       | Partial: the top bar and section tabs                                                                                                        |
+| `header.html`       | Partial: the top bar, section tabs and the main menu drawer that replaces them on phones                                                     |
 | `main.html`         | Partial: sidebar, page and table of contents                                                                                                 |
 | `search.html`       | Partial: the search dialog                                                                                                                   |
 | `editor.html`       | Partial: the page editor dialog                                                                                                              |

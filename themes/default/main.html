@@ -1,5 +1,5 @@
 <div class="layout">
-  <aside class="sidebar" id="sidebar" data-if="sidebar">
+  <aside class="sidebar drawer" id="sidebar" data-if="sidebar">
     <nav aria-label="Documentation" data-slot="sidebar"></nav>
   </aside>
 
@@ -56,6 +56,18 @@
           </div>
         </details>
       </div>
+      <button
+        class="icon-button sidebar-toggle"
+        type="button"
+        aria-label="Pages in this section"
+        data-tooltip="Pages in this section"
+        data-tooltip-align="end"
+        aria-controls="sidebar"
+        aria-expanded="false"
+        data-if="sidebar"
+      >
+        <i data-icon="menu"></i>
+      </button>
     </div>
     <article class="prose" data-slot="article"></article>
     <nav class="pager" aria-label="Pagination" data-slot="pager" data-if="pager"></nav>

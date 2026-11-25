@@ -4,7 +4,7 @@ description: The git link in the header and edit links, for any provider.
 order: 4
 icon: git-branch
 byline: The nodeps maintainers
-tags: [config, git]
+tags: [config, git, github]
 ---
 
 ```yaml title="docs.yaml"

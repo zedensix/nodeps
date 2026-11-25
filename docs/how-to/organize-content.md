@@ -4,6 +4,7 @@ description: Turn on header tabs, group pages and follow Diátaxis.
 order: 2
 icon: folder-tree
 byline: The nodeps maintainers
+tags: [navigation, diataxis, frontmatter]
 ---
 
 ## Turn on header tabs

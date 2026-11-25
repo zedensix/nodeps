@@ -1,20 +1,37 @@
-const menuToggle = document.querySelector<HTMLButtonElement>(".menu-toggle")!;
 const scrim = document.querySelector<HTMLElement>(".scrim")!;
 
+type Drawer = "navigation" | "main-menu";
+
+const toggles: Record<Drawer, string> = { navigation: ".sidebar-toggle", "main-menu": ".menu-toggle" };
+
 /**
- * Opens or closes the mobile navigation drawer, keeping the menu button's
- * aria-expanded and the click-to-close scrim in sync.
+ * Opens one drawer, closing the other, or closes both with null: the section
+ * sidebar ("navigation", from the button in the page) or the main menu (from
+ * the header button). Keeps the buttons' aria-expanded and the scrim in sync.
  */
-export function setNavigation(open: boolean) {
-  document.body.classList.toggle("navigation-open", open);
-  menuToggle.setAttribute("aria-expanded", String(open));
-  scrim.hidden = !open;
+export function setDrawer(open: Drawer | null) {
+  for (const [drawer, selector] of Object.entries(toggles)) {
+    document.body.classList.toggle(`${drawer}-open`, drawer === open);
+    document.querySelector(selector)?.setAttribute("aria-expanded", String(drawer === open));
+  }
+  scrim.hidden = open === null;
 }
 
 /**
- * Makes the menu button toggle the drawer and a click on the scrim close it.
+ * Makes each drawer button toggle its drawer, and a click on the scrim or a
+ * drawer's close button close it. Clicks are delegated because page swaps replace the in-page button.
  */
-export function setupSidebarToggle() {
-  menuToggle.addEventListener("click", () => setNavigation(!document.body.classList.contains("navigation-open")));
-  scrim.addEventListener("click", () => setNavigation(false));
+export function setupDrawers() {
+  document.addEventListener("click", (event) => {
+    if ((event.target as Element).closest?.(".drawer-close")) {
+      setDrawer(null);
+      return;
+    }
+    const toggle = (event.target as Element).closest?.(".menu-toggle, .sidebar-toggle");
+    if (toggle) {
+      const drawer: Drawer = toggle.matches(".menu-toggle") ? "main-menu" : "navigation";
+      setDrawer(document.body.classList.contains(`${drawer}-open`) ? null : drawer);
+    }
+  });
+  scrim.addEventListener("click", () => setDrawer(null));
 }

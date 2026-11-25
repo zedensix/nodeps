@@ -4,6 +4,7 @@ description: The dev, serve and build commands, and the mise tasks.
 order: 5
 icon: square-terminal
 byline: The nodeps maintainers
+tags: [cli, server]
 ---
 
 ```sh

@@ -27,8 +27,11 @@ description: One sentence, shown under the title and in llms.txt.
 icon: download
 byline: The Acme team
 order: 1
+tags: [config, theme]
 ---
 ```
+
+Tags feed the search filter and the related pages. Reuse the tags other pages already carry, and add a new one only when at least two pages share it: a tag on one page is noise in the tag list, and full-text search finds the word anyway.
 
 ## Markdown features
 

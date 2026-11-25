@@ -4,7 +4,7 @@ description: Mermaid diagrams and LaTeX formulas.
 order: 6
 icon: chart-network
 byline: The nodeps maintainers
-tags: [markdown, mermaid, math]
+tags: [markdown, code]
 ---
 
 ## Diagrams

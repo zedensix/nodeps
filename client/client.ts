@@ -9,7 +9,7 @@ import {
 } from "./page-enhancements.ts";
 import { setupPageTransitions } from "./page-transitions.ts";
 import { openSearch, setupSearch } from "./search/dialog.ts";
-import { setNavigation, setupSidebarToggle } from "./sidebar.ts";
+import { setDrawer, setupDrawers } from "./sidebar.ts";
 import { base, markdownUrl } from "./site-paths.ts";
 
 if (!/Mac|iPhone|iPad/.test(navigator.userAgent)) {
@@ -42,7 +42,7 @@ async function copyText(button: HTMLElement, text: string | Promise<string>) {
 
 setupColorMode();
 setupReaderMode();
-setupSidebarToggle();
+setupDrawers();
 
 document.addEventListener("click", (event) => {
   const target = event.target as HTMLElement;
@@ -129,6 +129,6 @@ document.addEventListener("keydown", (event) => {
     openSearch();
   }
   if (event.key === "Escape") {
-    setNavigation(false);
+    setDrawer(null);
   }
 });

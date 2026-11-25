@@ -4,7 +4,7 @@ description: URLs, frontmatter and attached resources.
 order: 7
 icon: file-text
 byline: The nodeps maintainers
-tags: [config, frontmatter]
+tags: [config, frontmatter, diataxis, icons, resources]
 ---
 
 ## URLs
@@ -41,7 +41,7 @@ resources:
 | `title`       | Default: the first `# heading`, then the file name                                                                                               |
 | `description` | Lead paragraph and meta description                                                                                                              |
 | `order`       | Position in the sidebar, lower first                                                                                                             |
-| `tags`        | Shown under the table of contents, boosted in search, filterable with `#tag`                                                                     |
+| `tags`        | Shown under the table of contents, boosted in search, filterable with `#tag`. Lowercase; spaces become dashes                                    |
 | `updated`     | Last update date. Default: the last git commit touching the file, then its modification time                                                     |
 | `diataxis`    | `tutorials`, `how-to`, `reference` or `explanation`, overriding the file name and folder. See [Diátaxis kinds](./homepage.md#page-kinds)         |
 | `hide`        | Any of `navigation`, `toc`, `footer`                                                                                                             |

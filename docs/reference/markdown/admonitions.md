@@ -4,7 +4,7 @@ description: Call-outs, collapsible blocks and GitHub alerts.
 order: 2
 icon: triangle-exclamation-point
 byline: The nodeps maintainers
-tags: [markdown, admonitions, mkdocs]
+tags: [markdown, mkdocs]
 ---
 
 ## Blocks

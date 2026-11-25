@@ -93,8 +93,8 @@ ${resource.description ? `<p class="resource-description">${escape(resource.desc
 }
 
 /**
- * Wraps the first `<h1>` with the badge in a title row. Returns the HTML
- * untouched when there is no badge.
+ * Wraps the first `<h1>` in a title block with the badge above it. Returns the
+ * HTML untouched when there is no badge.
  */
 function withTitleBadge(html: string, badge: string) {
   if (!badge) {
@@ -102,7 +102,7 @@ function withTitleBadge(html: string, badge: string) {
   }
   return html.replace(
     /<h1(?:\s[^>]*)?>[\s\S]*?<\/h1>/,
-    (heading) => `<div class="page-title">${heading}${badge}</div>`,
+    (heading) => `<div class="page-title">${badge}${heading}</div>`,
   );
 }
 

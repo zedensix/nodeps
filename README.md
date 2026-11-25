@@ -2,7 +2,7 @@
 
 A documentation site generator and server built only on Bun's native APIs: no `package.json`, no `node_modules`.
 
-Markdown pages become a themeable site with search, instant navigation, a Diátaxis homepage, downloadable resources and AI skills, `llms.txt`, Markdown twins of every page and an MCP server. It runs as a Bun server behind nginx, or exports static files.
+Markdown pages become a themeable site with search, instant navigation, a Diátaxis homepage, a WYSIWYG editor that turns edits into pull requests, downloadable resources and AI skills, `llms.txt`, Markdown twins of every page and an MCP server. It runs as a Bun server behind nginx, or exports static files.
 
 ## Install
 

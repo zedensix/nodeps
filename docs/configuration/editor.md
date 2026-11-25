@@ -1,10 +1,10 @@
 ---
 title: Editor
-description: The visual editor and GitHub pull request publishing.
+description: The WYSIWYG page editor and GitHub pull request publishing.
 order: 5
 icon: square-pen
 byline: The nodeps maintainers
-tags: [config, editor, oauth]
+tags: [config, editor, wysiwyg, oauth, github]
 ---
 
 ```yaml title="docs.yaml"

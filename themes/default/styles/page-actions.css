@@ -12,6 +12,15 @@
   margin-bottom: 1.25rem;
 }
 
+.sidebar-toggle {
+  display: none;
+  margin-right: -0.5rem;
+}
+
+.page-header:has(.sidebar-toggle) .breadcrumb {
+  margin-right: auto;
+}
+
 .breadcrumb {
   color: var(--accent);
   font-size: 0.875rem;

@@ -3,7 +3,7 @@ title: Theme gallery
 description: Every built-in theme, in light and dark. Apply one to this site to try it.
 icon: swatch-book
 byline: The nodeps maintainers
-tags: [theme, colors]
+tags: [theme, colors, dark-mode]
 ---
 
 Pick a theme in `docs.yaml`:

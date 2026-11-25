@@ -1,13 +1,13 @@
 ---
 title: Let anyone edit pages
-description: A visual editor for people who do not write Markdown, publishing through GitHub.
+description: A WYSIWYG editor on every page for people who do not write Markdown, publishing through GitHub.
 order: 3.5
 icon: square-pen
 byline: The nodeps maintainers
-tags: [editor, github, oauth, contributors]
+tags: [editor, wysiwyg, github, oauth, git]
 ---
 
-The visual editor is on by default. Every page gets **Edit this page**, at the bottom and in the page menu. It opens the page as it looks on the site, with a toolbar for headings, bold, links, lists, quotes and code. Drafts are kept on the editor's device until they are published.
+The visual editor, a WYSIWYG editor built into every page, is on by default. Every page gets **Edit this page**, at the bottom and in the page menu. It opens the page as it looks on the site, with a toolbar for headings, bold, links, lists, quotes and code. Drafts are kept on the editor's device until they are published.
 
 ## Write with Markdown shortcuts
 

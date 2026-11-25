@@ -4,7 +4,7 @@ description: Get the nodeps command from npm, PyPI, mise or a release binary.
 order: 0
 icon: download
 byline: The nodeps maintainers
-tags: [install, npm, pip, mise]
+tags: [install, cli, getting-started]
 ---
 
 Every channel ships the same standalone binary; none of them needs Bun.

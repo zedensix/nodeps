@@ -16,6 +16,10 @@ byline: The nodeps maintainers
 | File discovery              | `Bun.Glob`                           |
 | Server and live reload      | `Bun.serve` with WebSockets          |
 
+## Anyone can fix a page
+
+Every page has **Edit this page**. It opens a WYSIWYG editor right on the site: the page as readers see it, a formatting toolbar, Markdown shortcuts as you type, and a switch to the raw Markdown. **Publish** opens a GitHub pull request, or hands the change to your git provider's web editor. Contributors never clone the repository or learn Markdown. See [Let anyone edit pages](./how-to/let-anyone-edit.md).
+
 ## How these docs are organized
 
 This documentation follows [Diátaxis](https://diataxis.fr). Each section answers a different need:

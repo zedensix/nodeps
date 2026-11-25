@@ -4,6 +4,7 @@ description: Why pages are rendered by a server, and how the static export stays
 order: 2
 icon: layers
 byline: The nodeps maintainers
+tags: [server, static, bun, deploy]
 ---
 
 Documentation sites end up behind a web server anyway, usually nginx. Given that, nodeps treats a Bun server as the primary target and static files as an export of it.

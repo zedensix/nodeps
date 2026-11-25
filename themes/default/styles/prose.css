@@ -40,7 +40,7 @@
   font-weight: 500;
 }
 
-.prose h1 + .byline {
+.prose :is(h1, .page-title) + .byline {
   margin-top: 0;
 }
 

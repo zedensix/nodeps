@@ -4,7 +4,7 @@ description: Pull the content of another file into a page.
 order: 7
 icon: file-input
 byline: The nodeps maintainers
-tags: [markdown, snippets]
+tags: [markdown, mkdocs, code]
 ---
 
 ````md

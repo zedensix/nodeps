@@ -3,7 +3,7 @@ title: Configuration
 description: The three places nodeps reads settings from, and a complete example.
 icon: settings
 byline: The nodeps maintainers
-tags: [config, yaml]
+tags: [config, getting-started]
 resources:
   - path: files/docs.yaml
     title: Complete docs.yaml
