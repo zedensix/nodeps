@@ -9,7 +9,7 @@ tags: [install, cli, getting-started]
 
 Every channel ships the same standalone binary; none of them needs Bun.
 
-nodeps is in beta: every release is a prerelease like `1.0.0-beta.3`. npm installs it by default; pip and mise need to be asked for one.
+Every channel installs the latest stable release by default. To try what is coming next, see [Betas](#betas).
 
 ## With npm
 
@@ -22,16 +22,14 @@ Or without installing: `npx @zedensix/nodeps dev`.
 ## With pip
 
 ```sh
-pip install --pre zedensix-nodeps
+pip install zedensix-nodeps
 ```
 
 ## With mise
 
 ```sh
-mise use github:zedensix/nodeps@1.0.0-beta.1
+mise use github:zedensix/nodeps
 ```
-
-Pick the newest version from the [releases page](https://github.com/zedensix/nodeps/releases).
 
 ## As a binary
 
@@ -52,6 +50,17 @@ mise run cli:install
 ```
 
 It compiles the checkout into the same standalone binary and installs it as `~/.local/bin/nodeps`; pass another directory to install there instead, like `mise run cli:install /usr/local/bin`. `nodeps --version` then prints the commit it was built from. It warns when the directory is not on your `PATH`, or when another `nodeps` comes first. Run it again to update.
+
+## Betas
+
+Every change merged into nodeps ships a beta first, a version like `1.1.0-beta.2`. Ask for it explicitly:
+
+```sh
+npm install --global @zedensix/nodeps@beta
+pip install --pre zedensix-nodeps
+mise use github:zedensix/nodeps@1.1.0-beta.2   # a version from the releases page
+docker pull zedensix/nodeps:beta
+```
 
 ## Check it works
 

@@ -2,9 +2,12 @@ name: Pull request
 
 on:
   pull_request:
+  # releaser pushes the release PR branch before opening the PR, so its first commit only gets a push run.
+  push:
+    branches: [releaser/release]
 
 concurrency:
-  group: pull-request-${{ github.event.pull_request.number }}
+  group: pull-request-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 permissions: {}

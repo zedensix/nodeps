@@ -20,12 +20,13 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      pull-requests: write
     outputs:
       released: ${{ steps.release.outputs.released }}
       version: ${{ steps.release.outputs.version }}
       prerelease: ${{ steps.release.outputs.prerelease }}
     steps:
-      # releaser pushes tags (and later the release PR) through origin, so the credentials must persist.
+      # releaser pushes tags and the release PR branch through origin, so the credentials must persist.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ssh-key: ${{ secrets.RELEASE_DEPLOY_KEY }} # zizmor: ignore[artipacked]
@@ -40,6 +41,7 @@ jobs:
           MISE_TASK_RUN_AUTO_INSTALL: "false"
         with:
           prerelease: beta
+          release-pr: true
           prepare: mise run release ${version}
           artifacts: build/release/assets/*
       - if: steps.release.outputs.released == 'true'
@@ -77,12 +79,14 @@ jobs:
         with:
           node-version: 24
       # Trusted publishing: npm trades the job's OIDC token for a publish token and adds provenance itself.
-      # Until 1.0.0 every beta is `latest`, so a plain install gets it: the token cannot move dist-tags later.
+      # Stable releases are `latest`, so a plain install gets them; betas go to `beta`.
       - name: Publish the platform packages, then the launcher
+        env:
+          TAG: ${{ needs.release.outputs.prerelease == 'true' && 'beta' || 'latest' }}
         run: |
           chmod +x build/release/npm/*/bin/*
           for package in build/release/npm/nodeps-*/ build/release/npm/nodeps; do
-            npm publish "$package" --access public --tag latest
+            npm publish "$package" --access public --tag "$TAG"
           done
 
   pypi:
