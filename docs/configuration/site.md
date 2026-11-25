@@ -35,11 +35,12 @@ social:
 | `source`      | `docs`          | Directory of Markdown files and assets                                                        |
 | `output`      | `dist`          | Static export directory, deleted on every build                                               |
 | `logo`        |                 | Image inside the source directory, also the favicon                                           |
+| `favicon`     | `logo`          | Favicon inside the source directory. Without it or `logo`, a book icon in the accent color    |
 | `footer`      |                 | Text at the bottom of every page                                                              |
 | `links`       |                 | Text links in the header, each with a `label` and a `url`                                     |
 | `social`      |                 | Icon links in the footer: `icon`, `url` and an optional `label`                               |
 | `reader_mode` | `true`          | Shows the reader mode button in the header                                                    |
 
-Paths in `docs.yaml` (`source`, `output`, `theme.stylesheet`) are relative to the folder holding `docs.yaml`, not to the folder you run `nodeps` from. `logo` is the exception: it is a path inside `source`, as it is served with the pages.
+Paths in `docs.yaml` (`source`, `output`, `theme.stylesheet`) are relative to the folder holding `docs.yaml`, not to the folder you run `nodeps` from. `logo` and `favicon` are the exception: they are paths inside `source`, as it is served with the pages.
 
 `social` icons accept any [icon name](../reference/markdown/icons-and-emoji.md), like `fontawesome/brands/github` or `simple/bluesky`.

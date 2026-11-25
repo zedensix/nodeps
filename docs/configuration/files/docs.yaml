@@ -5,6 +5,7 @@ base: /
 source: docs
 output: dist
 logo: logo.svg
+favicon: favicon.png
 repository:
   url: https://github.com/acme/acme
   branch: main
@@ -31,6 +32,9 @@ sidebar:
 theme:
   accent: "#6d5efc"
   radius: 8px
+  link: "#4f46e5"
+  header-background: "linear-gradient(90deg, #1e3a8a, #7c3aed)"
+  header-text: "#ffffff"
   light:
     background: "#ffffff"
   dark:

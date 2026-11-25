@@ -1,7 +1,13 @@
 import { stat } from "node:fs/promises";
-import { basename } from "node:path";
+import { basename, posix } from "node:path";
 import type { Config } from "../config/config.ts";
-import { folderFile, readFolderSettings, type FolderSettings } from "./folder-settings.ts";
+import {
+  diataxisKind,
+  folderFile,
+  readFolderSettings,
+  type DiataxisKind,
+  type FolderSettings,
+} from "./folder-settings.ts";
 import { ensureIcons } from "../icons/icon-download.ts";
 import { iconDirectory, isIcon, normalizeIcon } from "../icons/icons.ts";
 import { buildCategories, buildCategoriesFromNav, type Category } from "./navigation.ts";
@@ -28,6 +34,7 @@ export interface Page {
   description: string;
   icon?: string;
   byline?: string;
+  diataxis?: DiataxisKind;
   tags: string[];
   hide: string[];
   order: number;
@@ -115,6 +122,18 @@ export async function loadSite(config: Config): Promise<Site> {
   const bySource = new Map<string, Page>();
   const committed = await lastCommitDates(config.source);
   const problems: string[] = [];
+  /**
+   * Finds the Diataxis kind of the nearest folder above a page whose
+   * `_folder.yaml` sets one.
+   */
+  const folderKind = (source: string) => {
+    for (let folder = posix.dirname(source); ; folder = posix.dirname(folder)) {
+      const kind = folders.get(folder === "." ? "" : folder)?.diataxis;
+      if (kind || folder === ".") {
+        return kind;
+      }
+    }
+  };
   const pages = drafts.map(({ source, modified, raw, data, body }) => {
     if (data.icon != null && (typeof data.icon !== "string" || !isIcon(normalizeIcon(data.icon)))) {
       problems.push(
@@ -123,6 +142,11 @@ export async function loadSite(config: Config): Promise<Site> {
     }
     if (data.byline != null && typeof data.byline !== "string") {
       problems.push(`${source}: frontmatter "byline" must be text`);
+    }
+    if (data.diataxis != null && !diataxisKind(data.diataxis)) {
+      warnings.push(
+        `${source}: frontmatter "diataxis" is not tutorials, how-to, reference or explanation: "${String(data.diataxis)}", so it was ignored`,
+      );
     }
     const slug = source.replace(/\.md$/, "");
     const url = pageUrl(slug);
@@ -135,6 +159,8 @@ export async function loadSite(config: Config): Promise<Site> {
       description: typeof data.description === "string" ? data.description : "",
       icon: typeof data.icon === "string" ? normalizeIcon(data.icon) : undefined,
       byline: typeof data.byline === "string" ? data.byline.trim() || undefined : undefined,
+      diataxis:
+        diataxisKind(data.diataxis) ?? diataxisKind(/\.([a-z-]+)\.md$/i.exec(source)?.[1]) ?? folderKind(source),
       tags: readTags(data.tags, source, problems),
       hide: Array.isArray(data.hide) ? data.hide.map(String) : [],
       order: typeof data.order === "number" ? data.order : Infinity,
@@ -195,7 +221,7 @@ export async function loadSite(config: Config): Promise<Site> {
       const path = decodeURIComponent(target.pathname)
         .slice(1)
         .replace(/\.md\/$/, ".md");
-      if (path.endsWith(".md")) {
+      if (path.endsWith(".md") && !files.has("/" + path)) {
         const linked = bySource.get(path);
         if (!linked) {
           warnings.push(`${page.source}: broken link to ${href}`);

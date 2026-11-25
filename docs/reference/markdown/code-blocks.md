@@ -6,7 +6,7 @@ icon: file-code
 byline: The nodeps maintainers
 ---
 
-Highlighted on the server. A `mermaid` block renders as a [diagram](./diagrams-and-math.md). Languages: `ts`, `js`, `tsx`, `jsx`, `json`, `sh`, `bash`, `css`, `html`, `xml`, `toml`, `yaml`, `python`, `rust`, `go`, `sql`, `diff`, `dockerfile`, `nginx`. Other languages, such as `svelte`, render as escaped plain text with no warning, and the copy button still works. Grammars are built in: a site cannot add one.
+Highlighted on the server. A `mermaid` block renders as a [diagram](./diagrams-and-math.md). Languages: `ts`, `js`, `tsx`, `jsx`, `json`, `sh`, `bash`, `css`, `html`, `xml`, `toml`, `yaml`, `python`, `rust`, `go`, `sql`, `diff`, `dockerfile`, `nginx`. `svelte` and `vue` use the HTML grammar: tags and attributes are highlighted, the script and `{…}` expressions are not. Any other language renders as escaped plain text, with no warning and no error, and the copy button still works. Grammars are built in: a site cannot add one.
 
 ## Options
 

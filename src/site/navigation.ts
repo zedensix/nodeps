@@ -29,7 +29,8 @@ export interface Category {
 /**
  * Builds the sidebar from the `nav` list in docs.yaml. Top-level sections
  * become categories, loose entries are gathered into a leading "Home"
- * category, and entries that match no page are dropped with a warning.
+ * category, and entries that match no page are dropped with a warning. A
+ * category takes the Diataxis kind its pages share, if they all share one.
  */
 export function buildCategoriesFromNav(
   nav: NavEntry[],
@@ -96,6 +97,8 @@ export function buildCategoriesFromNav(
     for (const page of category.pages) {
       page.category = category;
     }
+    const kinds = new Set(category.pages.map((page) => page.diataxis));
+    category.diataxis = kinds.size === 1 ? [...kinds][0] : undefined;
   }
   return categories;
 }

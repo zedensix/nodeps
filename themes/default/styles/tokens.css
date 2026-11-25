@@ -14,6 +14,11 @@
   --sidebar-width: 17rem;
   --toc-width: 15rem;
   --prose-width: 46rem;
+  --font-size: 1rem;
+  --h1-size: clamp(2rem, 1.6rem + 1.2vw, 2.6rem);
+  --h2-size: 1.55rem;
+  --h3-size: 1.2rem;
+  --h4-size: 1rem;
 
   --background: light-dark(var(--light-background, #ffffff), var(--dark-background, #0b0b0f));
   --surface: light-dark(var(--light-surface, #f7f7f9), var(--dark-surface, #121218));
@@ -53,6 +58,31 @@
   --important: light-dark(var(--light-important, #7c3aed), var(--dark-important, #a78bfa));
   --warning: light-dark(var(--light-warning, #d97706), var(--dark-warning, #fbbf24));
   --caution: light-dark(var(--light-caution, #dc2626), var(--dark-caution, #f87171));
+
+  --link: light-dark(var(--light-link, var(--accent)), var(--dark-link, var(--accent)));
+  --diataxis-tutorials: light-dark(
+    var(--light-diataxis-tutorials, var(--tip)),
+    var(--dark-diataxis-tutorials, var(--tip))
+  );
+  --diataxis-how-to: light-dark(var(--light-diataxis-how-to, var(--note)), var(--dark-diataxis-how-to, var(--note)));
+  --diataxis-reference: light-dark(
+    var(--light-diataxis-reference, var(--important)),
+    var(--dark-diataxis-reference, var(--important))
+  );
+  --diataxis-explanation: light-dark(
+    var(--light-diataxis-explanation, var(--warning)),
+    var(--dark-diataxis-explanation, var(--warning))
+  );
+
+  --abstract: light-dark(var(--light-abstract, #0284c7), var(--dark-abstract, #38bdf8));
+  --info: light-dark(var(--light-info, #0891b2), var(--dark-info, #22d3ee));
+  --success: light-dark(var(--light-success, #16a34a), var(--dark-success, #4ade80));
+  --question: light-dark(var(--light-question, #65a30d), var(--dark-question, #a3e635));
+  --failure: light-dark(var(--light-failure, #dc2626), var(--dark-failure, #f87171));
+  --danger: light-dark(var(--light-danger, #e11d48), var(--dark-danger, #fb7185));
+  --bug: light-dark(var(--light-bug, #db2777), var(--dark-bug, #f472b6));
+  --example: light-dark(var(--light-example, #7c3aed), var(--dark-example, #a78bfa));
+  --quote: light-dark(var(--light-quote, #6b7280), var(--dark-quote, #9ca3af));
 }
 
 :root[data-theme="light"] {

@@ -55,6 +55,18 @@ function logoUrl(site: Site) {
 }
 
 /**
+ * Resolves the favicon: `favicon`, then `logo`, against the site base, or the
+ * book icon in the accent color as an inline SVG when neither is set.
+ */
+function faviconUrl(site: Site) {
+  const favicon = site.config.favicon ?? site.config.logo;
+  if (favicon) {
+    return site.config.base + favicon.replace(/^\.?\//, "");
+  }
+  return `data:image/svg+xml,${encodeURIComponent(icon("book-open").replaceAll("currentColor", site.config.theme.accent))}`;
+}
+
+/**
  * Renders the header brand: the logo when there is one, then the site title.
  */
 function brand(site: Site) {
@@ -135,7 +147,6 @@ export function renderDocument(site: Site, options: RenderOptions, parts: Docume
   const { config } = site;
   const page = parts.page;
   const fullTitle = page?.url === "/" ? config.title : `${parts.title} · ${config.title}`;
-  const logo = logoUrl(site);
   const head = [
     `<meta name="description" content="${escape(parts.description)}">`,
     `<meta property="og:title" content="${escape(fullTitle)}">`,
@@ -147,7 +158,7 @@ export function renderDocument(site: Site, options: RenderOptions, parts: Docume
     config.url
       ? `<link rel="alternate" type="application/rss+xml" href="${escape(config.base)}feed.xml" title="${escape(config.title)}">`
       : "",
-    logo ? `<link rel="icon" href="${escape(logo)}">` : "",
+    `<link rel="icon" href="${escape(faviconUrl(site))}">`,
     themeStyle(config.theme),
     site.customStylesheet ? `<link rel="stylesheet" href="${escape(site.customStylesheet)}">` : "",
     options.dev ? liveReload(config.base) : "",
@@ -218,12 +229,12 @@ export function renderDocument(site: Site, options: RenderOptions, parts: Docume
     .on("[data-slot]", {
       /**
        * Replaces the element's content with its slot's HTML. An unknown slot
-       * keeps the template's own content.
+       * keeps the template's own content; an element `data-if` removed stays out.
        */
       element(element) {
         const content = slots[element.getAttribute("data-slot")!];
         element.removeAttribute("data-slot");
-        if (content !== undefined) {
+        if (content !== undefined && !element.removed) {
           element.setInnerContent(content, { html: true });
         }
       },

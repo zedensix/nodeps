@@ -30,19 +30,19 @@
 }
 
 .tree[data-diataxis="tutorials"] {
-  --kind: var(--tip);
+  --kind: var(--diataxis-tutorials);
 }
 
 .tree[data-diataxis="how-to"] {
-  --kind: var(--note);
+  --kind: var(--diataxis-how-to);
 }
 
 .tree[data-diataxis="reference"] {
-  --kind: var(--important);
+  --kind: var(--diataxis-reference);
 }
 
 .tree[data-diataxis="explanation"] {
-  --kind: var(--warning);
+  --kind: var(--diataxis-explanation);
 }
 
 .sidebar-text {

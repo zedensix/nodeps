@@ -41,7 +41,7 @@ nav:
 | `Title: https://…` | An external link                                                                      |
 | `Title: [ … ]`     | A section. At the top level, a header tab. A first `index.md` child becomes its index |
 
-Top-level pages are grouped into a first tab named "Home". Pages left out of `nav` still build.
+Top-level pages are grouped into a first tab named "Home": a top-level `Title: page.md` entry does not get a tab of its own. Pages left out of `nav` still build. With `nav`, `_folder.yaml` only contributes `diataxis`.
 
 ## sidebar
 
@@ -63,11 +63,11 @@ description: Lessons that take you by the hand.
 dropdown: true
 ```
 
-| Key           | Description                                                                |
-| ------------- | -------------------------------------------------------------------------- |
-| `title`       | Tab or branch label. Default: the folder's `index.md` title, then its name |
-| `icon`        | Icon name                                                                  |
-| `order`       | Position among sections or branches                                        |
-| `description` | Shown on the homepage card                                                 |
-| `diataxis`    | `tutorials`, `how-to`, `reference` or `explanation`                        |
-| `dropdown`    | Overrides `sidebar.dropdowns` for this folder                              |
+| Key           | Description                                                                                         |
+| ------------- | --------------------------------------------------------------------------------------------------- |
+| `title`       | Tab or branch label. Default: the folder's `index.md` title, then its name                          |
+| `icon`        | Icon name                                                                                           |
+| `order`       | Position among sections or branches                                                                 |
+| `description` | Shown on the homepage card                                                                          |
+| `diataxis`    | `tutorials`, `how-to`, `reference` or `explanation`, for every page below that does not set its own |
+| `dropdown`    | Overrides `sidebar.dropdowns` for this folder                                                       |

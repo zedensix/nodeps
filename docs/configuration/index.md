@@ -10,11 +10,11 @@ resources:
     description: Every option set, ready to copy.
 ---
 
-| File             | Scope                                            | Reference                                 |
-| ---------------- | ------------------------------------------------ | ----------------------------------------- |
-| `docs.yaml`      | The whole site                                   | [Site](./site.md) and the pages below     |
-| `_folder.yaml`   | One folder: its title, icon, order and kind      | [Navigation](./navigation.md#_folderyaml) |
-| Page frontmatter | One page: icon, byline, tags, resources and more | [Pages](./pages.md)                       |
+| File             | Scope                                            | Reference                                |
+| ---------------- | ------------------------------------------------ | ---------------------------------------- |
+| `docs.yaml`      | The whole site                                   | [Site](./site.md) and the pages below    |
+| `_folder.yaml`   | One folder: its title, icon, order and kind      | [Navigation](./navigation.md#folderyaml) |
+| Page frontmatter | One page: icon, byline, tags, resources and more | [Pages](./pages.md)                      |
 
 Every key of `docs.yaml` is optional. Paths in it are relative to the file. An unknown value fails the build with the name of the key, and `nodeps dev` keeps the last working version online while you fix it.
 

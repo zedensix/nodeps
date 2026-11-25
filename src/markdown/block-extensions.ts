@@ -40,6 +40,15 @@ const admonitionAliases: Record<string, string> = {
 };
 
 /**
+ * Whether nodeps styles an admonition type, by its name or an alias, in any
+ * letter case.
+ */
+export function isAdmonitionType(type: string) {
+  const name = type.toLowerCase();
+  return name in admonitionTypes || name in admonitionAliases;
+}
+
+/**
  * Renders a `!!!` admonition as a div, or a `???`/`???+` one as a collapsible
  * details element (open with `+`). Unknown types keep their name as title but
  * take the note styling; `""` as title drops the title bar of a `!!!` block.

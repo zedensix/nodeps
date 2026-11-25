@@ -41,10 +41,10 @@ const diataxisPages: Record<DiataxisKind, { label: string; url: string; icon: st
 
 /**
  * Renders the badge naming the page's Diataxis kind, linking to its definition
- * on diataxis.fr. Empty when the category has no kind or the site turns badges off.
+ * on diataxis.fr. Empty when the page has no kind or the site turns badges off.
  */
 function diataxisBadge(site: Site, page: Page) {
-  const kind = page.category?.diataxis;
+  const kind = page.diataxis;
   if (!kind || !site.config.diataxis.badge) {
     return "";
   }

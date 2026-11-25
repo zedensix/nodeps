@@ -41,6 +41,8 @@ Visible, can be closed.
 
 ## Types
 
+Each type has its own icon and a color you can change with the [design token](../../configuration/design-tokens.md#alerts-and-admonitions) of the same name.
+
 | Type       | Aliases                |
 | ---------- | ---------------------- |
 | `note`     |                        |
@@ -55,6 +57,8 @@ Visible, can be closed.
 | `bug`      |                        |
 | `example`  |                        |
 | `quote`    | `cite`                 |
+
+Any other type keeps its name as the title and takes the `note` color and icon. `nodeps migrate` lists such types with the first page using each.
 
 ## GitHub alerts
 

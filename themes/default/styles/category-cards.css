@@ -36,19 +36,19 @@
 }
 
 .category-card[data-diataxis="tutorials"] {
-  --card: var(--tip);
+  --card: var(--diataxis-tutorials);
 }
 
 .category-card[data-diataxis="how-to"] {
-  --card: var(--note);
+  --card: var(--diataxis-how-to);
 }
 
 .category-card[data-diataxis="reference"] {
-  --card: var(--important);
+  --card: var(--diataxis-reference);
 }
 
 .category-card[data-diataxis="explanation"] {
-  --card: var(--warning);
+  --card: var(--diataxis-explanation);
 }
 
 .prose a.card-heading {

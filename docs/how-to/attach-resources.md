@@ -46,7 +46,7 @@ resources:
   - skills/acme-deploy
 ```
 
-Readers get a **Download skill** button for a `.tar.gz` of the folder, built by the server, and a link to the `SKILL.md`. The folder is not turned into pages.
+Readers get a **Download skill** button for a `.tar.gz` of the folder, built by the server, and a link to the `SKILL.md`. The folder is not turned into pages, and it does not belong in `nav`. A link to its `SKILL.md` from any page opens the file.
 
 ## Install a downloaded skill in Claude Code
 

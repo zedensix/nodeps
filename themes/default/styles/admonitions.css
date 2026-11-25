@@ -1,37 +1,37 @@
 .prose .alert-abstract {
-  --alert: light-dark(#0284c7, #38bdf8);
+  --alert: var(--abstract);
 }
 
 .prose .alert-info {
-  --alert: light-dark(#0891b2, #22d3ee);
+  --alert: var(--info);
 }
 
 .prose .alert-success {
-  --alert: light-dark(#16a34a, #4ade80);
+  --alert: var(--success);
 }
 
 .prose .alert-question {
-  --alert: light-dark(#65a30d, #a3e635);
+  --alert: var(--question);
 }
 
 .prose .alert-failure {
-  --alert: light-dark(#dc2626, #f87171);
+  --alert: var(--failure);
 }
 
 .prose .alert-danger {
-  --alert: light-dark(#e11d48, #fb7185);
+  --alert: var(--danger);
 }
 
 .prose .alert-bug {
-  --alert: light-dark(#db2777, #f472b6);
+  --alert: var(--bug);
 }
 
 .prose .alert-example {
-  --alert: light-dark(#7c3aed, #a78bfa);
+  --alert: var(--example);
 }
 
 .prose .alert-quote {
-  --alert: light-dark(#6b7280, #9ca3af);
+  --alert: var(--quote);
 }
 
 .prose div.admonition,

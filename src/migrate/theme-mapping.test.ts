@@ -136,3 +136,17 @@ test("a dark-only palette keeps its color and says dark cannot be forced", async
   expect(report.config.theme).toEqual({ accent: "#ffc105" });
   expect(report.warnings.some((line) => line.startsWith("theme.palette.scheme: slate cannot be forced"))).toBe(true);
 });
+
+test("a custom primary is read from --md-primary-fg-color in the first extra_css file", async () => {
+  const report = await planMigration(
+    await project({
+      "mkdocs.yml":
+        "site_name: Brand\ntheme:\n  favicon: images/favicon.png\n  palette:\n    primary: custom\nextra_css:\n  - css/brand.css\n",
+      "docs/index.md": home,
+      "docs/css/brand.css": ":root {\n  --md-primary-fg-color: #1e3a8a;\n}\n",
+    }),
+  );
+  expect(report.config.theme).toEqual({ accent: "#1e3a8a", stylesheet: "docs/css/brand.css" });
+  expect(report.config.favicon).toBe("images/favicon.png");
+  expect(report.warnings.some((line) => line.startsWith("theme.palette.primary: custom"))).toBe(false);
+});

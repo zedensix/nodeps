@@ -67,7 +67,9 @@ try {
       const target = await writeMigration(mkdocsPath, report);
       console.log(`\nWrote ${target}. Check the result with: nodeps dev`);
     } else {
-      console.log(`\ndocs.yaml preview:\n\n${renderConfig(report.config)}\nRun again with --write to apply.`);
+      console.log(
+        `\ndocs.yaml preview:\n\n${renderConfig(report.config, report.comments)}\nRun again with --write to apply.`,
+      );
     }
   } else {
     console.error(`Unknown command "${command}"\n\n${usage}`);

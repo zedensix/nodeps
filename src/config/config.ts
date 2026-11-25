@@ -48,6 +48,7 @@ export interface Config {
   source: string;
   output: string;
   logo?: string;
+  favicon?: string;
   repository?: Repository;
   footer?: string;
   links: Link[];
@@ -181,6 +182,7 @@ function parseConfig(file: string, data: Mapping): Config {
     source,
     output,
     logo: readString(data, "logo"),
+    favicon: readString(data, "favicon"),
     repository: readRepository(data, root, source),
     editor: readEditor(data),
     footer: readString(data, "footer"),

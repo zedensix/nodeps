@@ -16,7 +16,7 @@ body {
       no-repeat,
     var(--background);
   color: var(--text);
-  font: 400 1rem/1.7 var(--font);
+  font: 400 var(--font-size)/1.7 var(--font);
   font-feature-settings: "cv11", "ss01";
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;

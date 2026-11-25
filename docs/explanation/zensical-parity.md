@@ -11,23 +11,24 @@ Zensical, by the team behind Material for MkDocs, reads `mkdocs.yml` and renders
 
 ## Authoring
 
-| Feature                                                              | nodeps                                 |
-| -------------------------------------------------------------------- | -------------------------------------- |
-| Admonitions, collapsible blocks, GitHub callouts                     | Yes                                    |
-| Content tabs, linked                                                 | Yes                                    |
-| Code blocks: title, `hl_lines`, `linenums`, copy                     | Yes                                    |
-| Code annotations `# (1)!`                                            | No                                     |
-| Inline highlighting `` `#!py …` ``                                   | No                                     |
-| Custom Pygments lexers (Svelte and others)                           | No: plain text, built-in grammars only |
-| Snippets `--8<--`                                                    | Yes                                    |
-| Icons: Lucide, Material, Font Awesome, Octicons, Simple Icons; emoji | Yes                                    |
-| Mermaid diagrams, math                                               | Yes, loaded from a CDN when used       |
-| Footnotes, definition lists, abbreviations                           | Yes                                    |
-| Keys, mark, insert, sub, sup                                         | Yes                                    |
-| Attribute lists, buttons, grids and cards                            | Yes                                    |
-| Image captions, `#only-light` / `#only-dark`                         | No                                     |
-| Smart symbols, magic links                                           | No                                     |
-| Front matter `hide`, `tags`, `icon`                                  | Yes                                    |
+| Feature                                                              | nodeps                           |
+| -------------------------------------------------------------------- | -------------------------------- |
+| Admonitions, collapsible blocks, GitHub callouts                     | Yes                              |
+| Content tabs, linked                                                 | Yes                              |
+| Code blocks: title, `hl_lines`, `linenums`, copy                     | Yes                              |
+| Code annotations `# (1)!`                                            | No                               |
+| Inline highlighting `` `#!py …` ``                                   | No                               |
+| Custom Pygments lexers                                               | No: built-in grammars only       |
+| Snippets `--8<--`                                                    | Yes                              |
+| Icons: Lucide, Material, Font Awesome, Octicons, Simple Icons; emoji | Yes                              |
+| Mermaid diagrams, math                                               | Yes, loaded from a CDN when used |
+| Footnotes, definition lists, abbreviations                           | Yes                              |
+| Keys, mark, insert, sub, sup                                         | Yes                              |
+| Attribute lists, buttons, grids and cards                            | Yes                              |
+| Image captions, `#only-light` / `#only-dark`                         | No                               |
+| Smart symbols, magic links                                           | No                               |
+| Front matter `hide`, `tags`, `icon`                                  | Yes                              |
+| Admonition colors per type                                           | Yes, one design token per type   |
 
 ## Site
 
@@ -50,7 +51,9 @@ Zensical, by the team behind Material for MkDocs, reads `mkdocs.yml` and renders
 | `extra_javascript`                                                  | No setting: load scripts from a theme's `head.html`        |
 | Google Fonts (`theme.font`)                                         | No download: install or self-host the font                 |
 | awesome-nav `.nav.yml` files                                        | Converted to `nav` by `nodeps migrate`                     |
+| `theme.favicon`                                                     | Yes, as `favicon`                                          |
+| Header, tabs, link and heading styling from CSS                     | Yes, as [design tokens](../configuration/design-tokens.md) |
 
 ## Only in nodeps
 
-A visual editor that opens pull requests, an MCP server, Diátaxis sections with a homepage compass, page resources and AI skills, reader mode, and a single binary that serves and exports.
+A visual editor that opens pull requests, an MCP server, Diátaxis kinds per page or folder with a homepage compass, page resources and AI skills, reader mode, and a single binary that serves and exports.

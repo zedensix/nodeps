@@ -36,10 +36,11 @@ function readNavFile(directory: string, source: string) {
 /**
  * Translates the `.nav.yml` files of an awesome-nav docs tree into one
  * docs.yaml `nav` list in the same order. Keys and values it cannot express
- * become warnings naming the file and key. Undefined when the tree has no
- * `.nav.yml` file, so the folder-based sidebar is kept.
+ * become warnings naming the file and key. An expanded glob adds a comment for
+ * the top of docs.yaml. Undefined when the tree has no `.nav.yml` file, so the
+ * folder-based sidebar is kept.
  */
-export function translateAwesomeNav(source: string, warnings: string[]): NavEntry[] | undefined {
+export function translateAwesomeNav(source: string, warnings: string[], comments: string[]): NavEntry[] | undefined {
   const navFiles = [...new Bun.Glob("**/.nav.{yml,yaml}").scanSync({ cwd: source, dot: true })];
   if (navFiles.length === 0) {
     return undefined;
@@ -83,6 +84,24 @@ export function translateAwesomeNav(source: string, warnings: string[]): NavEntr
     const descending = sort.direction === "desc" || data.order === "desc";
     const ignore = typeof data.ignore === "string" ? new Bun.Glob(data.ignore) : undefined;
     const listed = new Set<string>();
+    /**
+     * Collects the paths a `nav` list names outright, at any depth, which a
+     * glob in the same list leaves out as awesome-nav does.
+     */
+    const named = (entries: unknown[]): string[] =>
+      entries.flatMap((entry) => {
+        const target =
+          typeof entry === "string"
+            ? entry
+            : typeof entry === "object" && entry !== null
+              ? Object.values(entry)[0]
+              : undefined;
+        if (Array.isArray(target)) {
+          return named(target);
+        }
+        return typeof target === "string" && !/[*?[]/.test(target) ? [join(directory, target.replace(/\/$/, ""))] : [];
+      });
+    const explicit = new Set(named(nav ?? []));
 
     /**
      * Translates one entry of a `nav` list, resolving pages and folders
@@ -94,12 +113,20 @@ export function translateAwesomeNav(source: string, warnings: string[]): NavEntr
           return [entry];
         }
         if (/[*?[]/.test(entry)) {
-          const matches = [...new Bun.Glob(entry).scanSync({ cwd: base })].filter(isPage).sort();
+          const matches = [...new Bun.Glob(entry).scanSync({ cwd: base, onlyFiles: false })]
+            .filter((match) => isPage(match) || isDirectory(join(base, match)))
+            .filter((match) => !explicit.has(join(base, match)) && !listed.has(join(base, match)))
+            .sort();
           warnings.push(
             matches.length > 0
-              ? `${file}: glob "${entry}" was expanded to ${matches.length} pages in name order; pages added later are not picked up, so add them to docs.yaml nav.`
-              : `${file}: glob "${entry}" matches no page and was dropped.`,
+              ? `${file}: glob "${entry}" was expanded to ${matches.length} entries in name order, leaving out those listed elsewhere in the file; pages added later are not picked up, so add them to docs.yaml nav.`
+              : `${file}: glob "${entry}" matches nothing that is not already listed and was dropped.`,
           );
+          if (matches.length > 0 && comments.length === 0) {
+            comments.push(
+              "nav: the globs of the .nav.yml files were expanded when migrating. This list is a snapshot: add new pages to it by hand.",
+            );
+          }
           return matches.flatMap((match) => translate(match, base));
         }
         return translate({ [""]: entry }, base);

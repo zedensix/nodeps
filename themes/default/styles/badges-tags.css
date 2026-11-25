@@ -36,19 +36,19 @@
 }
 
 .diataxis-badge[data-diataxis="tutorials"] {
-  --kind: var(--tip);
+  --kind: var(--diataxis-tutorials);
 }
 
 .diataxis-badge[data-diataxis="how-to"] {
-  --kind: var(--note);
+  --kind: var(--diataxis-how-to);
 }
 
 .diataxis-badge[data-diataxis="reference"] {
-  --kind: var(--important);
+  --kind: var(--diataxis-reference);
 }
 
 .diataxis-badge[data-diataxis="explanation"] {
-  --kind: var(--warning);
+  --kind: var(--diataxis-explanation);
 }
 
 .diataxis-badge .icon {

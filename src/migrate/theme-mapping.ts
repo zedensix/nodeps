@@ -1,3 +1,4 @@
+import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import type { MigrationReport } from "./migrate.ts";
 import { materialColors } from "./mkdocs-support.ts";
@@ -17,10 +18,12 @@ function materialColor(name: unknown) {
 /**
  * Maps `theme.palette`: the light scheme's named primary becomes the accent,
  * a different dark one `theme.dark.accent`, and `accent` stands in when
- * primary is not a named color. Custom colors, unknown names and scheme
- * toggles are reported with what nodeps does instead.
+ * primary is not a named color. A custom primary is read from
+ * `--md-primary-fg-color` in `stylesheetPath`, the first local extra_css file.
+ * Other custom colors, unknown names and scheme toggles are reported with
+ * what nodeps does instead.
  */
-function mapPalette(palette: unknown, themeConfig: Mapping, report: MigrationReport) {
+function mapPalette(palette: unknown, themeConfig: Mapping, report: MigrationReport, stylesheetPath?: string) {
   const entries = (Array.isArray(palette) ? palette : palette ? [palette] : []) as Mapping[];
   if (entries.length === 0) {
     return;
@@ -31,7 +34,12 @@ function mapPalette(palette: unknown, themeConfig: Mapping, report: MigrationRep
     entries.find((entry) => entry.scheme !== "slate") ??
     entries[0]!;
   const dark = entries.find((entry) => entry.scheme === "slate");
-  const reported = new Set<string>();
+  const customValue =
+    light.primary === "custom" && stylesheetPath && existsSync(stylesheetPath)
+      ? /--md-primary-fg-color\s*:\s*([^;}]+)/.exec(readFileSync(stylesheetPath, "utf8"))?.[1]?.trim()
+      : undefined;
+  const custom = customValue?.includes("var(") ? undefined : customValue;
+  const reported = new Set<string>(custom ? ["primary:custom"] : []);
   for (const entry of entries) {
     for (const key of ["primary", "accent"]) {
       const value = entry[key];
@@ -46,11 +54,13 @@ function mapPalette(palette: unknown, themeConfig: Mapping, report: MigrationRep
       );
     }
   }
-  const primary = materialColor(light.primary);
+  const primary = materialColor(light.primary) ?? custom;
   const accent = materialColor(light.accent);
   if (primary) {
     themeConfig.accent = primary;
-    report.mapped.push(`theme.palette.primary (${String(light.primary)}) → theme.accent`);
+    report.mapped.push(
+      `theme.palette.primary (${custom ? `custom, --md-primary-fg-color: ${custom}` : String(light.primary)}) → theme.accent`,
+    );
     if (accent) {
       report.warnings.push(
         `theme.palette.accent (${String(light.accent)}) was not used: nodeps has one brand color and took primary. Swap theme.accent in docs.yaml if you prefer the accent.`,
@@ -142,12 +152,16 @@ function mapStylesheets(extraCss: unknown, source: string, themeConfig: Mapping,
 /**
  * Maps the theme-related settings of mkdocs.yml into `config.theme` and the
  * report: palette, fonts, extra stylesheets, plus explained refusals for
- * extra scripts and Jinja template overrides.
+ * extra scripts and Jinja template overrides. `source` is the absolute docs
+ * folder, where extra_css files are read.
  */
-export function mapTheme(mkdocs: Mapping, config: Mapping, report: MigrationReport) {
+export function mapTheme(mkdocs: Mapping, config: Mapping, report: MigrationReport, source: string) {
   const theme = (mkdocs.theme ?? {}) as Mapping;
   const themeConfig: Mapping = {};
-  mapPalette(theme.palette, themeConfig, report);
+  const firstStylesheet = (Array.isArray(mkdocs.extra_css) ? mkdocs.extra_css : []).find(
+    (entry): entry is string => typeof entry === "string" && !/^[a-z][a-z\d+.-]*:/i.test(entry),
+  );
+  mapPalette(theme.palette, themeConfig, report, firstStylesheet && join(source, firstStylesheet));
   mapFonts(theme.font, themeConfig, report);
   mapStylesheets(mkdocs.extra_css, String(config.source ?? "docs"), themeConfig, report);
   if (Object.keys(themeConfig).length > 0) {

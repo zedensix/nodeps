@@ -7,7 +7,7 @@
   top: 0;
   z-index: 20;
   border-bottom: 1px solid var(--border);
-  background: color-mix(in oklab, var(--background) 80%, transparent);
+  background: var(--header-background, color-mix(in oklab, var(--background) 80%, transparent));
   backdrop-filter: blur(14px) saturate(1.5);
 }
 
@@ -24,6 +24,7 @@
   gap: 1.75rem;
   height: var(--tabs-height);
   padding: 0 1.25rem;
+  background: var(--tabs-background, none);
   overflow-x: auto;
   scrollbar-width: none;
 }
@@ -33,7 +34,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  color: var(--text-muted);
+  color: var(--tabs-text, var(--header-text, var(--text-muted)));
   font-size: 0.9rem;
   font-weight: 500;
   text-decoration: none;
@@ -43,18 +44,18 @@
 
 .category-tabs a:hover,
 .category-tabs a[aria-current] {
-  color: var(--text);
+  color: var(--tabs-text, var(--header-text, var(--text)));
 }
 
 .category-tabs .icon {
   width: 1rem;
   height: 1rem;
-  color: var(--text-subtle);
+  color: var(--tabs-text, var(--header-text, var(--text-subtle)));
   transition: color 0.15s;
 }
 
 .category-tabs a:hover .icon {
-  color: var(--text);
+  color: var(--tabs-text, var(--header-text, var(--text)));
 }
 
 .category-tabs a[aria-current] .icon {
@@ -68,7 +69,7 @@
   left: 0;
   height: 2px;
   border-radius: 2px;
-  background: var(--accent);
+  background: var(--tabs-text, var(--header-text, var(--accent)));
   view-transition-name: tab-indicator;
 }
 
@@ -77,7 +78,7 @@
   align-items: center;
   gap: 0.625rem;
   margin-right: 1.5rem;
-  color: var(--text);
+  color: var(--header-text, var(--text));
   font-weight: 680;
   font-size: 1.05rem;
   letter-spacing: -0.015em;
@@ -100,7 +101,7 @@
   border: 0;
   border-radius: calc(var(--radius) - 2px);
   background: transparent;
-  color: var(--text-muted);
+  color: var(--header-text, var(--text-muted));
   transition:
     background 0.15s,
     color 0.15s;
@@ -108,7 +109,7 @@
 
 .icon-button:hover {
   background: var(--surface-strong);
-  color: var(--text);
+  color: var(--header-text, var(--text));
 }
 
 .menu-toggle {
@@ -151,7 +152,7 @@
 }
 
 .header-links a {
-  color: var(--text-muted);
+  color: var(--header-text, var(--text-muted));
   font-size: 0.9rem;
   font-weight: 500;
   text-decoration: none;
@@ -182,7 +183,7 @@
 }
 
 .header-links a:hover {
-  color: var(--text);
+  color: var(--header-text, var(--text));
 }
 
 .header-links:empty + .theme-picker {

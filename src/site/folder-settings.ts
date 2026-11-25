@@ -14,6 +14,20 @@ export interface FolderSettings {
 
 export const folderFile = "_folder.yaml";
 
+const diataxisAliases: Record<string, DiataxisKind> = { howto: "how-to", tutorial: "tutorials" };
+
+/**
+ * Reads a Diataxis kind, accepting `howto` and `tutorial` as aliases and any
+ * letter case. Undefined for anything else.
+ */
+export function diataxisKind(value: unknown): DiataxisKind | undefined {
+  if (typeof value !== "string") {
+    return undefined;
+  }
+  const kind = diataxisAliases[value.toLowerCase()] ?? value.toLowerCase();
+  return diataxisKinds.includes(kind as DiataxisKind) ? (kind as DiataxisKind) : undefined;
+}
+
 /**
  * Reads and validates a `_folder.yaml` file. Any bad key throws with the file
  * path in the message, so a typo stops the build instead of being ignored.
@@ -62,10 +76,10 @@ export async function readFolderSettings(path: string): Promise<FolderSettings> 
     settings.description = data.description;
   }
   if (data.diataxis !== undefined) {
-    if (!diataxisKinds.includes(data.diataxis as DiataxisKind)) {
+    settings.diataxis = diataxisKind(data.diataxis);
+    if (!settings.diataxis) {
       throw new Error(`${path}: "diataxis" must be one of ${diataxisKinds.join(", ")}`);
     }
-    settings.diataxis = data.diataxis as DiataxisKind;
   }
   return settings;
 }

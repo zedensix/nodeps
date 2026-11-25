@@ -122,6 +122,12 @@ export function readTokens(mapping: Mapping, path: string): Record<string, strin
     if (unsafeCss.test(String(value))) {
       fail(`${path}.${name}`, "a CSS value without < > { } ;");
     }
+    if (String(value).split("(").length !== String(value).split(")").length) {
+      fail(
+        `${path}.${name}`,
+        'a CSS value with balanced parentheses (quote a value holding " #": YAML reads the rest as a comment)',
+      );
+    }
     tokens[name] = String(value);
   }
   return tokens;

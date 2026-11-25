@@ -1,6 +1,9 @@
 import { existsSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { translateAwesomeNav } from "./awesome-nav.ts";
+import type { NavEntry } from "../config/config.ts";
+import { skillDirectories } from "../site/resources.ts";
+import { dropSkillEntries, warnUnknownAdmonitions } from "./content-checks.ts";
 import { supportedExtensions, supportedFeatures, supportedPlugins } from "./mkdocs-support.ts";
 import { mapTheme } from "./theme-mapping.ts";
 
@@ -75,6 +78,7 @@ export interface MigrationReport {
   unsupported: string[];
   warnings: string[];
   files: { path: string; content: string }[];
+  comments: string[];
 }
 
 const unsupportedKeys: Record<string, string> = {
@@ -107,6 +111,7 @@ export async function planMigration(mkdocsPath: string): Promise<MigrationReport
     unsupported: [],
     warnings: [],
     files: [],
+    comments: [],
   };
   const config = report.config;
   const map = (from: string, to: string, value: unknown) => {
@@ -123,6 +128,7 @@ export async function planMigration(mkdocsPath: string): Promise<MigrationReport
   map("site_dir", "output", mkdocs.site_dir ?? "site");
   map("copyright", "footer", typeof mkdocs.copyright === "string" ? stripHtml(mkdocs.copyright) : undefined);
   map("theme.logo", "logo", theme.logo);
+  map("theme.favicon", "favicon", theme.favicon);
 
   const features = names(theme.features);
   if (typeof mkdocs.repo_url === "string") {
@@ -154,7 +160,9 @@ export async function planMigration(mkdocsPath: string): Promise<MigrationReport
 
   const source = resolve(dirname(resolve(mkdocsPath)), String(config.source ?? "docs"));
   const plugins = names(mkdocs.plugins);
-  const awesomeNav = plugins.includes("awesome-nav") ? translateAwesomeNav(source, report.warnings) : undefined;
+  const awesomeNav = plugins.includes("awesome-nav")
+    ? translateAwesomeNav(source, report.warnings, report.comments)
+    : undefined;
   if (awesomeNav) {
     config.nav = awesomeNav;
     report.mapped.push(
@@ -163,8 +171,16 @@ export async function planMigration(mkdocsPath: string): Promise<MigrationReport
   } else if (mkdocs.nav) {
     map("nav", "nav", mkdocs.nav);
   }
+  const markdownFiles = [...new Bun.Glob("**/*.md").scanSync({ cwd: source })]
+    .map((path) => path.split("\\").join("/"))
+    .sort();
+  if (Array.isArray(config.nav)) {
+    const skills = new Set([...skillDirectories(markdownFiles)].filter((skill) => skill !== "."));
+    config.nav = dropSkillEntries(config.nav as NavEntry[], skills, report.warnings);
+  }
 
-  mapTheme(mkdocs, config, report);
+  mapTheme(mkdocs, config, report, source);
+  await warnUnknownAdmonitions(source, markdownFiles, report);
 
   for (const feature of features) {
     if (supportedFeatures.has(feature)) {
@@ -213,10 +229,11 @@ export async function planMigration(mkdocsPath: string): Promise<MigrationReport
 }
 
 /**
- * Renders a docs.yaml mapping as YAML text ending in a newline.
+ * Renders a docs.yaml mapping as YAML text ending in a newline, after the
+ * given comments.
  */
-export function renderConfig(config: Mapping) {
-  return `${yamlValue(config).trimStart()}\n`;
+export function renderConfig(config: Mapping, comments: string[] = []) {
+  return `${comments.map((comment) => `# ${comment}\n`).join("")}${yamlValue(config).trimStart()}\n`;
 }
 
 /**
@@ -231,7 +248,7 @@ export async function writeMigration(mkdocsPath: string, report: MigrationReport
       throw new Error(`${path} already exists; move it away to migrate again`);
     }
   }
-  await Bun.write(target, renderConfig(report.config));
+  await Bun.write(target, renderConfig(report.config, report.comments));
   for (const file of files) {
     await Bun.write(file.path, file.content);
   }
