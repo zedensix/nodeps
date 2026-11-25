@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+#MISE description="Compile nodeps from this checkout and install it as the nodeps command"
+#USAGE arg "[dir]" help="Directory to install into, ~/.local/bin by default"
+set -euo pipefail
+
+dir="${usage_dir:-${1:-$HOME/.local/bin}}"
+root="${MISE_PROJECT_ROOT:-$(pwd)}"
+
+version="$(git -C "$root" describe --tags --always --dirty 2>/dev/null || echo dev)"
+NODEPS_VERSION="${version#v}" bun "$root/.mise/tasks/compile.ts"
+mkdir -p "$dir"
+install -m 0755 "$root/build/nodeps" "$dir/nodeps"
+echo "Installed $("$dir/nodeps" --version) to $dir/nodeps"
+
+case ":$PATH:" in
+  *":$dir:"*) ;;
+  *) echo "warning: $dir is not on your PATH; add it to run nodeps by name" >&2 ;;
+esac
+found="$(command -v nodeps || true)"
+if [ -n "$found" ] && [ "$found" != "$dir/nodeps" ]; then
+  echo "warning: nodeps on your PATH is $found, which comes before $dir; remove it or reorder PATH" >&2
+fi

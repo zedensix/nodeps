@@ -21,6 +21,7 @@ mise install
 mise run dev        # live reload on http://localhost:3000
 mise run build      # static export
 mise run compile    # standalone binary in build/
+mise run cli:install  # compile and install as ~/.local/bin/nodeps
 ```
 
 The documentation lives in `docs/` and is served by the tool itself: start with `mise run dev`.

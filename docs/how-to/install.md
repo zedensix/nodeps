@@ -42,6 +42,17 @@ chmod +x nodeps-linux-x64
 ./nodeps-linux-x64 dev
 ```
 
+## From source
+
+With a clone of the repository and [mise](https://mise.jdx.dev):
+
+```sh
+mise install
+mise run cli:install
+```
+
+It compiles the checkout into the same standalone binary and installs it as `~/.local/bin/nodeps`; pass another directory to install there instead, like `mise run cli:install /usr/local/bin`. `nodeps --version` then prints the commit it was built from. It warns when the directory is not on your `PATH`, or when another `nodeps` comes first. Run it again to update.
+
 ## Check it works
 
 ```sh
