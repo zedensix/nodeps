@@ -1,6 +1,6 @@
 # nodeps
 
-A documentation site generator and server built only on Bun's native APIs: no `package.json`, no `node_modules`.
+A documentation site generator and server built only on Bun's native APIs: no runtime dependencies, nothing to install besides Bun.
 
 Markdown pages become a themeable site with search, instant navigation, a Diátaxis homepage, a WYSIWYG editor that turns edits into pull requests, downloadable resources and AI skills, `llms.txt`, Markdown twins of every page and an MCP server. It runs as a Bun server behind nginx, or exports static files.
 
@@ -39,10 +39,13 @@ Admonitions, content tabs, snippets, icons, Mermaid, math and the rest of the Py
 
 ```sh
 mise install              # installs Bun, prek and the git hooks
+bun install               # type definitions for editors, never shipped
 prek run --all-files --stage pre-push   # everything CI runs, including the compiled binary
 ```
 
-The hooks format with `bun fmt`, lint with `bun lint`, build the docs to catch broken pages, check YAML, JSON and TOML, audit workflows with zizmor and pinact, lint the Dockerfile with hadolint, and refuse commits with a Claude or Anthropic `Co-Authored-By` trailer. Pushing also compiles the binary and builds the docs with it. CI runs exactly the same prek command. `bun lint` needs the Bun canary build, which mise installs.
+The hooks format with `bun fmt`, lint with `bun lint`, build the docs to catch broken pages, check YAML, JSON and TOML, audit workflows with zizmor and pinact, lint the Dockerfile with hadolint, and refuse commits with a Claude or Anthropic `Co-Authored-By` trailer. Pushing also type-checks with `bun check` (installing the type definitions first), compiles the binary and builds the docs with it. CI runs exactly the same prek command. `bun lint` needs the Bun canary build, which mise installs.
+
+Server-rendered HTML is written as JSX (`.tsx` files starting with `/** @jsx h */`), turned into strings by the small factory in `src/render/jsx.ts`, with no React and no dependency. Text and attribute values are escaped by default; wrap HTML that is already safe, such as rendered Markdown or highlighted code, in `raw()`.
 
 ## Releases
 

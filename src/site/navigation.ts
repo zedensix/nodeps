@@ -177,7 +177,11 @@ export function buildCategories(
 
   const flatten = (items: NavItem[]): Page[] =>
     items.flatMap((item) =>
-      item.kind === "page" ? [item.page] : [...(item.index ? [item.index] : []), ...flatten(item.children)],
+      item.kind === "page"
+        ? [item.page]
+        : item.kind === "link"
+          ? []
+          : [...(item.index ? [item.index] : []), ...flatten(item.children)],
     );
 
   const byCategory = new Map<string, Page[]>();

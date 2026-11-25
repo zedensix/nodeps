@@ -1,5 +1,5 @@
 import { applyPreset, markCurrentPreset, setupColorMode, setupReaderMode } from "./appearance.ts";
-import { checkPendingEdit, openPageEditor } from "./editor/launcher.ts";
+import { checkPendingEdit, openEditorFromUrl, openPageEditor } from "./editor/launcher.ts";
 import {
   renderRichContent,
   revealActiveTab,
@@ -10,6 +10,7 @@ import {
 import { setupPageTransitions } from "./page-transitions.ts";
 import { openSearch, setupSearch } from "./search/dialog.ts";
 import { setDrawer, setupDrawers } from "./sidebar.ts";
+import { setupSidebarResize } from "./sidebar-resize.ts";
 import { base, markdownUrl } from "./site-paths.ts";
 
 if (!/Mac|iPhone|iPad/.test(navigator.userAgent)) {
@@ -43,6 +44,7 @@ async function copyText(button: HTMLElement, text: string | Promise<string>) {
 setupColorMode();
 setupReaderMode();
 setupDrawers();
+setupSidebarResize();
 
 document.addEventListener("click", (event) => {
   const target = event.target as HTMLElement;
@@ -81,6 +83,12 @@ document.addEventListener("click", (event) => {
     copyText(copyTextButton, copyTextButton.dataset.copyText!);
   }
 
+  const installButton = target.closest<HTMLButtonElement>("[data-copy-skill]");
+  if (installButton) {
+    const archive = new URL(installButton.dataset.copySkill!, location.href).href;
+    copyText(installButton, `mkdir -p ~/.claude/skills && curl -fsSL ${archive} | tar -xz -C ~/.claude/skills`);
+  }
+
   const editButton = target.closest<HTMLElement>("[data-edit-page]");
   if (editButton) {
     event.preventDefault();
@@ -108,10 +116,7 @@ document.addEventListener("click", (event) => {
 
 setupTabSync();
 
-if (location.hash === "#edit") {
-  history.replaceState(history.state, "", location.pathname + location.search);
-  openPageEditor();
-}
+openEditorFromUrl();
 checkPendingEdit();
 renderRichContent().catch((error) => console.error("Diagram or math rendering failed", error));
 markCurrentPreset();

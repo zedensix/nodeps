@@ -1,10 +1,11 @@
+/** @jsx h */
+/** @jsxFrag Fragment */
 import { pageHref } from "../output/ai.ts";
-import { renderDocument, time, type RenderOptions } from "./document.ts";
-import { icon } from "../icons/icons.ts";
+import { renderDocument, type RenderOptions } from "./document.ts";
+import { time } from "./document-parts.tsx";
 import type { DiataxisKind } from "../site/folder-settings.ts";
 import type { Page, Site } from "../site/site.ts";
-
-const escape = Bun.escapeHTML;
+import { Fragment, h, Icon, raw } from "./jsx.ts";
 
 const diataxisLabels: Record<DiataxisKind, string> = {
   tutorials: "Learning-oriented",
@@ -38,22 +39,42 @@ interface Card {
 function homeCard(site: Site, card: Card, home: Page) {
   const pages = [...new Set(card.pages)].filter((page) => page !== home);
   if (pages.length === 0) {
-    return "";
+    return <></>;
   }
   const latest = pages
     .toSorted((left, right) => right.updated.getTime() - left.updated.getTime())
-    .slice(0, site.config.home!.latest)
-    .map(
-      (page) =>
-        `<li><a href="${escape(pageHref(site, page))}">${page.icon ? icon(page.icon) : ""}<span>${escape(page.title)}</span>${time(page.updated)}</a></li>`,
-    )
-    .join("");
-  const kind = card.diataxis ? `<span class="card-kind">${diataxisLabels[card.diataxis]}</span>` : "";
-  return `<section class="category-card"${card.diataxis ? ` data-diataxis="${card.diataxis}"` : ""}>
-<a class="card-heading" href="${escape(pageHref(site, pages[0]!))}"><span class="card-icon">${icon(card.icon ?? "book-open")}</span><span><strong>${escape(card.title)}</strong>${kind}</span>${icon("arrow-right")}</a>
-${card.description ? `<p class="card-description">${escape(card.description)}</p>` : ""}
-${latest ? `<p class="card-latest">Latest</p><ul>${latest}</ul>` : ""}
-</section>`;
+    .slice(0, site.config.home!.latest);
+  return (
+    <section class="category-card" data-diataxis={card.diataxis}>
+      <a class="card-heading" href={pageHref(site, pages[0]!)}>
+        <span class="card-icon">
+          <Icon name={card.icon ?? "book-open"} />
+        </span>
+        <span>
+          <strong>{card.title}</strong>
+          {card.diataxis && <span class="card-kind">{diataxisLabels[card.diataxis]}</span>}
+        </span>
+        <Icon name="arrow-right" />
+      </a>
+      {card.description && <p class="card-description">{card.description}</p>}
+      {latest.length > 0 && (
+        <>
+          <p class="card-latest">Latest</p>
+          <ul>
+            {latest.map((page) => (
+              <li>
+                <a href={pageHref(site, page)}>
+                  {page.icon && <Icon name={page.icon} />}
+                  <span>{page.title}</span>
+                  {time(page.updated)}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+    </section>
+  );
 }
 
 /**
@@ -102,36 +123,47 @@ function resolveLink(site: Site, url: string) {
  */
 export function renderHome(site: Site, page: Page, options: RenderOptions) {
   const home = site.config.home!;
-  const actions = home.actions
-    .map(
-      (action, index) =>
-        `<a class="button${index === 0 ? " primary" : ""}" href="${escape(resolveLink(site, action.url))}">${escape(action.label)}${index === 0 ? icon("arrow-right") : ""}</a>`,
-    )
-    .join("");
-  const compass = compassCards(site)
-    .map((card) => homeCard(site, card, page))
-    .join("");
+  const compass = compassCards(site).map((card) => homeCard(site, card, page));
   const others = site.categories
     .filter((category) => category.folder !== "" && !category.diataxis)
-    .map((category) => homeCard(site, category, page))
-    .join("");
-  const compassHtml = compass
-    ? `<section class="compass" aria-label="Documentation by purpose"><div class="compass-axes" aria-hidden="true"><span>Practical</span><span>Theoretical</span><span>Study</span><span>Work</span></div><div class="compass-grid">${compass}</div></section>`
-    : "";
-  const othersHtml = others ? `<section class="category-grid">${others}</section>` : "";
+    .map((category) => homeCard(site, category, page));
   const body = page.hasTitleHeading ? page.html.replace(/<h1[\s>][\s\S]*?<\/h1>/, "") : page.html;
-  const article = `<section class="home-hero">
-<h1>${escape(home.headline)}</h1>
-${home.tagline ? `<p class="home-tagline">${escape(home.tagline)}</p>` : ""}
-${actions ? `<div class="home-actions">${actions}</div>` : ""}
-</section>
-${compassHtml}${othersHtml}
-${body.trim() ? `<div class="home-content">${body}</div>` : ""}`;
+  const article = (
+    <>
+      <section class="home-hero">
+        <h1>{home.headline}</h1>
+        {home.tagline && <p class="home-tagline">{home.tagline}</p>}
+        {home.actions.length > 0 && (
+          <div class="home-actions">
+            {home.actions.map((action, index) => (
+              <a class={index === 0 ? "button primary" : "button"} href={resolveLink(site, action.url)}>
+                {action.label}
+                {index === 0 && <Icon name="arrow-right" />}
+              </a>
+            ))}
+          </div>
+        )}
+      </section>
+      {compass.some(String) && (
+        <section class="compass" aria-label="Documentation by purpose">
+          <div class="compass-axes" aria-hidden="true">
+            <span>Practical</span>
+            <span>Theoretical</span>
+            <span>Study</span>
+            <span>Work</span>
+          </div>
+          <div class="compass-grid">{compass}</div>
+        </section>
+      )}
+      {others.some(String) && <section class="category-grid">{others}</section>}
+      {body.trim() && <div class="home-content">{raw(body)}</div>}
+    </>
+  );
   return renderDocument(site, options, {
     title: page.title,
     description: page.description || site.config.description,
     page,
     home: true,
-    article,
+    article: String(article),
   });
 }

@@ -209,7 +209,7 @@ export function setupSearch() {
       event.preventDefault();
       select(selected + (event.key === "ArrowDown" ? 1 : -1));
     } else if (event.key === "Enter") {
-      const link = results.querySelectorAll('li[role="option"] a')[selected];
+      const link = results.querySelectorAll<HTMLAnchorElement>('li[role="option"] a')[selected];
       if (link) {
         event.preventDefault();
         dialog.close();

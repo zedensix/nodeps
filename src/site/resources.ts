@@ -2,7 +2,7 @@ import { extname, posix } from "node:path";
 import { isSupported } from "../markdown/highlight.ts";
 import { parseFrontmatter } from "../markdown/markdown.ts";
 
-export type ResourceKind = "skill" | "code" | "document" | "file";
+export type ResourceKind = "skill" | "folder" | "code" | "document" | "file";
 
 export interface Resource {
   title: string;
@@ -14,6 +14,7 @@ export interface Resource {
   archivePath?: string;
   skillFile?: string;
   code?: string;
+  files?: Resource[];
 }
 
 const documentExtensions = new Set([
@@ -58,6 +59,9 @@ const previewLimit = 100_000;
 export function resourceIcon(resource: Resource) {
   if (resource.kind === "skill") {
     return "brain-circuit";
+  }
+  if (resource.kind === "folder") {
+    return "folder-code";
   }
   if (resource.kind === "code") {
     return "file-code";
@@ -120,7 +124,7 @@ interface ResourceEntry {
  * `{ path, title, description }` mapping. Bad entries are reported in
  * `problems` and skipped.
  */
-function readEntries(value: unknown, source: string, problems: string[]): ResourceEntry[] {
+export function readEntries(value: unknown, source: string, problems: string[]): ResourceEntry[] {
   if (value === undefined || value === null) {
     return [];
   }
@@ -147,13 +151,37 @@ function readEntries(value: unknown, source: string, problems: string[]): Resour
 }
 
 /**
+ * Describes one file: a kind from its extension and, for small code files,
+ * its text for the preview.
+ */
+async function describeFile(sourceDirectory: string, path: string, title: string, description: string) {
+  const file = Bun.file(`${sourceDirectory}/${path}`);
+  const extension = extname(path).slice(1).toLowerCase();
+  const kind: ResourceKind = documentExtensions.has(extension)
+    ? "document"
+    : isSupported(extension) || codeExtensions.has(extension)
+      ? "code"
+      : "file";
+  return {
+    title,
+    path,
+    kind,
+    extension,
+    size: file.size,
+    description,
+    code: kind === "code" && file.size <= previewLimit ? await file.text() : undefined,
+  } satisfies Resource;
+}
+
+/**
  * Resolves a page's resources relative to the page and describes each one. A
- * skill folder gets its SKILL.md metadata, total size and a tarball path;
- * a file gets a kind from its extension and, for small code files, its text
- * for the preview. Missing or out-of-source paths are reported in `problems`.
+ * folder gets its files, total size and a tarball path; a skill folder also
+ * gets its SKILL.md metadata; a file gets a kind from its extension and, for
+ * small code files, its text for the preview. Missing or out-of-source paths
+ * are reported in `problems`.
  */
 export async function resolveResources(
-  value: unknown,
+  frontmatter: Record<string, unknown>,
   pageSource: string,
   sourceDirectory: string,
   files: Set<string>,
@@ -161,29 +189,31 @@ export async function resolveResources(
   problems: string[],
 ): Promise<Resource[]> {
   const resources: Resource[] = [];
-  for (const entry of readEntries(value, pageSource, problems)) {
+  for (const entry of readEntries(frontmatter.resources, pageSource, problems)) {
     const path = posix.normalize(posix.join(posix.dirname(pageSource), entry.path)).replace(/\/$/, "");
     if (path.startsWith("..")) {
       problems.push(`${pageSource}: resource "${entry.path}" is outside the source directory`);
       continue;
     }
-    if (skills.has(path)) {
-      const skillFile = `${path}/SKILL.md`;
-      const { data } = parseFrontmatter(await Bun.file(`${sourceDirectory}/${skillFile}`).text(), skillFile);
-      const skillFiles = [...files].filter((file) => file.startsWith(path + "/"));
-      const size = (await Promise.all(skillFiles.map((file) => Bun.file(`${sourceDirectory}/${file}`).size))).reduce(
-        (sum, bytes) => sum + bytes,
-        0,
+    const inside = [...files].filter((file) => file.startsWith(path + "/")).sort();
+    if (inside.length > 0) {
+      const folderFiles = await Promise.all(
+        inside.map((file) => describeFile(sourceDirectory, file, file.slice(path.length + 1), "")),
       );
+      const skillFile = skills.has(path) ? `${path}/SKILL.md` : undefined;
+      const { data } = skillFile
+        ? parseFrontmatter(await Bun.file(`${sourceDirectory}/${skillFile}`).text(), skillFile)
+        : { data: {} as Record<string, unknown> };
       resources.push({
         title: entry.title ?? (typeof data.name === "string" ? data.name : posix.basename(path)),
         path,
-        kind: "skill",
+        kind: skillFile ? "skill" : "folder",
         extension: "",
-        size,
+        size: folderFiles.reduce((sum, file) => sum + file.size, 0),
         description: entry.description ?? (typeof data.description === "string" ? data.description : ""),
         archivePath: `${path}.tar.gz`,
         skillFile,
+        files: folderFiles,
       });
       continue;
     }
@@ -191,37 +221,22 @@ export async function resolveResources(
       problems.push(`${pageSource}: resource "${entry.path}" not found`);
       continue;
     }
-    const file = Bun.file(`${sourceDirectory}/${path}`);
-    const extension = extname(path).slice(1).toLowerCase();
-    const kind: ResourceKind = documentExtensions.has(extension)
-      ? "document"
-      : isSupported(extension) || codeExtensions.has(extension)
-        ? "code"
-        : "file";
-    resources.push({
-      title: entry.title ?? posix.basename(path),
-      path,
-      kind,
-      extension,
-      size: file.size,
-      description: entry.description ?? "",
-      code: kind === "code" && file.size <= previewLimit ? await file.text() : undefined,
-    });
+    resources.push(
+      await describeFile(sourceDirectory, path, entry.title ?? posix.basename(path), entry.description ?? ""),
+    );
   }
   return resources;
 }
 
 /**
- * Packs every file of a skill folder into a gzipped tarball, rooted at the
- * folder name so it unpacks into a directory of its own.
+ * Lists a page's resources as Markdown for its `.md` twin and llms.txt: a link
+ * to each file, a skill's SKILL.md or a folder's archive, with its kind.
  */
-export async function skillArchive(sourceDirectory: string, skill: string, files: Set<string>) {
-  const name = posix.basename(skill);
-  const entries: Record<string, Blob> = {};
-  for (const file of files) {
-    if (file.startsWith(skill + "/")) {
-      entries[`${name}/${file.slice(skill.length + 1)}`] = Bun.file(`${sourceDirectory}/${file}`);
-    }
-  }
-  return new Bun.Archive(entries, { compress: "gzip" }).blob();
+export function resourcesMarkdown(resources: Resource[], url: (path: string) => string) {
+  const list = resources.map((resource) => {
+    const target = resource.skillFile ?? (resource.kind === "folder" ? resource.archivePath! : resource.path);
+    const archive = resource.archivePath ? `, download: ${url(resource.archivePath)}` : "";
+    return `- [${resource.title}](${url(target)}) (${resource.kind}${archive})${resource.description ? `: ${resource.description}` : ""}`;
+  });
+  return `\n\n## Resources\n\n${list.join("\n")}\n`;
 }

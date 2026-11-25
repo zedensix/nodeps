@@ -25,6 +25,7 @@ repo = "local"
 hooks = [
   { id = "bun-fmt", name = "bun fmt", entry = "bun fmt", language = "system", types_or = [
     "ts",
+    "tsx",
     "javascript",
     "css",
     "html",
@@ -33,10 +34,16 @@ hooks = [
     "markdown",
     "toml",
   ] },
-  { id = "bun-lint", name = "bun lint", entry = "bun lint", language = "system", types_or = ["ts", "javascript"] },
+  { id = "bun-lint", name = "bun lint", entry = "bun lint", language = "system", types_or = [
+    "ts",
+    "tsx",
+    "javascript",
+  ] },
   { id = "bun-test", name = "bun test", entry = "bun test", language = "system", pass_filenames = false, types_or = [
     "ts",
+    "tsx",
   ] },
+  { id = "bun-check", name = "bun check", entry = "sh -c 'bun install --frozen-lockfile --silent && bun check'", language = "system", pass_filenames = false, types_or = ["ts", "tsx"], stages = ["pre-push"] },
   { id = "max-lines", name = "files stay under 300 lines", entry = "awk 'FNR == 301 { print FILENAME \": more than 300 lines\"; failed = 1 } END { exit failed }'", language = "system", types_or = ["css", "html", "json", "markdown", "yaml", "toml", "shell"] },
   { id = "docs-build", name = "docs build", entry = "bun docs.ts build", language = "system", pass_filenames = false, files = "^(docs/|src/|client/|themes/|docs\\.(ts|yaml)$)" },
   { id = "zizmor", name = "zizmor", entry = "zizmor --min-severity low", language = "system", files = "^\\.github/workflows/" },

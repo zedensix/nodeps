@@ -21,18 +21,56 @@ theme:
     background: "#0b0b0f"
 ```
 
-| Key          | Description                                                                                                            |
-| ------------ | ---------------------------------------------------------------------------------------------------------------------- |
-| `name`       | Theme to use: a built-in one from the [theme gallery](../themes/index.md) or a folder in `themes/`. Default: `default` |
-| `accent`     | Brand color, any CSS color                                                                                             |
-| `font`       | Body text font: a CSS `font-family` value, such as `'"Inter", system-ui, sans-serif'`. Not a URL or a file             |
-| `mono`       | Code font, same format as `font`                                                                                       |
-| `stylesheet` | Extra CSS file, bundled and loaded after the theme. The path is relative to the folder holding `docs.yaml`             |
-| `light`      | Token values for light mode                                                                                            |
-| `dark`       | Token values for dark mode                                                                                             |
-| any token    | Sets that [design token](./design-tokens.md) for both modes                                                            |
+| Key          | Description                                                                                                                                   |
+| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`       | Theme to use: a built-in one from the [theme gallery](../themes/index.md) or a folder in `themes/`. Default: `default`                        |
+| `accent`     | Brand color, any CSS color                                                                                                                    |
+| `font`       | Body text font: a CSS `font-family` value, such as `'"Inter", system-ui, sans-serif'`, or a font file to ship, see below                      |
+| `mono`       | Code font, same format as `font`                                                                                                              |
+| `stylesheet` | Extra CSS file, bundled and loaded after the theme. The path is relative to the folder holding `docs.yaml`                                    |
+| `picker`     | Shows the palette button that lets readers pick another theme. `false` removes it and ignores a theme a reader picked before. Default: `true` |
+| `light`      | Token values for light mode                                                                                                                   |
+| `dark`       | Token values for dark mode                                                                                                                    |
+| any token    | Sets that [design token](./design-tokens.md) for both modes                                                                                   |
 
-nodeps never downloads fonts. A family in `font` or `mono` is used when the reader has it installed; otherwise the next one in the list applies. To ship a font, add it with `@font-face` in `stylesheet` (Bun bundles the font file) and name it first in `font`.
+## Fonts
+
+A family name in `font` or `mono` is used when the reader has it installed; otherwise the next one in the list applies. To ship the font itself, give its file:
+
+```yaml title="docs.yaml"
+theme:
+  font:
+    family: Space Grotesk
+    file: fonts/space-grotesk-latin-wght-normal.woff2
+    weight: 300 700
+  mono:
+    family: JetBrains Mono
+    file: fonts/jetbrains-mono-latin-wght-normal.woff2
+```
+
+A static font, one file per weight or style, lists its files:
+
+```yaml title="docs.yaml"
+theme:
+  font:
+    family: Source Serif
+    file:
+      - path: fonts/source-serif-regular.woff2
+        weight: 400
+      - path: fonts/source-serif-bold.woff2
+        weight: 700
+      - path: fonts/source-serif-italic.woff2
+        style: italic
+```
+
+| Key      | Description                                                                                                                  |
+| -------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `family` | Name the font is declared under, put first in the font stack before the system fallbacks                                     |
+| `file`   | `.woff2`, `.woff`, `.ttf` or `.otf` path, relative to the folder holding `docs.yaml`, or a list of `path`, `weight`, `style` |
+| `weight` | A weight like `400`, or a range like `300 700` for a variable font                                                           |
+| `style`  | `normal` or `italic`                                                                                                         |
+
+nodeps serves each file under a content-hashed URL, declares it with `font-display: swap`, and preloads the body font's first file so text does not flash in a fallback font. A missing file or an unknown format fails the build with the setting and the path. Anything the config cannot express, such as `unicode-range` subsets, still goes in `stylesheet`.
 
 Values set here win over the theme's. Readers can pick another theme for themselves from the palette button in the header: it swaps the theme's variables, not its HTML.
 

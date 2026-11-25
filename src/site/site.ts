@@ -21,8 +21,10 @@ import {
   readTags,
   titleCase,
 } from "./pages.ts";
-import { insideSkill, resolveResources, skillArchive, skillDirectories, type Resource } from "./resources.ts";
-import { bundle, bundleTheme, embeddedTheme } from "../theme/theme.ts";
+import { addBrandImages } from "./brand-images.ts";
+import { addArchives, addSkillIndexes, servedFolders, type Draft } from "./resource-folders.ts";
+import { insideSkill, resolveResources, resourcesMarkdown, skillDirectories, type Resource } from "./resources.ts";
+import { bundleSiteTheme, embeddedTheme } from "../theme/theme.ts";
 import { parseFrontmatter, renderMarkdown, type Heading, type Section } from "../markdown/markdown.ts";
 
 export interface Page {
@@ -64,7 +66,8 @@ export interface Site {
   navPages: Page[];
   files: Map<string, Asset>;
   template: string;
-  customStylesheet?: string;
+  stylesheets: string[];
+  fontPreload?: { href: string; type: string };
   warnings: string[];
 }
 
@@ -93,7 +96,7 @@ export async function loadSite(config: Config): Promise<Site> {
 
   const files = new Map<string, Asset>();
   const folders = new Map<string, FolderSettings>();
-  const drafts: { source: string; modified: Date; raw: string; data: Record<string, unknown>; body: string }[] = [];
+  const drafts: Draft[] = [];
 
   const sourcePaths = Array.from(new Bun.Glob("**/*").scanSync({ cwd: config.source }), (path) =>
     path.split("\\").join("/"),
@@ -117,6 +120,14 @@ export async function loadSite(config: Config): Promise<Site> {
     const raw = await file.text();
     drafts.push({ source: path, modified: (await file.stat()).mtime, raw, ...parseFrontmatter(raw, path) });
   }
+  addSkillIndexes(drafts, skills, config.source);
+  const served = servedFolders(drafts, sourcePaths, skills);
+  const pageDrafts = drafts.filter((draft) => !insideSkill(draft.source, served));
+  for (const { source } of drafts.filter((draft) => insideSkill(draft.source, served))) {
+    const file = Bun.file(`${config.source}/${source}`);
+    files.set("/" + source, { body: file, type: file.type, immutable: false });
+    assetPaths.add(source);
+  }
 
   const warnings: string[] = [];
   const bySource = new Map<string, Page>();
@@ -134,7 +145,7 @@ export async function loadSite(config: Config): Promise<Site> {
       }
     }
   };
-  const pages = drafts.map(({ source, modified, raw, data, body }) => {
+  const pages = pageDrafts.map(({ source, modified, raw, data, body }) => {
     if (data.icon != null && (typeof data.icon !== "string" || !isIcon(normalizeIcon(data.icon)))) {
       problems.push(
         `${source}: frontmatter "icon" is not a known icon: "${data.icon}" (a Lucide icon name, see https://lucide.dev/icons)`,
@@ -180,19 +191,14 @@ export async function loadSite(config: Config): Promise<Site> {
 
   for (const [index, page] of pages.entries()) {
     page.resources = await resolveResources(
-      drafts[index]!.data.resources,
+      pageDrafts[index]!.data,
       page.source,
       config.source,
       assetPaths,
       skills,
       problems,
     );
-    for (const resource of page.resources) {
-      if (resource.archivePath && !files.has("/" + resource.archivePath)) {
-        const body = await skillArchive(config.source, resource.path, assetPaths);
-        files.set("/" + resource.archivePath, { body, type: "application/gzip", immutable: false });
-      }
-    }
+    await addArchives(page.resources, config.source, assetPaths, files);
   }
 
   if (problems.length > 0) {
@@ -255,12 +261,7 @@ export async function loadSite(config: Config): Promise<Site> {
         heading: "Resources",
         text: page.resources.map((resource) => `${resource.title} ${resource.description}`).join(" "),
       });
-      const list = page.resources.map((resource) => {
-        const link = `[${resource.title}](${resourceUrl(config, resource.skillFile ?? resource.path)})`;
-        const archive = resource.archivePath ? `, download: ${resourceUrl(config, resource.archivePath)}` : "";
-        return `- ${link} (${resource.kind}${archive})${resource.description ? `: ${resource.description}` : ""}`;
-      });
-      page.markdown = `${page.markdown.trimEnd()}\n\n## Resources\n\n${list.join("\n")}\n`;
+      page.markdown = page.markdown.trimEnd() + resourcesMarkdown(page.resources, (path) => resourceUrl(config, path));
     }
     if (page.tags.length > 0) {
       page.markdown = `${page.markdown.trimEnd()}\n\nTags: ${page.tags.join(", ")}\n`;
@@ -279,19 +280,11 @@ export async function loadSite(config: Config): Promise<Site> {
     : buildCategories(pages, folders, bySlug, config.sidebar.dropdowns);
   const navPages = categories.flatMap((category) => category.pages);
 
-  if (config.theme.stylesheet && !(await Bun.file(config.theme.stylesheet).exists())) {
-    throw new Error(`docs.yaml: theme.stylesheet not found: ${config.theme.stylesheet}`);
-  }
-  const publicPath = config.base + "_assets/";
-  const [layout, stylesheet] = await Promise.all([
-    bundleTheme(config.theme, publicPath),
-    config.theme.stylesheet ? bundle(config.theme.stylesheet, publicPath) : undefined,
-  ]);
-  for (const [name, asset] of [...layout.assets, ...(stylesheet?.assets ?? [])]) {
+  addBrandImages(config, files);
+
+  const { assets, ...theme } = await bundleSiteTheme(config.theme, config.base + "_assets/");
+  for (const [name, asset] of assets) {
     files.set("/_assets/" + name, { ...asset, immutable: true });
   }
-  const template = layout.entry;
-  const customStylesheet = stylesheet?.entry;
-
-  return { config, pages, pageByUrl, categories, navPages, files, template, customStylesheet, warnings };
+  return { config, pages, pageByUrl, categories, navPages, files, ...theme, warnings };
 }

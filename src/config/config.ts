@@ -3,12 +3,14 @@ import {
   ConfigError,
   fail,
   readBoolean,
+  readFont,
   readLinks,
   readMapping,
   readNav,
   readSocial,
   readString,
   readTokens,
+  type FontSetting,
   type Mapping,
 } from "./config-fields.ts";
 import { listThemes, resolveTheme, type ThemeDefinition } from "../theme/themes.ts";
@@ -28,8 +30,15 @@ export interface Home {
 
 export interface Theme extends ThemeDefinition {
   stylesheet?: string;
+  fonts: FontSetting[];
+  picker: boolean;
   choices: ThemeDefinition[];
 }
+
+const fontFallbacks = {
+  font: 'ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif',
+  mono: 'ui-monospace, "SF Mono", "Cascadia Code", Menlo, Consolas, monospace',
+};
 
 export interface Editor {
   enabled: boolean;
@@ -48,6 +57,8 @@ export interface Config {
   source: string;
   output: string;
   logo?: string;
+  logoDark?: string;
+  logoOnly: boolean;
   favicon?: string;
   repository?: Repository;
   footer?: string;
@@ -159,6 +170,16 @@ function parseConfig(file: string, data: Mapping): Config {
     fail("sidebar.bylines", "true or false");
   }
 
+  const logo = readString(data, "logo");
+  const logoDark = readString(data, "logo_dark");
+  const logoOnly = readBoolean(data, "logo_only", "logo_only", false);
+  if (!logo && logoDark) {
+    fail("logo_dark", "set together with logo");
+  }
+  if (!logo && logoOnly) {
+    fail("logo_only", "false when no logo is set");
+  }
+
   const themeMapping = readMapping(data, "theme") ?? {};
   const themesDirectory = resolve(root, "themes");
   const theme = resolveTheme(readString(themeMapping, "name", "theme.name") ?? "default", themesDirectory);
@@ -167,9 +188,26 @@ function parseConfig(file: string, data: Mapping): Config {
     fail("theme.accent", "a CSS color");
   }
   const stylesheet = readString(themeMapping, "stylesheet", "theme.stylesheet");
-  const { light, dark, accent: _accent, stylesheet: _stylesheet, name: _name, ...tokens } = themeMapping;
+  const {
+    light,
+    dark,
+    accent: _accent,
+    stylesheet: _stylesheet,
+    name: _name,
+    picker: _picker,
+    ...tokens
+  } = themeMapping;
+  const fonts: FontSetting[] = [];
+  for (const role of ["font", "mono"] as const) {
+    const value = tokens[role];
+    if (typeof value === "object" && value !== null && !Array.isArray(value)) {
+      const font = readFont(value as Mapping, role, root);
+      fonts.push(font);
+      tokens[role] = `${JSON.stringify(font.family)}, ${fontFallbacks[role]}`;
+    }
+  }
   const userDark = readTokens(readMapping(themeMapping, "dark", "theme.dark") ?? {}, "theme.dark");
-  const derivedDarkAccent =
+  const derivedDarkAccent: Record<string, string> =
     userAccent && !userDark.accent ? { accent: "color-mix(in oklab, var(--brand) 72%, white)" } : {};
 
   return {
@@ -181,7 +219,9 @@ function parseConfig(file: string, data: Mapping): Config {
     base: normalizeBase(readString(data, "base") ?? "/"),
     source,
     output,
-    logo: readString(data, "logo"),
+    logo,
+    logoDark,
+    logoOnly,
     favicon: readString(data, "favicon"),
     repository: readRepository(data, root, source),
     editor: readEditor(data),
@@ -200,6 +240,8 @@ function parseConfig(file: string, data: Mapping): Config {
       light: { ...theme.light, ...readTokens(readMapping(themeMapping, "light", "theme.light") ?? {}, "theme.light") },
       dark: { ...theme.dark, ...derivedDarkAccent, ...userDark },
       stylesheet: stylesheet ? resolve(root, stylesheet) : undefined,
+      fonts,
+      picker: readBoolean(themeMapping, "picker", "theme.picker", true),
       choices: listThemes(themesDirectory),
     },
   };

@@ -27,7 +27,8 @@
     --tabs-height: 0px;
   }
 
-  .category-tabs {
+  .category-tabs,
+  .sidebar-resize {
     display: none;
   }
 
@@ -41,7 +42,12 @@
   }
 
   .brand {
+    min-width: 0;
     margin-right: 0;
+  }
+
+  .brand-logo {
+    max-width: 9rem;
   }
 
   .search-trigger {

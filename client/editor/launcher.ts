@@ -23,6 +23,30 @@ export function openPageEditor() {
 }
 
 /**
+ * Adds or removes `?edit=true` on the current URL without a navigation, so a
+ * reload reopens the editor and closing it leaves a clean address.
+ */
+export function setEditParameter(open: boolean) {
+  const url = new URL(location.href);
+  if (open) {
+    url.searchParams.set("edit", "true");
+  } else {
+    url.searchParams.delete("edit");
+  }
+  history.replaceState(history.state, "", url);
+}
+
+/**
+ * Opens the editor when the URL asks for it with `?edit=true`, so an open
+ * editor survives a reload and the link can be shared.
+ */
+export function openEditorFromUrl() {
+  if (new URLSearchParams(location.search).get("edit") === "true") {
+    openPageEditor();
+  }
+}
+
+/**
  * Tells whether a pull request sent from this device for this page is still
  * tracked, without loading the editor chunk.
  */

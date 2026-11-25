@@ -11,7 +11,7 @@
   --topbar-height: 3.75rem;
   --tabs-height: 0px;
   --header-height: calc(var(--topbar-height) + var(--tabs-height));
-  --sidebar-width: 17rem;
+  --sidebar-width: 19rem;
   --toc-width: 15rem;
   --prose-width: 46rem;
   --font-size: 1rem;

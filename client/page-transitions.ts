@@ -1,5 +1,5 @@
 import { markCurrentPreset } from "./appearance.ts";
-import { checkPendingEdit } from "./editor/launcher.ts";
+import { checkPendingEdit, openEditorFromUrl } from "./editor/launcher.ts";
 import { renderRichContent, revealActiveTab, setupPromptLinks, setupTableOfContents } from "./page-enhancements.ts";
 import { closeSearch } from "./search/dialog.ts";
 import { setDrawer } from "./sidebar.ts";
@@ -138,14 +138,16 @@ function swapPage(next: Document) {
   revealActiveTab();
   markCurrentPreset();
   checkPendingEdit();
+  openEditorFromUrl();
   renderRichContent().catch((error) => console.error("Diagram or math rendering failed", error));
 }
 
 /**
  * Prefetches pages on hover, touch and focus, then turns same-site page
  * navigations into in-place swaps through the Navigation API where the browser
- * has it. A page that fails to load falls back to a full load, and is marked
- * so that load is not intercepted again.
+ * has it. Staying on the same path (a reload, a query or hash change such as
+ * the editor's `?edit=true`) is left to the browser. A page that fails to load
+ * falls back to a full load, and is marked so that load is not intercepted again.
  */
 export function setupPageTransitions() {
   document.addEventListener("mouseover", prefetch, { passive: true });
@@ -164,7 +166,7 @@ export function setupPageTransitions() {
       return;
     }
     const url = new URL(navigateEvent.destination.url);
-    if (!isPage(url) || bypass.delete(url.href)) {
+    if (!isPage(url) || url.pathname === location.pathname || bypass.delete(url.href)) {
       return;
     }
     navigateEvent.intercept({

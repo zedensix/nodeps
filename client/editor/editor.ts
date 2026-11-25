@@ -9,6 +9,7 @@ import {
   showPanel,
   type Pending,
 } from "./publish.ts";
+import { setEditParameter } from "./launcher.ts";
 import { setupMarkdownPaste, setupMarkdownShortcuts } from "./shortcuts.ts";
 
 export interface EditorSettings {
@@ -141,8 +142,12 @@ export async function openEditor(settings: EditorSettings) {
     content.focus();
   };
 
-  dialog.addEventListener("close", () => dialog.remove());
+  dialog.addEventListener("close", () => {
+    dialog.remove();
+    setEditParameter(false);
+  });
   dialog.showModal();
+  setEditParameter(true);
   document.execCommand("defaultParagraphSeparator", false, "p");
   content.focus();
 
@@ -151,10 +156,13 @@ export async function openEditor(settings: EditorSettings) {
 
   const serializeDraft = () => JSON.stringify({ mode, value: mode === "visual" ? content.innerHTML : source.value });
   let saveTimer: Timer | undefined;
+  let savePending = false;
   const scheduleSave = () => {
     clearTimeout(saveTimer);
+    savePending = true;
     status.textContent = "Editing…";
     saveTimer = setTimeout(() => {
+      savePending = false;
       storage.set(draftKey(settings), serializeDraft());
       discard.hidden = false;
       status.textContent = "Draft saved on this device";
@@ -162,6 +170,19 @@ export async function openEditor(settings: EditorSettings) {
   };
   content.addEventListener("input", scheduleSave);
   source.addEventListener("input", scheduleSave);
+
+  /**
+   * Asks the browser to confirm a reload or a closed tab while the page has
+   * unpublished changes: a draft on this device or an edit not saved yet.
+   * Browsers show their own dialog for this; a page cannot replace it.
+   */
+  const confirmLeaving = (event: BeforeUnloadEvent) => {
+    if (savePending || storage.get(draftKey(settings)) !== null) {
+      event.preventDefault();
+    }
+  };
+  addEventListener("beforeunload", confirmLeaving);
+  dialog.addEventListener("close", () => removeEventListener("beforeunload", confirmLeaving));
 
   let savedRange: Range | null = null;
   const applyLink = () => {

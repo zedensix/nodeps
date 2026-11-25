@@ -99,13 +99,17 @@ export function markCurrentPreset() {
 }
 
 /**
- * Applies a preset's inline CSS variables to the root element and saves both
- * its name and style so the head script can restore it before first paint. An
- * empty style resets to the site's own theme.
+ * Applies a preset's inline CSS variables to the root element, keeping the
+ * reader's sidebar width, and saves both its name and style so the head script
+ * can restore it before first paint. An empty style resets to the site's own theme.
  */
 export function applyPreset(name: string, style: string) {
   const update = () => {
+    const sidebarWidth = root.style.getPropertyValue("--sidebar-width");
     root.style.cssText = style;
+    if (sidebarWidth) {
+      root.style.setProperty("--sidebar-width", sidebarWidth);
+    }
   };
   if (document.startViewTransition && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
     document.startViewTransition(update);

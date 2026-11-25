@@ -1,11 +1,18 @@
 import { cp, mkdtemp, realpath, rm } from "node:fs/promises";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { dirname, join, relative } from "node:path";
+import { basename, dirname, extname, join, relative } from "node:path";
+import type { FontSetting } from "../config/config-fields.ts";
+import type { Theme } from "../config/config.ts";
 import type { ThemeDefinition } from "./themes.ts";
 
 export interface BundledAsset {
-  body: string;
+  body: string | Blob;
+  type: string;
+}
+
+export interface FontPreload {
+  href: string;
   type: string;
 }
 
@@ -51,9 +58,11 @@ export function sourceRoot() {
 }
 
 /**
- * Bundles an HTML or script entrypoint for the browser with Bun.build into
- * content-hashed files. Returns the HTML text as the entry for an HTML
- * entrypoint, otherwise the public URL of the entry script.
+ * Bundles an HTML, script or stylesheet entrypoint for the browser with
+ * Bun.build into content-hashed files. Returns the HTML text as the entry for
+ * an HTML entrypoint, otherwise the public URL of the entry file. The entry is
+ * found by name and extension, as Bun reports a CSS-only entrypoint as an
+ * asset; a build without one throws.
  */
 export async function bundle(entrypoint: string, publicPath: string): Promise<Bundle> {
   const result = await Bun.build({
@@ -69,17 +78,24 @@ export async function bundle(entrypoint: string, publicPath: string): Promise<Bu
     throw new Error(`Failed to build ${entrypoint}:\n${result.logs.join("\n")}`);
   }
   const assets = new Map<string, BundledAsset>();
+  const stem = basename(entrypoint).replace(/\.[^.]+$/, "");
+  const extension = /\.(html|css)$/.exec(entrypoint)?.[0] ?? ".js";
   let entry = "";
   for (const output of result.outputs) {
     const name = output.path.replace(/^\.\//, "");
-    if (output.kind === "entry-point" && name.endsWith(".html")) {
+    const isEntry =
+      !entry && name.endsWith(extension) && (output.kind === "entry-point" || basename(name).startsWith(`${stem}-`));
+    if (isEntry && extension === ".html") {
       entry = await output.text();
-    } else {
-      assets.set(name, { body: await output.text(), type: output.type });
+      continue;
     }
-    if (output.kind === "entry-point" && !name.endsWith(".html")) {
-      entry ||= publicPath + name;
+    assets.set(name, { body: await output.text(), type: output.type });
+    if (isEntry) {
+      entry = publicPath + name;
     }
+  }
+  if (!entry) {
+    throw new Error(`Building ${entrypoint} produced no ${extension} entry file`);
   }
   return { entry, assets };
 }
@@ -128,4 +144,68 @@ export async function bundleTheme(theme: ThemeDefinition, publicPath: string): P
   } finally {
     await rm(directory, { recursive: true, force: true });
   }
+}
+
+const fontTypes: Record<string, string> = {
+  woff2: "font/woff2",
+  woff: "font/woff",
+  truetype: "font/ttf",
+  opentype: "font/otf",
+};
+
+/**
+ * Serves each font file under a content-hashed name and writes one
+ * `@font-face` per file, with `font-display: swap`, into a hashed stylesheet.
+ * Bun's CSS bundler would inline the fonts as data URLs, so this skips it.
+ * Returns the stylesheet, the assets and the body font's first file to preload.
+ */
+async function bundleFonts(fonts: FontSetting[], publicPath: string): Promise<Bundle & { preload?: FontPreload }> {
+  const assets = new Map<string, BundledAsset>();
+  const faces: string[] = [];
+  let preload: FontPreload | undefined;
+  for (const font of fonts) {
+    for (const file of font.files) {
+      const body = Bun.file(file.path);
+      const name = `${basename(file.path, extname(file.path))}-${Bun.hash(await body.bytes()).toString(36)}${extname(file.path)}`;
+      assets.set(name, { body, type: fontTypes[file.format]! });
+      const declarations = [
+        `font-family: ${JSON.stringify(font.family)}`,
+        `src: url("${publicPath + name}") format("${file.format}")`,
+        file.weight ? `font-weight: ${file.weight}` : "",
+        file.style ? `font-style: ${file.style}` : "",
+        "font-display: swap",
+      ];
+      faces.push(`@font-face { ${declarations.filter(Boolean).join("; ")}; }`);
+      if (font.role === "font" && !preload) {
+        preload = { href: publicPath + name, type: fontTypes[file.format]! };
+      }
+    }
+  }
+  const css = faces.join("\n") + "\n";
+  const stylesheet = `fonts-${Bun.hash(css).toString(36)}.css`;
+  assets.set(stylesheet, { body: css, type: "text/css;charset=utf-8" });
+  return { entry: publicPath + stylesheet, assets, preload };
+}
+
+/**
+ * Bundles everything the site's pages load: the theme layout with the client
+ * script, the generated font faces and `theme.stylesheet`, in that cascade
+ * order. Returns the page template, the stylesheet URLs, the font to preload
+ * and every asset. A missing stylesheet throws with its path.
+ */
+export async function bundleSiteTheme(theme: Theme, publicPath: string) {
+  if (theme.stylesheet && !existsSync(theme.stylesheet)) {
+    throw new Error(`docs.yaml: theme.stylesheet not found: ${theme.stylesheet}`);
+  }
+  const [layout, fonts, stylesheet] = await Promise.all([
+    bundleTheme(theme, publicPath),
+    theme.fonts.length > 0 ? bundleFonts(theme.fonts, publicPath) : undefined,
+    theme.stylesheet ? bundle(theme.stylesheet, publicPath) : undefined,
+  ]);
+  return {
+    template: layout.entry,
+    stylesheets: [fonts?.entry, stylesheet?.entry].filter((entry) => entry !== undefined),
+    fontPreload: fonts?.preload,
+    assets: [...layout.assets, ...(fonts?.assets ?? []), ...(stylesheet?.assets ?? [])],
+  };
 }

@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { loadConfig } from "../config/config.ts";
 import { loadSite, type Site } from "../site/site.ts";
-import { renderPage } from "./layout.ts";
+import { renderPage } from "./layout.tsx";
 
 // Loading a site downloads the icon sets on a fresh checkout, which takes longer than the default 5 s.
 const siteTimeout = 60_000;
@@ -19,6 +19,7 @@ const pages = {
   "docs/standards/api.md": "---\ndiataxis: reference\n---\n# API\n",
   "docs/standards/why.md": "# Why\n",
   "docs/standards/odd.md": "---\ndiataxis: guide\n---\n# Odd\n",
+  "docs/brand/icon.png": "png",
 };
 
 /**
@@ -130,6 +131,30 @@ test(
   "the home page keeps out the pager its template hides",
   async () => {
     expect(render(await site(), "index.md")).not.toContain('class="pager-next"');
+  },
+  siteTimeout,
+);
+
+test(
+  "a folder holding only its index.md is a plain sidebar link, with no chevron to open",
+  async () => {
+    const root = mkdtempSync(join(tmpdir(), "nodeps-sidebar-"));
+    for (const [path, content] of Object.entries({
+      "docs/guides/index.md": "# Guides\n",
+      "docs/guides/install.md": "# Install\n",
+      "docs/guides/faq/index.md": "# FAQ\n",
+      "docs/guides/deploy/index.md": "# Deploy\n",
+      "docs/guides/deploy/docker.md": "# Docker\n",
+    })) {
+      await Bun.write(join(root, path), content);
+    }
+    await Bun.write(join(root, "docs.yaml"), "title: Acme\n");
+    const loaded = await loadSite(await loadConfig(join(root, "docs.yaml")));
+    const html = render(loaded, "guides/install.md");
+    const tree = /<ul class="tree"[\s\S]*?<\/nav>/.exec(html)![0];
+    expect(tree.match(/<details/g)).toHaveLength(1);
+    expect(tree).toContain('href="/guides/faq/"');
+    expect(tree).not.toMatch(/<details[^>]*><summary><a href="\/guides\/faq\/"/);
   },
   siteTimeout,
 );

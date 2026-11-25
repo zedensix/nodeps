@@ -87,8 +87,29 @@
 }
 
 .brand-logo {
-  width: 1.75rem;
+  width: auto;
+  max-width: 12rem;
   height: 1.75rem;
+  object-fit: contain;
+}
+
+.brand-logo-dark,
+:root[data-theme="dark"] .brand-logo-light {
+  display: none;
+}
+
+:root[data-theme="dark"] .brand-logo-dark {
+  display: block;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) .brand-logo-light {
+    display: none;
+  }
+
+  :root:not([data-theme]) .brand-logo-dark {
+    display: block;
+  }
 }
 
 .icon-button {

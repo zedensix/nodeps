@@ -65,7 +65,7 @@ theme:
 | `mono`             | The system monospace font                              |
 | `radius`           | `10px`                                                 |
 | `topbar-height`    | `3.75rem`                                              |
-| `sidebar-width`    | `17rem`                                                |
+| `sidebar-width`    | `19rem`, until a reader drags the sidebar's edge       |
 | `toc-width`        | `15rem`                                                |
 | `prose-width`      | `46rem`, the maximum line length of paragraphs         |
 | `font-size`        | `1rem`, body text                                      |

@@ -14,8 +14,12 @@
           document.documentElement.dataset.reader = "";
         }
         const presetStyle = localStorage.getItem("theme-preset-style");
-        if (presetStyle) {
+        if (presetStyle && !document.documentElement.hasAttribute("data-no-presets")) {
           document.documentElement.style.cssText = presetStyle;
+        }
+        const sidebarWidth = localStorage.getItem("sidebar-width");
+        if (sidebarWidth) {
+          document.documentElement.style.setProperty("--sidebar-width", sidebarWidth + "px");
         }
       } catch {}
     </script>

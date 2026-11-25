@@ -1,3 +1,5 @@
+import { existsSync } from "node:fs";
+import { extname, resolve } from "node:path";
 import type { Link, NavEntry } from "./config.ts";
 
 export class ConfigError extends Error {}
@@ -154,4 +156,54 @@ export function readNav(value: unknown, path: string): NavEntry[] {
     }
     return { [title]: readNav(target, `${path}[${index}].${title}`) };
   });
+}
+
+export interface FontFile {
+  path: string;
+  format: string;
+  weight?: string;
+  style?: string;
+}
+
+export interface FontSetting {
+  role: "font" | "mono";
+  family: string;
+  files: FontFile[];
+}
+
+const fontFormats: Record<string, string> = { woff2: "woff2", woff: "woff", ttf: "truetype", otf: "opentype" };
+
+/**
+ * Reads the mapping form of `theme.font` or `theme.mono`: a `family` and a
+ * `file`, either one path with an optional `weight` and `style` or a list of
+ * `{ path, weight, style }` for static fonts. Paths resolve against `root`;
+ * a missing file or an unknown format fails with the setting and the path.
+ */
+export function readFont(value: Mapping, role: "font" | "mono", root: string): FontSetting {
+  const path = `theme.${role}`;
+  const family = readString(value, "family", `${path}.family`) ?? fail(`${path}.family`, "a font family name");
+  const single = typeof value.file === "string";
+  const entries: unknown[] = single
+    ? [{ path: value.file, weight: value.weight, style: value.style }]
+    : Array.isArray(value.file)
+      ? value.file
+      : fail(`${path}.file`, "a font file path, or a list of { path, weight, style }");
+  const files = entries.map((entry, index) => {
+    const at = single ? `${path}.file` : `${path}.file[${index}]`;
+    const mapping = (typeof entry === "string" ? { path: entry } : entry) as Mapping;
+    const file = readString(mapping, "path", `${at}.path`) ?? fail(at, "a font file path");
+    const format =
+      fontFormats[extname(file).slice(1).toLowerCase()] ?? fail(at, `a .woff2, .woff, .ttf or .otf file, got ${file}`);
+    if (!existsSync(resolve(root, file))) {
+      fail(at, `an existing file, not found: ${file}`);
+    }
+    const [weight, style] = [mapping.weight, mapping.style].map((part) =>
+      part === undefined ? undefined : String(part),
+    );
+    if ([weight, style].some((part) => part !== undefined && !/^[\w .-]+$/.test(part))) {
+      fail(at, "a weight like 400 or 300 700, and a style like normal or italic");
+    }
+    return { path: resolve(root, file), format, weight, style };
+  });
+  return { role, family, files };
 }

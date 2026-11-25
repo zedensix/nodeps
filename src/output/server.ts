@@ -6,7 +6,7 @@ import { loadConfig, type Config } from "../config/config.ts";
 import { editorHtml, editorPayload } from "../editor/editor.ts";
 import { createEditorRoutes } from "../editor/editor-routes.ts";
 import type { RenderOptions } from "../render/document.ts";
-import { renderNotFound, renderPage } from "../render/layout.ts";
+import { renderNotFound, renderPage } from "../render/layout.tsx";
 import { loadSite, type Site } from "../site/site.ts";
 import { embeddedTheme, sourceRoot } from "../theme/theme.ts";
 

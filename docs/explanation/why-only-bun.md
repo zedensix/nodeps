@@ -9,7 +9,7 @@ tags: [bun, install]
 
 Most documentation generators install hundreds of packages before rendering a single page: a Markdown parser and its plugins, a highlighter and its grammars, a bundler, a dev server, a YAML parser. Each one is a version to pin, an advisory to triage and a cold start to wait for.
 
-Bun ships most of that in the runtime. nodeps is an experiment in leaning on it entirely: Markdown goes through `Bun.markdown`, configuration through `Bun.YAML`, HTML through `HTMLRewriter`, the client through `Bun.build`, files through `Bun.Glob`, and the server is `Bun.serve`. There is no `package.json` and nothing to install besides Bun.
+Bun ships most of that in the runtime. nodeps is an experiment in leaning on it entirely: Markdown goes through `Bun.markdown`, configuration through `Bun.YAML`, HTML through `HTMLRewriter`, the client through `Bun.build`, files through `Bun.Glob`, and the server is `Bun.serve`. There are no runtime dependencies and nothing to install besides Bun; the repository's `package.json` only brings type definitions for editors.
 
 ## What it costs
 

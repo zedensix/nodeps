@@ -31,6 +31,7 @@ sidebar:
 
 theme:
   accent: "#6d5efc"
+  picker: true
   radius: 8px
   link: "#4f46e5"
   header-background: "linear-gradient(90deg, #1e3a8a, #7c3aed)"

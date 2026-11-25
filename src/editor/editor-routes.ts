@@ -197,7 +197,7 @@ export function createEditorRoutes(getSite: () => Site) {
       const user = await github<{ login: string; avatar_url: string }>(token, "GET", "/user");
       const id = crypto.randomUUID();
       sessions.set(id, { token, login: user.login, avatar: user.avatar_url, expires: Date.now() + sessionLifetime });
-      const headers = new Headers({ location: `${returnTo}#edit` });
+      const headers = new Headers({ location: `${returnTo}?edit=true` });
       headers.append(
         "set-cookie",
         new Bun.Cookie(sessionCookie, id, cookieOptions(config, sessionLifetime / 1000)).toString(),

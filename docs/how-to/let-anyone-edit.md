@@ -7,7 +7,7 @@ byline: The nodeps maintainers
 tags: [editor, wysiwyg, github, oauth, git]
 ---
 
-The visual editor, a WYSIWYG editor built into every page, is on by default. Every page gets **Edit this page**, at the bottom and in the page menu. It opens the page as it looks on the site, with a toolbar for headings, bold, links, lists, quotes and code. Drafts are kept on the editor's device until they are published.
+The visual editor, a WYSIWYG editor built into every page, is on by default. Every page gets **Edit this page**, at the bottom and in the page menu. It opens the page as it looks on the site, with a toolbar for headings, bold, links, lists, quotes and code. Drafts are kept on the editor's device until they are published. While it is open the address ends in `?edit=true`, so a reload keeps it open and the link opens the editor for whoever follows it. Reloading or closing the tab with unpublished changes asks for confirmation first, in the browser's own dialog.
 
 ## Write with Markdown shortcuts
 

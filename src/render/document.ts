@@ -1,132 +1,13 @@
-import { markdownHref, pageHref } from "../output/ai.ts";
-import type { Theme } from "../config/config.ts";
-import { editorSourcePath } from "../editor/editor.ts";
-import { editUrl, gitProviders } from "../config/repository.ts";
-import { themeDeclarations } from "../theme/theme-declarations.ts";
-import { icon, normalizeIcon } from "../icons/icons.ts";
-import { categoryTabs, pager, sidebar, tableOfContents } from "./page-navigation.ts";
+import { markdownHref } from "../output/ai.ts";
+import { icon } from "../icons/icons.ts";
 import type { Page, Site } from "../site/site.ts";
+import { brand } from "./brand.tsx";
+import { footer, headerLinks, headTags, tagList, themePicker } from "./document-parts.tsx";
+import { categoryTabs, pager, sidebar, tableOfContents } from "./page-navigation.tsx";
 
 export interface RenderOptions {
   dev: boolean;
   server: boolean;
-}
-
-const escape = Bun.escapeHTML;
-
-/**
- * Inlines the site theme as custom properties on `:root`, so pages paint with
- * the right colors before any stylesheet or script loads.
- */
-function themeStyle(theme: Theme) {
-  return `<style>:root{${themeDeclarations(theme)}}</style>`;
-}
-
-/**
- * Renders the header theme menu entries, one per theme with a swatch. The
- * site default carries an empty `data-style` so choosing it clears the override.
- */
-function themePicker(site: Site) {
-  const items = site.config.theme.choices
-    .map((preset) => {
-      const isSiteDefault = preset.name === site.config.theme.name;
-      const label = isSiteDefault ? `${escape(preset.title)} <small>site default</small>` : escape(preset.title);
-      const style = isSiteDefault ? "" : themeDeclarations(preset);
-      return `<button type="button" class="menu-item theme-option" data-preset="${preset.name}" data-style="${escape(style)}" role="menuitemradio"><span class="swatch" style="${escape(themeDeclarations(preset))}" data-theme-scope></span><span><strong>${label}</strong><small>${escape(preset.description)}</small></span>${icon("check")}</button>`;
-    })
-    .join("");
-  return items;
-}
-
-/**
- * Inline dev script that reloads on a message from the reload socket. When the
- * socket closes (server restart), it polls the page and reloads once the server
- * answers again, or reconnects.
- */
-const liveReload = (base: string) =>
-  `<script>(()=>{const connect=()=>{const socket=new WebSocket(location.origin.replace(/^http/,"ws")+${JSON.stringify(base + "__reload")});socket.onmessage=()=>location.reload();socket.onclose=()=>setTimeout(()=>fetch(location.href).then(()=>location.reload(),connect),400)};connect()})()</script>`;
-
-/**
- * Resolves the configured logo against the site base, stripping a leading
- * `./` or `/`. Undefined when no logo is set.
- */
-function logoUrl(site: Site) {
-  return site.config.logo ? site.config.base + site.config.logo.replace(/^\.?\//, "") : undefined;
-}
-
-/**
- * Resolves the favicon: `favicon`, then `logo`, against the site base, or the
- * book icon in the accent color as an inline SVG when neither is set.
- */
-function faviconUrl(site: Site) {
-  const favicon = site.config.favicon ?? site.config.logo;
-  if (favicon) {
-    return site.config.base + favicon.replace(/^\.?\//, "");
-  }
-  return `data:image/svg+xml,${encodeURIComponent(icon("book-open").replaceAll("currentColor", site.config.theme.accent))}`;
-}
-
-/**
- * Renders the header brand: the logo when there is one, then the site title.
- */
-function brand(site: Site) {
-  const logo = logoUrl(site);
-  return `${logo ? `<img class="brand-logo" src="${escape(logo)}" alt="">` : ""}<span>${escape(site.config.title)}</span>`;
-}
-
-const dateFormat = new Intl.DateTimeFormat("en", { dateStyle: "medium", timeZone: "UTC" });
-
-/**
- * Renders a `<time>` element with a medium English date, formatted in UTC so
- * the output does not depend on the build machine's time zone.
- */
-export function time(date: Date) {
-  return `<time datetime="${date.toISOString()}">${dateFormat.format(date)}</time>`;
-}
-
-/**
- * Embeds the settings the in-browser editor reads for this page as JSON.
- * Server-only features (OAuth, server rendering) are null in a static export,
- * and `<` is escaped so the JSON cannot close the script tag.
- */
-function editorSettings(site: Site, page: Page, options: RenderOptions) {
-  const { config } = site;
-  const settings = {
-    source: page.source,
-    title: page.title,
-    payload: config.base + editorSourcePath(page).slice(1),
-    editUrl: config.repository ? editUrl(config.repository, page.source) : null,
-    provider: config.repository ? gitProviders[config.repository.provider] : null,
-    oauth: options.server && config.editor.oauth !== undefined,
-    render: options.server ? `${config.base}_editor/render` : null,
-    base: config.base,
-  };
-  return `<script type="application/json" id="nodeps-editor">${JSON.stringify(settings).replaceAll("<", "\\u003c")}</script>`;
-}
-
-/**
- * Renders the footer: an edit link (the built-in editor wins over the
- * repository's edit page), the footer text and the social links. Without a
- * page there is no edit link.
- */
-function footer(site: Site, page?: Page) {
-  const repository = site.config.repository;
-  let edit = "";
-  if (page && site.config.editor.enabled) {
-    edit = `<a class="edit-link" href="#edit" data-edit-page>${icon("square-pen")}Edit this page</a>`;
-  } else if (page && repository?.edit) {
-    edit = `<a class="edit-link" href="${escape(editUrl(repository, page.source))}">${icon("square-pen")}Edit this page on ${gitProviders[repository.provider]}</a>`;
-  }
-  const social = site.config.social
-    .map(
-      (entry) =>
-        `<a href="${escape(entry.url)}" aria-label="${escape(entry.label)}" data-tooltip="${escape(entry.label)}">${icon(normalizeIcon(entry.icon))}</a>`,
-    )
-    .join("");
-  const text =
-    (site.config.footer ? `<p>${escape(site.config.footer)}</p>` : "") +
-    (social ? `<nav class="social-links" aria-label="Social links">${social}</nav>` : "");
-  return edit ? `<div class="page-meta">${edit}</div>${text}` : text;
 }
 
 interface DocumentParts {
@@ -147,44 +28,22 @@ export function renderDocument(site: Site, options: RenderOptions, parts: Docume
   const { config } = site;
   const page = parts.page;
   const fullTitle = page?.url === "/" ? config.title : `${parts.title} · ${config.title}`;
-  const head = [
-    `<meta name="description" content="${escape(parts.description)}">`,
-    `<meta property="og:title" content="${escape(fullTitle)}">`,
-    `<meta property="og:description" content="${escape(parts.description)}">`,
-    config.url && page ? `<link rel="canonical" href="${escape(config.url + pageHref(site, page))}">` : "",
-    page
-      ? `<link rel="alternate" type="text/markdown" href="${escape(markdownHref(site, page))}" title="Markdown">`
-      : "",
-    config.url
-      ? `<link rel="alternate" type="application/rss+xml" href="${escape(config.base)}feed.xml" title="${escape(config.title)}">`
-      : "",
-    `<link rel="icon" href="${escape(faviconUrl(site))}">`,
-    themeStyle(config.theme),
-    site.customStylesheet ? `<link rel="stylesheet" href="${escape(site.customStylesheet)}">` : "",
-    options.dev ? liveReload(config.base) : "",
-    page && !parts.home && config.editor.enabled ? editorSettings(site, page, options) : "",
-  ].join("");
+  const head = String(headTags(site, options, { fullTitle, description: parts.description, page, home: parts.home }));
 
-  const pagerHtml = page ? pager(site, page) : "";
-  const footerHtml = footer(site, parts.home ? undefined : page);
-  const tocHtml = page ? tableOfContents(page) : "";
-  const tagsHtml = (page?.tags ?? [])
-    .map((tag) => `<li><button type="button" class="tag" data-search="#${escape(tag)}">#${escape(tag)}</button></li>`)
-    .join("");
-  const tabsHtml = categoryTabs(site, page);
+  const pagerHtml = page ? String(pager(site, page)) : "";
+  const footerHtml = String(footer(site, parts.home ? undefined : page));
+  const tocHtml = page ? String(tableOfContents(page)) : "";
+  const tagsHtml = String(tagList(page?.tags ?? []));
+  const tabsHtml = String(categoryTabs(site, page));
   const slots: Record<string, string> = {
-    title: escape(fullTitle),
-    brand: brand(site),
-    links:
-      config.links.map((link) => `<a href="${escape(link.url)}">${escape(link.label)}</a>`).join("") +
-      (config.repository
-        ? `<a class="repository-link" href="${escape(config.repository.url)}" title="Source on ${gitProviders[config.repository.provider]}">${icon(`simple-${config.repository.provider}`)}<span>${escape(config.repository.label)}</span></a>`
-        : ""),
-    sidebar: sidebar(site, page),
-    "theme-picker": themePicker(site),
+    title: Bun.escapeHTML(fullTitle),
+    brand: String(brand(site)),
+    links: String(headerLinks(config)),
+    sidebar: String(sidebar(site, page)),
+    "theme-picker": config.theme.picker ? String(themePicker(site)) : "",
     tabs: tabsHtml,
-    breadcrumb: escape([page?.category?.title, ...(page?.trail ?? [])].filter(Boolean).join(" › ")),
-    section: escape(page?.category?.title ?? ""),
+    breadcrumb: Bun.escapeHTML([page?.category?.title, ...(page?.trail ?? [])].filter(Boolean).join(" › ")),
+    section: Bun.escapeHTML(page?.category?.title ?? ""),
     article: parts.article,
     pager: pagerHtml,
     footer: footerHtml,
@@ -202,10 +61,22 @@ export function renderDocument(site: Site, options: RenderOptions, parts: Docume
     tags: tagsHtml !== "",
     editor: config.editor.enabled,
     reader: config.readerMode,
+    picker: config.theme.picker,
     tabs: tabsHtml !== "",
   };
 
   const html = new HTMLRewriter()
+    .on("html", {
+      /**
+       * Marks the page when the site turns the theme picker off, so the head
+       * script ignores a preset the reader picked earlier.
+       */
+      element(element) {
+        if (!config.theme.picker) {
+          element.setAttribute("data-no-presets", "");
+        }
+      },
+    })
     .on("head", {
       /**
        * Appends the meta tags, theme style and scripts built above to `<head>`.

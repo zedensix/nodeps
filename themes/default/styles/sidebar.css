@@ -8,6 +8,29 @@
   grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
 }
 
+.sidebar-resize {
+  position: fixed;
+  top: var(--header-height);
+  bottom: 0;
+  left: calc(var(--sidebar-width) - 3px);
+  z-index: 5;
+  width: 6px;
+  cursor: col-resize;
+  touch-action: none;
+  transition: background 0.15s;
+}
+
+.sidebar-resize:hover,
+.sidebar-resize:focus-visible,
+.sidebar-resize.dragging {
+  outline: none;
+  background: color-mix(in oklab, var(--accent) 45%, transparent);
+}
+
+.layout:not(:has(> .sidebar)) > .sidebar-resize {
+  display: none;
+}
+
 .sidebar,
 .toc {
   position: sticky;
