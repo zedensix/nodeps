@@ -49,7 +49,7 @@ function diataxisBadge(site: Site, page: Page) {
     return "";
   }
   const { label, url, icon: kindIcon } = diataxisPages[kind];
-  return `<a class="diataxis-badge" data-diataxis="${kind}" href="${url}" target="_blank" rel="noopener" data-tooltip="What makes a ${label.toLowerCase()}, on diataxis.fr">${icon(kindIcon)}${label}</a>`;
+  return `<a class="diataxis-badge" data-diataxis="${kind}" href="${url}" data-tooltip="What makes a ${label.toLowerCase()}, on diataxis.fr">${icon(kindIcon)}${label}</a>`;
 }
 
 /**

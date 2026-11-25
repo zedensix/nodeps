@@ -108,7 +108,7 @@ function footer(site: Site, page?: Page) {
   const social = site.config.social
     .map(
       (entry) =>
-        `<a href="${escape(entry.url)}" target="_blank" rel="noopener" aria-label="${escape(entry.label)}" data-tooltip="${escape(entry.label)}">${icon(normalizeIcon(entry.icon))}</a>`,
+        `<a href="${escape(entry.url)}" aria-label="${escape(entry.label)}" data-tooltip="${escape(entry.label)}">${icon(normalizeIcon(entry.icon))}</a>`,
     )
     .join("");
   const text =
@@ -193,7 +193,7 @@ export function renderDocument(site: Site, options: RenderOptions, parts: Docume
     tabs: tabsHtml !== "",
   };
 
-  return new HTMLRewriter()
+  const html = new HTMLRewriter()
     .on("head", {
       /**
        * Appends the meta tags, theme style and scripts built above to `<head>`.
@@ -263,4 +263,21 @@ export function renderDocument(site: Site, options: RenderOptions, parts: Docume
       },
     })
     .transform(site.template);
+
+  return new HTMLRewriter()
+    .on('a[href^="http://"], a[href^="https://"], a[href^="//"]', {
+      /**
+       * Opens external links in a new tab. Runs as a second pass because the
+       * first one does not see the HTML it inserts into slots.
+       */
+      element(element) {
+        if (!element.hasAttribute("target")) {
+          element.setAttribute("target", "_blank");
+        }
+        if (!element.hasAttribute("rel")) {
+          element.setAttribute("rel", "noopener");
+        }
+      },
+    })
+    .transform(html);
 }

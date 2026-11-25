@@ -52,7 +52,7 @@ function sidebarItems(site: Site, items: NavItem[], current?: Page): string {
         return `<li>${sidebarLink(site, item.page, current, item.label ?? item.page.title)}</li>`;
       }
       if (item.kind === "link") {
-        return `<li><a href="${escape(item.url)}" target="_blank" rel="noopener">${icon("external-link")}<span class="sidebar-text"><span>${escape(item.title)}</span></span></a></li>`;
+        return `<li><a href="${escape(item.url)}">${icon("external-link")}<span class="sidebar-text"><span>${escape(item.title)}</span></span></a></li>`;
       }
       const children = sidebarItems(site, item.children, current);
       const folderIcon = item.icon ? icon(item.icon) : "";
